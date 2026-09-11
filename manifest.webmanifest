@@ -1,0 +1,16 @@
+{
+  "name": "Tính Mí Lon",
+  "short_name": "Tính Mí Lon",
+  "description": "Ứng dụng tính tỷ lệ chồng mí lon",
+  "lang": "vi",
+  "start_url": "./",
+  "scope": "./",
+  "display": "standalone",
+  "background_color": "#f2f2f7",
+  "theme_color": "#007aff",
+  "orientation": "portrait",
+  "icons": [
+    {"src":"icons/icon-192.png","sizes":"192x192","type":"image/png","purpose":"any maskable"},
+    {"src":"icons/icon-512.png","sizes":"512x512","type":"image/png","purpose":"any maskable"}
+  ]
+}

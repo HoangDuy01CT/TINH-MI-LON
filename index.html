@@ -1,0 +1,46 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Tính mí lon</title>
+<meta name="theme-color" content="#007aff">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="default">
+<meta name="apple-mobile-web-app-title" content="Tính Mí Lon">
+<link rel="manifest" href="manifest.webmanifest">
+<link rel="apple-touch-icon" href="icons/icon-192.png">
+<style>
+:root{--bg:#f2f2f7;--card:#fff;--text:#111;--secondary:#6c6c70;--line:#d1d1d6;--blue:#007aff;--red:#ff3b30;--fill:#e9e9eb}
+*{box-sizing:border-box;-webkit-tap-highlight-color:transparent}body{margin:0;background:var(--bg);font-family:-apple-system,BlinkMacSystemFont,"SF Pro Display","SF Pro Text",Arial,sans-serif;color:var(--text);font-size:15px;padding-bottom:24px}.container{width:100%;max-width:620px;margin:0 auto;padding:env(safe-area-inset-top) 16px env(safe-area-inset-bottom)}h1{text-align:left;font-size:32px;line-height:1.1;letter-spacing:-.8px;margin:20px 4px 3px}.subtitle{text-align:left;color:var(--secondary);margin:0 4px 18px;font-size:15px}.menu{display:grid;grid-template-columns:1fr;gap:10px}.main-btn,.sub-btn{appearance:none;width:100%;border:0;background:var(--card);border-radius:16px;padding:16px 18px;text-align:left;font-size:17px;font-weight:600;color:var(--text);cursor:pointer;box-shadow:0 1px 2px rgba(0,0,0,.04)}.main-btn:active,.sub-btn:active,.btn:active{transform:scale(.98);opacity:.82}.main-btn::after{content:'›';float:right;color:#c7c7cc;font-size:25px;font-weight:400;line-height:18px}.submenu{display:none;grid-template-columns:1fr;gap:1px;background:var(--card);border-radius:16px;overflow:hidden;margin-top:-2px}.submenu .sub-btn{border-radius:0;padding:14px 18px;font-size:16px;border-bottom:1px solid #eee}.submenu .sub-btn:last-child{border-bottom:0}.submenu .sub-btn::before{content:'↳';color:var(--blue);margin-right:9px}.calculator{display:none;margin-top:10px}.calc-head{display:flex;align-items:center;justify-content:space-between;margin:20px 4px 12px}.calculator h2{margin:0;font-size:28px;letter-spacing:-.6px}.tag{font-size:12px;color:var(--secondary)}.form-grid{display:grid;grid-template-columns:1fr 1fr;gap:10px}.form-grid>div{background:var(--card);border-radius:14px;padding:10px 12px}label{display:block;font-size:12px;font-weight:600;color:var(--secondary);margin-bottom:5px}input{appearance:none;width:100%;height:38px;border:0;background:transparent;padding:0;font-size:21px;font-weight:600;color:var(--text);outline:0}.actions{display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-top:14px}.btn{appearance:none;border:0;border-radius:14px;min-height:48px;padding:12px 14px;font-size:16px;font-weight:700;cursor:pointer}.action{grid-column:1/-1;background:var(--blue);color:white}.reset{background:#fff;color:var(--red)}.back{background:var(--fill);color:var(--text)}.result{margin-top:16px;background:var(--card);border-radius:18px;padding:16px;display:flex;justify-content:space-between;align-items:center;gap:10px}.result-title{font-size:16px;font-weight:700}.result small{display:block;color:var(--secondary);margin-top:4px;font-size:13px}.result .value{font-size:30px;font-weight:800;letter-spacing:-.7px;color:var(--blue);white-space:nowrap}.formula{margin-top:16px;background:transparent;border-radius:0;padding:0 4px;line-height:1.5;font-size:12px;color:var(--secondary)}.note{font-size:12px;color:var(--secondary);line-height:1.45;margin:8px 4px 0}@media(max-width:390px){.container{padding-left:12px;padding-right:12px}.form-grid{gap:8px}.calculator h2{font-size:25px}h1{font-size:29px}.result .value{font-size:26px}}
+</style>
+</head>
+<body><div class="container">
+<h1>🥫 TÍNH MÍ LON</h1><div class="subtitle">Chọn loại lon để nhập và tính số liệu</div>
+<div id="menu" class="menu">
+<button class="main-btn" onclick="openCalc('Lon số 2')">🥫 Lon số 2</button><button class="main-btn" onclick="toggle('lon3')">🥫 Lon số 3 ▾</button>
+<div id="lon3" class="submenu"><button class="sub-btn" onclick="openCalc('Lon số 3 Dẹp')">Lon số 3 Dẹp</button><button class="sub-btn" onclick="openCalc('Lon số 3 Vừa')">Lon số 3 Vừa</button><button class="sub-btn" onclick="openCalc('Lon số 3 Cao')">Lon số 3 Cao</button></div>
+<button class="main-btn" onclick="openCalc('Lon số 5')">🥫 Lon số 5</button><button class="main-btn" onclick="openCalc('Lon A10')">🥫 Lon A10</button>
+</div>
+<div id="calculator" class="calculator"><div class="calc-head"><h2 id="title">Tính mí lon</h2><span class="tag">Đơn vị: mm</span></div>
+<div class="form-grid">
+<div><label for="mocthan">Móc thân</label><input id="mocthan" type="number" step="0.01" min="0" placeholder="0.00"></div>
+<div><label for="mocnap">Móc nắp</label><input id="mocnap" type="number" step="0.01" min="0" placeholder="0.00"></div>
+<div><label for="day">Độ dày vật liệu</label><input id="day" type="number" step="0.001" min="0" placeholder="0.000"></div>
+<div><label for="rong">Bề rộng mí ghép</label><input id="rong" type="number" step="0.01" min="0" placeholder="0.00"></div>
+</div>
+<div class="actions"><button class="btn action" onclick="calculate()">TÍNH TOÁN</button><button class="btn reset" onclick="resetCurrent()">↻ Reset</button><button class="btn back" onclick="back()">← Danh sách</button></div>
+<div class="result"><div><div class="result-title">Tỷ lệ chồng mí</div><small id="message">Chưa có dữ liệu</small></div><div id="result" class="value">-- %</div></div>
+</div></div>
+<script>
+let current="";const canData=JSON.parse(localStorage.getItem("tinhMiLonData")||"{}");
+function persist(){localStorage.setItem("tinhMiLonData",JSON.stringify(canData))}
+function toggle(id){const el=document.getElementById(id);el.style.display=el.style.display==="grid"?"none":"grid"}
+function openCalc(name){current=name;const saved=canData[name]||{};["mocthan","mocnap","day","rong"].forEach(id=>document.getElementById(id).value=saved[id]??"");document.getElementById("result").textContent=saved.result??"-- %";document.getElementById("message").textContent=saved.message??"Chưa có dữ liệu";document.getElementById("title").textContent=name;document.getElementById("menu").style.display="none";document.getElementById("calculator").style.display="block";window.scrollTo({top:0,behavior:"smooth"})}
+function saveCurrent(){if(!current)return;const data={};["mocthan","mocnap","day","rong"].forEach(id=>data[id]=document.getElementById(id).value);data.result=document.getElementById("result").textContent;data.message=document.getElementById("message").textContent;canData[current]=data;persist()}
+function resetCurrent(){if(!current)return;delete canData[current];persist();["mocthan","mocnap","day","rong"].forEach(id=>document.getElementById(id).value="");document.getElementById("result").textContent="-- %";document.getElementById("message").textContent="Đã reset số liệu của "+current}
+function back(){saveCurrent();document.getElementById("calculator").style.display="none";document.getElementById("menu").style.display="grid"}
+function num(id){return parseFloat(document.getElementById(id).value)}
+function calculate(){const a=num("mocthan"),b=num("mocnap"),c=num("day"),d=num("rong"),r=document.getElementById("result"),m=document.getElementById("message");if(!Number.isFinite(a)||!Number.isFinite(b)||!Number.isFinite(c)||!Number.isFinite(d)||c<=0||a<0||b<0||d<0){r.textContent="-- %";m.textContent="Vui lòng nhập đầy đủ thông số.";return}const x=(a+b+c-d)/(3*c)*100;r.textContent=x.toFixed(2)+" %";m.textContent="Kết quả của "+current;saveCurrent()}
+if('serviceWorker' in navigator){window.addEventListener('load',()=>navigator.serviceWorker.register('./sw.js').catch(()=>{}))}
+</script></body></html>
