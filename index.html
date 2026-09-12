@@ -2,34 +2,172 @@
 <html lang="vi">
 <head>
 <meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
-<title>Tính mí lon</title>
-<meta name="theme-color" content="#f2f2f7">
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, viewport-fit=cover">
+<title>Tính Mí Lon</title>
+<meta name="description" content="Tính tỷ lệ chồng mí lon (BH, CH, SL, ST, Tb, Te) cho lon số 2, số 3, số 5, A10 — lưu lịch sử và đánh giá đạt/chưa đạt.">
+<meta name="theme-color" content="#f2f2f7" media="(prefers-color-scheme: light)">
+<meta name="theme-color" content="#000000" media="(prefers-color-scheme: dark)">
 <meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-status-bar-style" content="default">
-<meta name="apple-mobile-web-app-title" content="Tính Mí Lon">
-<link rel="manifest" href="manifest.webmanifest">
-<link rel="apple-touch-icon" href="icons/icon-192.png">
+<meta name="apple-mobile-web-app-title" content="Mí Lon">
+<meta name="format-detection" content="telephone=no">
+<link rel="manifest" href="manifest.webmanifest?v=8">
+<link rel="icon" href="icons/favicon-32-v8.png" sizes="32x32">
+<link rel="apple-touch-icon" href="icons/apple-touch-icon-v8.png">
+<link rel="apple-touch-startup-image" href="icons/splash-1290x2796-v8.png"
+  media="(device-width: 430px) and (device-height: 932px) and (-webkit-device-pixel-ratio: 3) and (orientation: portrait)">
 <style>
-:root{--bg:#f2f2f7;--card:#fff;--text:#171717;--muted:#707076;--line:#e5e5ea;--blue:#007aff;--green:#34c759;--orange:#ff9500;--red:#ff3b30;--fill:#f2f2f7}
-*{box-sizing:border-box;-webkit-tap-highlight-color:transparent}html{background:var(--bg)}body{margin:0;background:var(--bg);font-family:-apple-system,BlinkMacSystemFont,"SF Pro Display","SF Pro Text",Arial,sans-serif;color:var(--text);font-size:15px;padding-bottom:max(24px,env(safe-area-inset-bottom))}.container{max-width:620px;margin:auto;padding:max(12px,env(safe-area-inset-top)) 14px 20px}h1{font-size:30px;letter-spacing:-.8px;margin:10px 4px 2px}.subtitle{margin:0 4px 16px;color:var(--muted);font-size:14px}.menu{display:grid;gap:9px}.main-btn,.sub-btn{width:100%;border:0;background:var(--card);color:var(--text);border-radius:15px;padding:15px 17px;text-align:left;font:600 16px inherit;cursor:pointer;box-shadow:0 1px 1px rgba(0,0,0,.03)}.main-btn::after{content:'›';float:right;color:#c7c7cc;font-size:24px;line-height:16px}.submenu{display:none;overflow:hidden;background:var(--card);border-radius:15px;margin-top:-2px}.sub-btn{border-radius:0;border-bottom:1px solid var(--line);padding:13px 18px;font-size:15px}.sub-btn:last-child{border:0}.calculator{display:none}.topbar{display:flex;align-items:center;gap:12px;margin:4px 2px 14px}.back-icon{border:0;background:transparent;color:var(--blue);font-size:28px;line-height:1;padding:5px;cursor:pointer}.calc-title{flex:1}.calc-title h2{font-size:25px;letter-spacing:-.6px;margin:0}.calc-title span{font-size:12px;color:var(--muted)}.section-title{font-size:13px;font-weight:700;color:var(--muted);margin:15px 5px 7px;text-transform:uppercase;letter-spacing:.25px}.form-card{background:var(--card);border-radius:17px;overflow:hidden}.field{padding:11px 14px;border-bottom:1px solid var(--line)}.field:last-child{border:0}.field label{display:flex;justify-content:space-between;gap:8px;font-size:14px;font-weight:600}.field label span{font-size:12px;font-weight:500;color:var(--muted)}input{width:100%;border:0;background:transparent;outline:0;padding:6px 0 0;font:700 22px -apple-system,BlinkMacSystemFont,"SF Pro Display",Arial,sans-serif;color:var(--text)}.hint{font-size:12px;color:var(--muted);margin:6px 5px 0}.actions{display:grid;grid-template-columns:1fr 1fr;gap:9px;margin-top:14px}.btn{border:0;border-radius:15px;min-height:48px;padding:12px;font:700 15px inherit;cursor:pointer}.calc{grid-column:1/-1;background:var(--blue);color:#fff}.reset{background:#fff;color:var(--red)}.clear-result{background:#fff;color:var(--text)}.results{display:grid;gap:9px;margin-top:14px}.result-card{background:var(--card);border-radius:17px;padding:14px 15px;display:flex;justify-content:space-between;align-items:center;gap:10px}.result-card .name{font-size:15px;font-weight:700}.result-card small{display:block;color:var(--muted);font-size:12px;margin-top:3px}.value{font-size:26px;font-weight:800;letter-spacing:-.6px;white-space:nowrap}.blue{color:var(--blue)}.green{color:var(--green)}.orange{color:var(--orange)}.formula-note{margin:14px 4px 0;color:var(--muted);font-size:12px;line-height:1.5}.formula-note strong{color:var(--text)}.btn:active,.main-btn:active,.sub-btn:active{transform:scale(.985);opacity:.82}@media(max-width:360px){.container{padding-left:10px;padding-right:10px}.calc-title h2{font-size:23px}.value{font-size:23px}}
+:root{
+  --bg:#f2f4f8; --card:#fff; --card2:#f8f9fb; --text:#111827; --muted:#6b7280;
+  --line:#e5e7eb; --blue:#0a84ff; --blue2:#0077ed; --green:#20b45b;
+  --orange:#f59e0b; --red:#ef4444; --shadow:0 8px 30px rgba(17,24,39,.08);
+  --radius:22px; --radius-sm:16px; --overlay:rgba(15,23,42,.36);
+  --badge-ok-bg:#eaf8ef; --badge-bad-bg:#fff0ef;
+}
+@media(prefers-color-scheme:dark){
+  :root{
+    --bg:#000; --card:#1c1c1e; --card2:#2c2c2e; --text:#f5f5f7; --muted:#98989f;
+    --line:#38383a; --blue:#0a84ff; --green:#30d158; --orange:#ff9f0a; --red:#ff453a;
+    --shadow:none; --overlay:rgba(0,0,0,.62); --badge-ok-bg:#10351c; --badge-bad-bg:#3a1715;
+  }
+}
+*{box-sizing:border-box;-webkit-tap-highlight-color:transparent}
+html{height:100%;background:var(--bg);overscroll-behavior:none}
+body{
+  margin:0; min-height:100%; background:var(--bg); color:var(--text);
+  font-family:-apple-system,BlinkMacSystemFont,"SF Pro Display","SF Pro Text",system-ui,sans-serif;
+  padding-bottom:max(24px,env(safe-area-inset-bottom)); overscroll-behavior:none;
+}
+button,input{font:inherit} button{touch-action:manipulation}
+.container{width:100%;max-width:520px;margin:0 auto;padding:max(12px,env(safe-area-inset-top)) 14px 28px}
+h1{font-size:31px;line-height:1.08;letter-spacing:-1.1px;margin:16px 2px 4px;font-weight:800}
+.subtitle{margin:0 2px 18px;color:var(--muted);font-size:14px;line-height:1.45}
+.menu{display:grid;grid-template-columns:1fr 1fr;gap:11px}
+.main-btn,.sub-btn{
+  border:0;background:var(--card);color:var(--text);box-shadow:var(--shadow);
+  border-radius:var(--radius);min-height:104px;padding:16px;text-align:left;
+  font-size:17px;font-weight:750;cursor:pointer;position:relative;overflow:hidden;
+}
+.main-btn::before{content:"🥫";display:block;font-size:28px;margin-bottom:10px}
+.main-btn::after{content:"›";position:absolute;right:14px;bottom:13px;color:var(--blue);font-size:22px}
+.main-btn:nth-child(2){background:linear-gradient(145deg,var(--card),color-mix(in srgb,var(--blue) 6%,var(--card)))}
+.main-btn:nth-child(3){background:linear-gradient(145deg,var(--card),color-mix(in srgb,var(--green) 6%,var(--card)))}
+.main-btn:nth-child(5){background:linear-gradient(145deg,var(--card),color-mix(in srgb,var(--orange) 7%,var(--card)))}
+.submenu{grid-column:1/-1;display:none;grid-template-columns:repeat(3,1fr);gap:8px;background:transparent}
+.submenu .sub-btn{min-height:88px;padding:11px;border-radius:17px;font-size:13px;box-shadow:var(--shadow)}
+.sub-btn::before{content:"";display:block}
+.sub-btn::after{display:none}
+.calculator{display:none}
+.topbar{
+  display:flex;align-items:center;gap:6px;margin:2px 0 15px;
+  position:sticky;top:0;z-index:20;padding:6px 0 8px;
+  background:linear-gradient(var(--bg) 75%,transparent);
+}
+.icon-btn{border:0;background:transparent;color:var(--blue);font-size:21px;line-height:1;padding:10px;cursor:pointer;border-radius:12px}
+.back-icon{font-size:31px;padding:6px 8px 6px 2px}
+.calc-title{flex:1;min-width:0}
+.calc-title h2{margin:0;font-size:22px;letter-spacing:-.7px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.calc-title span{font-size:11px;color:var(--muted)}
+.section-title{
+  margin:18px 5px 8px;font-size:12px;font-weight:800;color:var(--muted);
+  text-transform:uppercase;letter-spacing:.65px;display:flex;justify-content:space-between;align-items:center
+}
+.section-title a{color:var(--blue);text-transform:none;letter-spacing:0;font-size:13px;font-weight:700;cursor:pointer}
+.form-card{
+  display:grid;grid-template-columns:1fr 1fr;gap:1px;background:var(--line);
+  border-radius:var(--radius);overflow:hidden;box-shadow:var(--shadow)
+}
+.field{
+  background:var(--card);padding:13px 14px;min-width:0;min-height:105px;
+  display:flex;flex-direction:column;justify-content:space-between
+}
+.field label{font-size:13px;font-weight:750;line-height:1.25}
+.field label span{display:block;margin-top:4px;font-size:10px;font-weight:600;color:var(--muted)}
+input{
+  width:100%;border:0;background:transparent;outline:0;padding:5px 0 0;
+  font-size:25px;line-height:1.1;font-weight:800;letter-spacing:-.6px;color:var(--text);
+  min-width:0
+}
+input::placeholder{color:#c7c7cc}
+.hint{font-size:11px;color:var(--muted);margin:7px 5px 0}
+.actions{display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-top:16px}
+.btn{
+  border:0;border-radius:18px;min-height:52px;padding:13px 12px;font-size:14px;font-weight:800;cursor:pointer
+}
+.calc{grid-column:1/-1;background:linear-gradient(135deg,var(--blue),var(--blue2));color:white;box-shadow:0 9px 20px color-mix(in srgb,var(--blue) 25%,transparent)}
+.reset{background:var(--card);color:var(--red);box-shadow:var(--shadow)}
+.clear-result{background:var(--card);color:var(--text);box-shadow:var(--shadow)}
+.results{display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-top:4px}
+.result-card{
+  background:var(--card);border-radius:var(--radius);padding:15px;box-shadow:var(--shadow);
+  min-height:132px;display:flex;flex-direction:column;justify-content:space-between
+}
+.result-card:first-child{
+  grid-column:1/-1;min-height:145px;padding:18px;
+  background:linear-gradient(135deg,var(--card),color-mix(in srgb,var(--blue) 8%,var(--card)))
+}
+.result-card:last-child{grid-column:1/-1;min-height:108px}
+.result-card .name{font-size:13px;font-weight:800;line-height:1.25}
+.result-card small{display:block;color:var(--muted);font-size:10px;line-height:1.35;margin-top:4px}
+.result-right{display:flex;flex-direction:column;align-items:flex-start;gap:4px;margin-top:8px}
+.value{font-size:29px;font-weight:850;letter-spacing:-1px;line-height:1.05;white-space:nowrap}
+.result-card:first-child .value{font-size:38px}
+.blue{color:var(--blue)}.green{color:var(--green)}.orange{color:var(--orange)}
+.badge{font-size:10px;font-weight:800;padding:3px 8px;border-radius:999px;white-space:nowrap}
+.badge.ok{background:var(--badge-ok-bg);color:var(--green)}
+.badge.bad{background:var(--badge-bad-bg);color:var(--red)}
+.formula-note{margin:13px 5px 0;color:var(--muted);font-size:11px;line-height:1.45}
+.btn:active,.main-btn:active,.sub-btn:active,.icon-btn:active{transform:scale(.975);opacity:.82}
+
+/* Sheets */
+.sheet-overlay{position:fixed;inset:0;background:var(--overlay);display:none;z-index:50;opacity:0;transition:opacity .2s}
+.sheet-overlay.open{display:block;opacity:1}
+.sheet{
+  position:fixed;left:0;right:0;bottom:0;max-width:620px;margin:auto;background:var(--bg);
+  border-radius:26px 26px 0 0;padding-bottom:max(16px,env(safe-area-inset-bottom));
+  max-height:82vh;display:flex;flex-direction:column;box-shadow:0 -10px 40px rgba(0,0,0,.2)
+}
+.sheet-handle{width:38px;height:5px;border-radius:10px;background:#c7c7cc;margin:9px auto 4px}
+.sheet-header{display:flex;align-items:center;justify-content:space-between;padding:5px 16px 10px}
+.sheet-header h3{margin:0;font-size:19px;letter-spacing:-.4px}
+.sheet-body{overflow:auto;padding:0 14px 12px}
+.hist-item{display:flex;justify-content:space-between;gap:10px;background:var(--card);border-radius:16px;padding:12px;margin-bottom:8px}
+.hi-time{font-weight:800;font-size:13px}.hi-vals{font-size:10px;color:var(--muted);margin-top:4px}
+.hist-item .hi-right{display:flex;align-items:center;gap:8px}.hi-pct{font-size:16px;font-weight:850}.hist-del{border:0;background:transparent;color:var(--red);font-size:18px}
+.empty-state{color:var(--muted);font-size:13px;text-align:center;padding:28px 10px}
+.set-field{margin-bottom:13px}.set-field label{display:block;font-size:12px;font-weight:800;margin-bottom:6px}.set-field .set-row{display:flex;align-items:center;gap:10px;background:var(--card);border-radius:15px;padding:8px 12px}.set-field input{font-size:20px;flex:1}.set-unit{color:var(--muted);font-size:12px;font-weight:700}.set-note{font-size:11px;color:var(--muted);line-height:1.5;margin:3px 2px 15px}.sheet-actions{display:grid;gap:9px;margin-top:4px}
+.toast{position:fixed;left:50%;bottom:max(28px,env(safe-area-inset-bottom));transform:translate(-50%,10px);background:var(--text);color:var(--bg);padding:11px 18px;border-radius:14px;font-size:12px;font-weight:700;opacity:0;pointer-events:none;transition:.2s;z-index:60;max-width:86%;text-align:center}
+.toast.show{opacity:1;transform:translate(-50%,0)}
+@media(max-width:360px){.container{padding-left:10px;padding-right:10px}.field{padding:11px}.main-btn{min-height:96px}.value{font-size:25px}}
 </style>
 </head>
 <body>
 <div class="container">
+
 <div id="menu">
-<h1>🥫 TÍNH MÍ LON</h1>
-<div class="subtitle">Nhập thông số kiểm tra mí ghép cho từng loại lon</div>
+<h1>Tính Mí Lon</h1>
+<div class="subtitle">Kiểm tra nhanh thông số mí ghép · tối ưu cho thao tác trên iPhone</div>
 <div class="menu">
 <button class="main-btn" onclick="openCalc('Lon số 2')">Lon số 2</button>
 <button class="main-btn" onclick="toggle('lon3')">Lon số 3</button>
-<div id="lon3" class="submenu"><button class="sub-btn" onclick="openCalc('Lon số 3 Dẹp')">Lon số 3 Dẹp</button><button class="sub-btn" onclick="openCalc('Lon số 3 Vừa')">Lon số 3 Vừa</button><button class="sub-btn" onclick="openCalc('Lon số 3 Cao')">Lon số 3 Cao</button></div>
+<div id="lon3" class="submenu">
+  <button class="sub-btn" onclick="openCalc('Số 3 Dẹp')">Số 3 Dẹp</button>
+  <button class="sub-btn" onclick="openCalc('Số 3 Vừa')">Số 3 Vừa</button>
+  <button class="sub-btn" onclick="openCalc('Số 3 Cao')">Số 3 Cao</button>
+</div>
 <button class="main-btn" onclick="openCalc('Lon số 5')">Lon số 5</button>
 <button class="main-btn" onclick="openCalc('Lon A10')">Lon A10</button>
-</div></div>
+</div>
+</div>
 
 <div id="calculator" class="calculator">
-<div class="topbar"><button class="back-icon" aria-label="Quay lại" onclick="back()">‹</button><div class="calc-title"><h2 id="title">Tính mí lon</h2><span>Tất cả thông số nhập theo đơn vị mm</span></div></div>
+<div class="topbar">
+  <button class="icon-btn back-icon" aria-label="Quay lại" onclick="back()">‹</button>
+  <div class="calc-title"><h2 id="title">Tính mí lon</h2><span>Thông số nhập theo đơn vị mm</span></div>
+  <button class="icon-btn" aria-label="Lịch sử" onclick="openHistory()">🕘</button>
+  <button class="icon-btn" aria-label="Cài đặt ngưỡng" onclick="openSettings()">⚙️</button>
+</div>
 
 <div class="section-title">Thông số mí ghép</div>
 <div class="form-card">
@@ -46,41 +184,299 @@
 </div>
 <div class="hint">Nhập đủ 6 thông số để tính các chỉ số bên dưới.</div>
 
-<div class="actions"><button class="btn calc" onclick="calculate()">TÍNH KẾT QUẢ</button><button class="btn reset" onclick="resetCurrent()">↻ Reset loại lon</button><button class="btn clear-result" onclick="clearInputs()">Xóa ô nhập</button></div>
+<div class="actions">
+  <button class="btn calc" onclick="calculate()">TÍNH KẾT QUẢ</button>
+  <button class="btn reset" onclick="resetCurrent()">↻ Reset loại lon</button>
+  <button class="btn clear-result" onclick="clearInputs()">Xóa ô nhập</button>
+</div>
 
-<div class="section-title">Kết quả tính toán</div>
-<div class="results">
-<div class="result-card"><div><div class="name">Độ chồng mí</div><small>Overlap = BH + CH + Te − SL</small></div><div id="overlap" class="value blue">-- mm</div></div>
-<div class="result-card"><div><div class="name">Phần trăm độ chồng mí</div><small>% Overlap</small></div><div id="overlapPct" class="value green">-- %</div></div>
-<div class="result-card"><div><div class="name">Phần trăm độ móc thân</div><small>% Body Hook Width / % BH</small></div><div id="bodyHookPct" class="value blue">-- %</div></div>
-<div class="result-card"><div><div class="name">Khoảng trống bên trong mí ghép</div><small>Free Space / Gap</small></div><div id="gap" class="value orange">-- mm</div></div>
+<div class="section-title">Kết quả tính toán<a onclick="shareResult()">Chia sẻ</a></div>
+<div class="results" aria-live="polite">
+<div class="result-card"><div><div class="name">Độ chồng mí</div><small>Overlap = BH + CH + Te − SL</small></div><div class="result-right"><div id="overlap" class="value blue">-- mm</div></div></div>
+<div class="result-card"><div><div class="name">Phần trăm độ chồng mí</div><small>% Overlap</small></div><div class="result-right"><div id="overlapPct" class="value green">-- %</div><div id="overlapBadge"></div></div></div>
+<div class="result-card"><div><div class="name">Phần trăm độ móc thân</div><small>% Body Hook Width / % BH</small></div><div class="result-right"><div id="bodyHookPct" class="value blue">-- %</div><div id="bodyHookBadge"></div></div></div>
+<div class="result-card"><div><div class="name">Khoảng trống bên trong mí ghép</div><small>Free Space / Gap</small></div><div class="result-right"><div id="gap" class="value orange">-- mm</div></div></div>
 </div>
 <div id="message" class="formula-note">Kết quả được tính riêng và lưu trên thiết bị cho từng loại lon.</div>
 </div>
+
 </div>
+
+<!-- History sheet -->
+<div id="historyOverlay" class="sheet-overlay" onclick="if(event.target===this)closeHistory()">
+  <div class="sheet">
+    <div class="sheet-handle"></div>
+    <div class="sheet-header"><h3>Lịch sử đo</h3><button class="icon-btn" onclick="closeHistory()">Xong</button></div>
+    <div class="sheet-body">
+      <div id="historyList"></div>
+      <div class="sheet-actions">
+        <button class="btn clear-result" onclick="exportHistoryCsv()">⬇︎ Xuất CSV</button>
+        <button class="btn reset" onclick="clearHistory()">Xóa toàn bộ lịch sử</button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- Settings sheet -->
+<div id="settingsOverlay" class="sheet-overlay" onclick="if(event.target===this)closeSettings()">
+  <div class="sheet">
+    <div class="sheet-handle"></div>
+    <div class="sheet-header"><h3>Ngưỡng đánh giá</h3><button class="icon-btn" onclick="closeSettings()">Xong</button></div>
+    <div class="sheet-body">
+      <div class="set-field">
+        <label for="thOverlap">Ngưỡng đạt · % Overlap tối thiểu</label>
+        <div class="set-row"><input id="thOverlap" inputmode="decimal" type="number" step="0.1" min="0" placeholder="45"><span class="set-unit">%</span></div>
+      </div>
+      <div class="set-field">
+        <label for="thBodyHook">Ngưỡng đạt · % Body Hook tối thiểu</label>
+        <div class="set-row"><input id="thBodyHook" inputmode="decimal" type="number" step="0.1" min="0" placeholder="70"><span class="set-unit">%</span></div>
+      </div>
+      <div class="set-note">Giá trị mặc định (45% / 70%) chỉ mang tính tham khảo chung. Hãy chỉnh theo tiêu chuẩn kiểm tra mí ghép thực tế của nhà máy/thiết bị bạn đang dùng. Để trống nếu không muốn hiển thị đánh giá Đạt/Chưa đạt.</div>
+      <div class="sheet-actions">
+        <button class="btn calc" onclick="saveSettings()">Lưu ngưỡng cho loại lon này</button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<div id="toast" class="toast"></div>
+
 <script>
 let current='';
 const fields=['BH','CH','SL','ST','Tb','Te'];
-const canData=JSON.parse(localStorage.getItem('tinhMiLonDataV2')||'{}');
-function persist(){localStorage.setItem('tinhMiLonDataV2',JSON.stringify(canData))}
+const STORE_KEY='tinhMiLonDataV3';
+const OLD_KEY='tinhMiLonDataV2';
+
+function loadStore(){
+  let raw=localStorage.getItem(STORE_KEY);
+  if(raw){try{return JSON.parse(raw)}catch(e){}}
+  // migrate from old flat format if present
+  const migrated={};
+  const old=localStorage.getItem(OLD_KEY);
+  if(old){
+    try{
+      const oldData=JSON.parse(old);
+      Object.keys(oldData).forEach(name=>{
+        const inputs={};
+        fields.forEach(f=>{if(oldData[name][f]!==undefined)inputs[f]=oldData[name][f]});
+        migrated[name]={inputs,thresholds:{},history:[]};
+      });
+    }catch(e){}
+  }
+  return migrated;
+}
+const canData=loadStore();
+function persist(){localStorage.setItem(STORE_KEY,JSON.stringify(canData))}
+function ensureCan(name){if(!canData[name])canData[name]={inputs:{},thresholds:{},history:[]};return canData[name]}
+
 function toggle(id){const el=document.getElementById(id);el.style.display=el.style.display==='block'?'none':'block'}
-function setResults(data={}){document.getElementById('overlap').textContent=data.overlap??'-- mm';document.getElementById('overlapPct').textContent=data.overlapPct??'-- %';document.getElementById('bodyHookPct').textContent=data.bodyHookPct??'-- %';document.getElementById('gap').textContent=data.gap??'-- mm';document.getElementById('message').textContent=data.message??'Kết quả được tính riêng và lưu trên thiết bị cho từng loại lon.'}
-function openCalc(name){current=name;const saved=canData[name]||{};fields.forEach(id=>document.getElementById(id).value=saved[id]??'');setResults(saved);document.getElementById('title').textContent=name;document.getElementById('menu').style.display='none';document.getElementById('calculator').style.display='block';window.scrollTo({top:0,behavior:'smooth'})}
-function saveCurrent(){if(!current)return;const data={...canData[current]};fields.forEach(id=>data[id]=document.getElementById(id).value);['overlap','overlapPct','bodyHookPct','gap'].forEach(id=>data[id]=document.getElementById(id).textContent);data.message=document.getElementById('message').textContent;canData[current]=data;persist()}
-function resetCurrent(){if(!current)return;delete canData[current];persist();fields.forEach(id=>document.getElementById(id).value='');setResults({message:'Đã reset toàn bộ số liệu của '+current+'.'} )}
-function clearInputs(){fields.forEach(id=>document.getElementById(id).value='');setResults({message:'Đã xóa dữ liệu đang nhập. Nhấn Tính kết quả sau khi nhập lại.'})}
-function back(){saveCurrent();document.getElementById('calculator').style.display='none';document.getElementById('menu').style.display='block';window.scrollTo({top:0,behavior:'smooth'})}
+
+function showToast(msg){
+  const t=document.getElementById('toast');
+  t.textContent=msg;
+  t.classList.add('show');
+  clearTimeout(showToast._t);
+  showToast._t=setTimeout(()=>t.classList.remove('show'),1800);
+}
+
+function setResults(data={}){
+  document.getElementById('overlap').textContent=data.overlap??'-- mm';
+  document.getElementById('overlapPct').textContent=data.overlapPct??'-- %';
+  document.getElementById('bodyHookPct').textContent=data.bodyHookPct??'-- %';
+  document.getElementById('gap').textContent=data.gap??'-- mm';
+  document.getElementById('message').textContent=data.message??'Kết quả được tính riêng và lưu trên thiết bị cho từng loại lon.';
+  renderBadge('overlapBadge',data.overlapPctNum,thresholdFor('overlapPct'));
+  renderBadge('bodyHookBadge',data.bodyHookPctNum,thresholdFor('bodyHookPct'));
+}
+
+function thresholdFor(key){
+  const c=canData[current];
+  if(!c||!c.thresholds)return null;
+  const v=c.thresholds[key];
+  return (v===undefined||v===null||v==='')?null:parseFloat(v);
+}
+function renderBadge(elId,valueNum,min){
+  const el=document.getElementById(elId);
+  if(!el)return;
+  if(min===null||!Number.isFinite(valueNum)){el.innerHTML='';return}
+  const ok=valueNum>=min;
+  el.innerHTML='<span class="badge '+(ok?'ok':'bad')+'">'+(ok?'Đạt':'Chưa đạt')+'</span>';
+}
+
+function openCalc(name){
+  current=name;
+  const c=ensureCan(name);
+  fields.forEach(id=>document.getElementById(id).value=c.inputs[id]??'');
+  document.getElementById('title').textContent=name;
+  document.getElementById('menu').style.display='none';
+  document.getElementById('calculator').style.display='block';
+  // restore last computed display if present
+  if(c.lastResult){setResults(c.lastResult)}else{setResults({})}
+  window.scrollTo({top:0,behavior:'smooth'});
+}
+
+function saveInputsOnly(){
+  if(!current)return;
+  const c=ensureCan(current);
+  fields.forEach(id=>c.inputs[id]=document.getElementById(id).value);
+  persist();
+}
+
+function resetCurrent(){
+  if(!current)return;
+  delete canData[current];
+  persist();
+  fields.forEach(id=>document.getElementById(id).value='');
+  setResults({message:'Đã reset toàn bộ số liệu của '+current+'.'});
+}
+function clearInputs(){
+  fields.forEach(id=>document.getElementById(id).value='');
+  setResults({message:'Đã xóa dữ liệu đang nhập. Nhấn Tính kết quả sau khi nhập lại.'});
+}
+function back(){saveInputsOnly();document.getElementById('calculator').style.display='none';document.getElementById('menu').style.display='block';window.scrollTo({top:0,behavior:'smooth'})}
+
 function num(id){return parseFloat(document.getElementById(id).value)}
 function fmt(v,unit,digits=3){return Number.isFinite(v)?v.toFixed(digits).replace(/\.?(0+)$/,'')+' '+unit:'-- '+unit}
-function calculate(){const BH=num('BH'),CH=num('CH'),SL=num('SL'),ST=num('ST'),Tb=num('Tb'),Te=num('Te');const values=[BH,CH,SL,ST,Tb,Te];if(values.some(v=>!Number.isFinite(v)||v<0)){setResults({message:'Vui lòng nhập đầy đủ 6 thông số hợp lệ (không âm).'});return}
-const overlap=BH+CH+Te-SL;
-const overlapDen=SL-(2*Te+Tb);
-const bodyDen=SL-1.1*(2*Te+Tb);
-const gap=ST-(2*Tb+3*Te);
-if(Math.abs(overlapDen)<1e-12||Math.abs(bodyDen)<1e-12){setResults({message:'Không thể tính phần trăm vì mẫu số bằng 0. Hãy kiểm tra SL, Te và Tb.'});return}
-const overlapPct=(overlap/overlapDen)*100;
-const bodyHookPct=((BH-1.1*Tb)/bodyDen)*100;
-setResults({overlap:fmt(overlap,'mm',3),overlapPct:fmt(overlapPct,'%',2),bodyHookPct:fmt(bodyHookPct,'%',2),gap:fmt(gap,'mm',3),message:'Đã tính kết quả cho '+current+'.'});saveCurrent()}
+
+function calculate(){
+  const BH=num('BH'),CH=num('CH'),SL=num('SL'),ST=num('ST'),Tb=num('Tb'),Te=num('Te');
+  const values=[BH,CH,SL,ST,Tb,Te];
+  if(values.some(v=>!Number.isFinite(v)||v<0)){setResults({message:'Vui lòng nhập đầy đủ 6 thông số hợp lệ (không âm).'});return}
+  const overlap=BH+CH+Te-SL;
+  const overlapDen=SL-(2*Te+Tb);
+  const bodyDen=SL-1.1*(2*Te+Tb);
+  const gap=ST-(2*Tb+3*Te);
+  if(Math.abs(overlapDen)<1e-12||Math.abs(bodyDen)<1e-12){setResults({message:'Không thể tính phần trăm vì mẫu số bằng 0. Hãy kiểm tra SL, Te và Tb.'});return}
+  const overlapPct=(overlap/overlapDen)*100;
+  const bodyHookPct=((BH-1.1*Tb)/bodyDen)*100;
+
+  const result={
+    overlap:fmt(overlap,'mm',3),
+    overlapPct:fmt(overlapPct,'%',2),
+    bodyHookPct:fmt(bodyHookPct,'%',2),
+    gap:fmt(gap,'mm',3),
+    overlapPctNum:overlapPct,
+    bodyHookPctNum:bodyHookPct,
+    message:'Đã tính kết quả cho '+current+'.'
+  };
+  setResults(result);
+
+  const c=ensureCan(current);
+  fields.forEach(id=>c.inputs[id]=document.getElementById(id).value);
+  c.lastResult=result;
+  c.history=c.history||[];
+  c.history.unshift({
+    ts:Date.now(),
+    BH,CH,SL,ST,Tb,Te,
+    overlap:overlap,overlapPct:overlapPct,bodyHookPct:bodyHookPct,gap:gap
+  });
+  if(c.history.length>50)c.history.length=50;
+  persist();
+}
+
+/* ---------- History sheet ---------- */
+function openHistory(){
+  renderHistory();
+  document.getElementById('historyOverlay').classList.add('open');
+}
+function closeHistory(){document.getElementById('historyOverlay').classList.remove('open')}
+function fmtTime(ts){
+  const d=new Date(ts);
+  const p=n=>String(n).padStart(2,'0');
+  return p(d.getDate())+'/'+p(d.getMonth()+1)+' '+p(d.getHours())+':'+p(d.getMinutes());
+}
+function renderHistory(){
+  const list=document.getElementById('historyList');
+  const c=canData[current];
+  const hist=(c&&c.history)||[];
+  if(hist.length===0){
+    list.innerHTML='<div class="empty-state">Chưa có lịch sử đo cho '+current+'.<br>Nhấn “Tính kết quả” để lưu một mục.</div>';
+    return;
+  }
+  list.innerHTML=hist.map((h,i)=>{
+    const vals='BH '+h.BH+' · CH '+h.CH+' · SL '+h.SL+' · ST '+h.ST+' · Tb '+h.Tb+' · Te '+h.Te;
+    return '<div class="hist-item" onclick="loadHistoryEntry('+i+')">'+
+      '<div class="hi-left"><div class="hi-time">'+fmtTime(h.ts)+'</div><div class="hi-vals">'+vals+'</div></div>'+
+      '<div class="hi-right"><div class="hi-pct green">'+h.overlapPct.toFixed(1)+'%</div>'+
+      '<button class="hist-del" onclick="event.stopPropagation();deleteHistoryEntry('+i+')" aria-label="Xóa">✕</button></div>'+
+      '</div>';
+  }).join('');
+}
+function loadHistoryEntry(i){
+  const c=canData[current];
+  const h=c.history[i];
+  if(!h)return;
+  fields.forEach(id=>document.getElementById(id).value=h[id]);
+  calculate();
+  closeHistory();
+  showToast('Đã nạp lại số liệu từ lịch sử');
+}
+function deleteHistoryEntry(i){
+  const c=canData[current];
+  c.history.splice(i,1);
+  persist();
+  renderHistory();
+}
+function clearHistory(){
+  const c=ensureCan(current);
+  c.history=[];
+  persist();
+  renderHistory();
+  showToast('Đã xóa lịch sử của '+current);
+}
+function exportHistoryCsv(){
+  const rows=[['Loại lon','Thời gian','BH','CH','SL','ST','Tb','Te','Overlap(mm)','%Overlap','%BodyHook','Gap(mm)']];
+  Object.keys(canData).forEach(name=>{
+    (canData[name].history||[]).forEach(h=>{
+      rows.push([name,new Date(h.ts).toLocaleString('vi-VN'),h.BH,h.CH,h.SL,h.ST,h.Tb,h.Te,
+        h.overlap.toFixed(3),h.overlapPct.toFixed(2),h.bodyHookPct.toFixed(2),h.gap.toFixed(3)]);
+    });
+  });
+  if(rows.length===1){showToast('Chưa có dữ liệu lịch sử để xuất');return}
+  const csv='\uFEFF'+rows.map(r=>r.map(v=>'"'+String(v).replace(/"/g,'""')+'"').join(',')).join('\r\n');
+  const blob=new Blob([csv],{type:'text/csv;charset=utf-8;'});
+  const url=URL.createObjectURL(blob);
+  const a=document.createElement('a');
+  a.href=url;a.download='tinh-mi-lon-lich-su.csv';
+  document.body.appendChild(a);a.click();document.body.removeChild(a);
+  setTimeout(()=>URL.revokeObjectURL(url),1000);
+}
+
+/* ---------- Settings sheet ---------- */
+function openSettings(){
+  const c=ensureCan(current);
+  document.getElementById('thOverlap').value=c.thresholds.overlapPct??'';
+  document.getElementById('thBodyHook').value=c.thresholds.bodyHookPct??'';
+  document.getElementById('settingsOverlay').classList.add('open');
+}
+function closeSettings(){document.getElementById('settingsOverlay').classList.remove('open')}
+function saveSettings(){
+  const c=ensureCan(current);
+  const ov=document.getElementById('thOverlap').value;
+  const bh=document.getElementById('thBodyHook').value;
+  c.thresholds.overlapPct=ov===''?null:parseFloat(ov);
+  c.thresholds.bodyHookPct=bh===''?null:parseFloat(bh);
+  persist();
+  if(c.lastResult)setResults(c.lastResult);
+  closeSettings();
+  showToast('Đã lưu ngưỡng đánh giá');
+}
+
+/* ---------- Share ---------- */
+function shareResult(){
+  const c=canData[current];
+  if(!c||!c.lastResult||!c.lastResult.overlap){showToast('Hãy tính kết quả trước khi chia sẻ');return}
+  const r=c.lastResult;
+  const text=current+'\nOverlap: '+r.overlap+' (% '+r.overlapPct+')\n% Body Hook: '+r.bodyHookPct+'\nGap: '+r.gap;
+  if(navigator.share){
+    navigator.share({title:'Kết quả '+current,text}).catch(()=>{});
+  }else if(navigator.clipboard){
+    navigator.clipboard.writeText(text).then(()=>showToast('Đã sao chép kết quả'));
+  }else{
+    showToast(text);
+  }
+}
+
 if('serviceWorker' in navigator){window.addEventListener('load',()=>navigator.serviceWorker.register('./sw.js').catch(()=>{}))}
 </script>
 </body></html>
