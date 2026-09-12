@@ -1,29 +1,17 @@
-# Tính Mí Lon – Fix danh sách loại lon theo chiều dọc
+# Tính Mí Lon – Bước 7: Lịch sử đo nâng cao
 
-## Đã sửa đúng nguyên nhân
-Lần chỉnh trước dùng các class không tồn tại trong source hiện tại.
+## Nâng cấp mới
+- Tự động lưu từng lần tính kết quả.
+- Hiển thị đầy đủ ngày/tháng/năm và giờ đo.
+- Thống kê nhanh: ĐẠT / CẦN THEO DÕI / KHÔNG ĐẠT.
+- Lọc lịch sử theo ngày.
+- Lọc theo trạng thái chất lượng.
+- Chạm vào từng lần đo để xem chi tiết.
+- Xem 6 thông số đầu vào và 4 kết quả của lần đo.
+- Nạp lại một lần đo mà không tạo thêm bản ghi trùng lặp.
+- Xóa từng lần đo.
+- Xóa toàn bộ lịch sử có xác nhận.
+- Xuất CSV theo đúng dữ liệu đang lọc.
+- Service Worker cache nâng lên v18.
 
-Source thực tế dùng:
-- `.menu` — khung chứa các loại lon
-- `.main-btn` — ô loại lon chính
-- `.submenu` — nhóm lựa chọn phụ
-- `.sub-btn` — ô lựa chọn phụ
-
-Bản này ép toàn bộ các phần trên hiển thị 1 cột từ trên xuống dưới.
-
-## Kết quả
-Lon số 2
-↓
-Lon số 3
-↓
-Số 3 Dẹp
-↓
-Số 3 Vừa
-↓
-Số 3 Cao
-↓
-Lon số 5
-↓
-Lon A10
-
-Service Worker cache: v16.
+Mỗi loại lon vẫn có lịch sử hoàn toàn riêng.

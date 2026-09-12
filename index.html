@@ -302,6 +302,28 @@ input::placeholder{color:#c7c7cc}
   #menu .submenu{grid-template-columns:1fr !important;}
 }
 
+
+/* ===== BƯỚC 7 — LỊCH SỬ ĐO NÂNG CAO ===== */
+.history-tools{display:grid;grid-template-columns:1fr 1fr;gap:8px;margin:0 0 12px}
+.history-tools select,.history-tools input{width:100%;min-height:42px;border:1px solid var(--line);border-radius:12px;background:var(--card);padding:0 10px;font:inherit;font-size:12px;color:var(--text)}
+.history-summary{display:flex;gap:8px;margin:0 0 12px}
+.history-chip{flex:1;padding:9px 8px;border-radius:12px;background:var(--card);box-shadow:var(--shadow);text-align:center}
+.history-chip b{display:block;font-size:16px;line-height:1}
+.history-chip span{display:block;margin-top:4px;font-size:9px;color:var(--muted);font-weight:800;text-transform:uppercase}
+.history-chip.pass b{color:#22a06b}.history-chip.watch b{color:#c88700}.history-chip.fail b{color:#d64545}
+.hist-item{cursor:pointer}
+.hist-status{display:inline-flex;align-items:center;justify-content:center;margin-top:5px;padding:3px 7px;border-radius:999px;font-size:9px;font-weight:900}
+.hist-status.pass{background:rgba(34,160,107,.12);color:#188356}.hist-status.watch{background:rgba(200,135,0,.12);color:#a46d00}.hist-status.fail{background:rgba(214,69,69,.12);color:#b63131}.hist-status.unset{background:rgba(120,120,130,.12);color:#6e6e78}
+.hist-detail-results{display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-top:12px}
+.hist-metric{background:var(--card);border:1px solid var(--line);border-radius:13px;padding:10px}
+.hist-metric span{display:block;font-size:9px;color:var(--muted);font-weight:750}
+.hist-metric b{display:block;margin-top:3px;font-size:15px}
+.hist-inputs{margin-top:10px;padding-top:10px;border-top:1px solid var(--line);font-size:11px;line-height:1.7}
+.history-detail-time{font-size:11px;color:var(--muted);margin-bottom:6px}
+.history-detail-actions{display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-top:14px}
+.history-empty-filter{padding:24px 14px;text-align:center;color:var(--muted);font-size:12px}
+@media(max-width:430px){.history-tools{grid-template-columns:1fr}.history-summary{gap:6px}.history-chip{padding:8px 5px}}
+
 </style>
 </head>
 <body>
@@ -385,12 +407,33 @@ input::placeholder{color:#c7c7cc}
     <div class="sheet-handle"></div>
     <div class="sheet-header"><div><h3>Lịch sử đo</h3><div id="historySubtitle" style="font-size:11px;color:var(--muted);margin-top:3px">Dữ liệu lưu riêng theo từng loại lon</div></div><button class="icon-btn" onclick="closeHistory()">Xong</button></div>
     <div class="sheet-body">
+      <div class="history-tools">
+        <input id="historyDateFilter" type="date" onchange="renderHistory()">
+        <select id="historyStatusFilter" onchange="renderHistory()">
+          <option value="all">Tất cả trạng thái</option>
+          <option value="pass">ĐẠT</option>
+          <option value="watch">CẦN THEO DÕI</option>
+          <option value="fail">KHÔNG ĐẠT</option>
+          <option value="unset">CHƯA THIẾT LẬP</option>
+        </select>
+      </div>
+      <div id="historySummary" class="history-summary"></div>
       <div id="historyList"></div>
       <div class="sheet-actions">
-        <button class="btn clear-result" onclick="exportHistoryCsv()">⬇︎ Xuất CSV</button>
+        <button class="btn clear-result" onclick="exportFilteredHistoryCsv()">⬇︎ Xuất dữ liệu đang lọc</button>
         <button class="btn reset" onclick="clearHistory()">Xóa toàn bộ lịch sử</button>
       </div>
     </div>
+  </div>
+</div>
+
+
+<!-- History detail sheet -->
+<div id="historyDetailOverlay" class="sheet-overlay" onclick="if(event.target===this)closeHistoryDetail()">
+  <div class="sheet">
+    <div class="sheet-handle"></div>
+    <div class="sheet-header"><div><h3>Chi tiết lần đo</h3><div id="historyDetailTitle" class="sheet-note"></div></div><button class="icon-btn" onclick="closeHistoryDetail()">Xong</button></div>
+    <div class="sheet-body"><div id="historyDetailBody"></div></div>
   </div>
 </div>
 
@@ -504,7 +547,14 @@ function loadStore(){
 }
 const canData=loadStore();
 function persist(){localStorage.setItem(STORE_KEY,JSON.stringify(canData))}
-function ensureCan(name){if(!canData[name])canData[name]={inputs:{},thresholds:{},history:[]};return canData[name]}
+function ensureCan(name){
+  if(!canData[name])canData[name]={inputs:{},thresholds:{},history:[]};
+  const c=canData[name];
+  c.inputs=c.inputs||{};
+  c.thresholds=c.thresholds||{};
+  c.history=c.history||[];
+  return c;
+}
 
 function toggle(id){const el=document.getElementById(id);el.style.display=el.style.display==='block'?'none':'block'}
 
@@ -594,11 +644,14 @@ function renderQuality(q){
   status.style.color=q.state==='pass'?'var(--green)':q.state==='fail'?'var(--red)':'var(--orange)';
 }
 
+function openCalculator(name){ return openCalc(name); }
+
 function openCalc(name){
   current=name;
   const c=ensureCan(name);
   fields.forEach(id=>document.getElementById(id).value=c.inputs[id]??'');
-  document.getElementById('title').textContent=name;
+  const type=(typeof listCanTypes==='function'?listCanTypes():[]).find(x=>x.key===name);
+  document.getElementById('title').textContent=(type&&type.name) || c.displayName || name;
   document.getElementById('menu').style.display='none';
   document.getElementById('calculator').style.display='block';
   // restore last computed display if present
@@ -754,16 +807,49 @@ function calculateOriginal(){
   updateHistoryCount();
 }
 
-/* ---------- History sheet ---------- */
+
+/* ---------- History sheet nâng cao ---------- */
+let historyDetailIndex=null;
+
 function openHistory(){
+  const d=document.getElementById('historyDateFilter');
+  const s=document.getElementById('historyStatusFilter');
+  if(d)d.value='';
+  if(s)s.value='all';
   renderHistory();
   document.getElementById('historyOverlay').classList.add('open');
 }
 function closeHistory(){document.getElementById('historyOverlay').classList.remove('open')}
+function closeHistoryDetail(){document.getElementById('historyDetailOverlay').classList.remove('open')}
 function fmtTime(ts){
-  const d=new Date(ts);
-  const p=n=>String(n).padStart(2,'0');
-  return p(d.getDate())+'/'+p(d.getMonth()+1)+' '+p(d.getHours())+':'+p(d.getMinutes());
+  const d=new Date(ts),p=n=>String(n).padStart(2,'0');
+  return p(d.getDate())+'/'+p(d.getMonth()+1)+'/'+d.getFullYear()+' · '+p(d.getHours())+':'+p(d.getMinutes());
+}
+function dateKey(ts){
+  const d=new Date(ts),p=n=>String(n).padStart(2,'0');
+  return d.getFullYear()+'-'+p(d.getMonth()+1)+'-'+p(d.getDate());
+}
+function historyState(h){
+  const state=(h.qualityState||'').toLowerCase();
+  if(['pass','watch','fail','unset'].includes(state))return state;
+  const status=(h.qualityStatus||'').toUpperCase();
+  if(status==='ĐẠT')return 'pass';
+  if(status.includes('THEO DÕI'))return 'watch';
+  if(status.includes('KHÔNG'))return 'fail';
+  return 'unset';
+}
+function historyLabel(state){
+  return {pass:'ĐẠT',watch:'CẦN THEO DÕI',fail:'KHÔNG ĐẠT',unset:'CHƯA THIẾT LẬP'}[state]||'CHƯA THIẾT LẬP';
+}
+function filteredHistory(){
+  const c=canData[current]||{};
+  const date=(document.getElementById('historyDateFilter')||{}).value||'';
+  const status=(document.getElementById('historyStatusFilter')||{}).value||'all';
+  return (c.history||[]).map((h,index)=>({h,index})).filter(x=>{
+    if(date && dateKey(x.h.ts)!==date)return false;
+    if(status!=='all' && historyState(x.h)!==status)return false;
+    return true;
+  });
 }
 function updateHistoryCount(){
   const el=document.getElementById('historyCount');
@@ -776,64 +862,117 @@ function updateHistoryCount(){
 function renderHistory(){
   updateHistoryCount();
   const subtitle=document.getElementById('historySubtitle');
-  if(subtitle)subtitle.textContent='Lưu riêng cho '+(current||'loại lon đang chọn')+' · '+(((canData[current]||{}).history||[]).length)+' lần đo';
+  const total=((canData[current]||{}).history||[]).length;
+  if(subtitle)subtitle.textContent='Lưu riêng cho '+(current||'loại lon đang chọn')+' · '+total+' lần đo';
+
+  const all=(canData[current]||{}).history||[];
+  const pass=all.filter(h=>historyState(h)==='pass').length;
+  const watch=all.filter(h=>historyState(h)==='watch').length;
+  const fail=all.filter(h=>historyState(h)==='fail').length;
+  const summary=document.getElementById('historySummary');
+  if(summary)summary.innerHTML=
+    '<div class="history-chip pass"><b>'+pass+'</b><span>Đạt</span></div>'+
+    '<div class="history-chip watch"><b>'+watch+'</b><span>Theo dõi</span></div>'+
+    '<div class="history-chip fail"><b>'+fail+'</b><span>Không đạt</span></div>';
+
   const list=document.getElementById('historyList');
-  const c=canData[current];
-  const hist=(c&&c.history)||[];
+  const hist=filteredHistory();
   if(hist.length===0){
-    list.innerHTML='<div class="empty-state">Chưa có lịch sử đo cho '+current+'.<br>Nhấn “Tính kết quả” để lưu một mục.</div>';
+    list.innerHTML=all.length
+      ?'<div class="history-empty-filter">Không có lần đo phù hợp với bộ lọc.</div>'
+      :'<div class="empty-state">Chưa có lịch sử đo cho '+current+'.<br>Nhấn “Tính kết quả” để tự động lưu một mục.</div>';
     return;
   }
-  list.innerHTML=hist.map((h,i)=>{
+  list.innerHTML=hist.map(({h,index})=>{
     const vals='BH '+h.BH+' · CH '+h.CH+' · SL '+h.SL+' · ST '+h.ST+' · Tb '+h.Tb+' · Te '+h.Te;
-    return '<div class="hist-item" onclick="loadHistoryEntry('+i+')">'+
-      '<div class="hi-left"><div class="hi-time">'+fmtTime(h.ts)+'</div><div class="hi-vals">'+vals+'</div></div>'+
-      '<div class="hi-right"><div class="hi-pct '+(h.qualityState==='fail'?'red':'green')+'">'+(h.qualityStatus||h.overlapPct.toFixed(1)+'%')+'</div>'+
-      '<button class="hist-del" onclick="event.stopPropagation();deleteHistoryEntry('+i+')" aria-label="Xóa">✕</button></div>'+
+    const state=historyState(h), label=historyLabel(state);
+    return '<div class="hist-item" onclick="openHistoryDetail('+index+')">'+
+      '<div class="hi-left"><div class="hi-time">'+fmtTime(h.ts)+'</div><div class="hi-vals">'+vals+'</div><div class="hist-status '+state+'">'+label+'</div></div>'+
+      '<div class="hi-right"><div class="hi-pct '+(state==='fail'?'red':'green')+'">'+Number(h.overlapPct).toFixed(1)+'%</div>'+
+      '<button class="hist-del" onclick="event.stopPropagation();deleteHistoryEntry('+index+')" aria-label="Xóa">✕</button></div>'+
       '</div>';
   }).join('');
 }
-function loadHistoryEntry(i){
-  const c=canData[current];
-  const h=c.history[i];
+function openHistoryDetail(i){
+  const h=(canData[current]||{}).history?.[i];
+  if(!h)return;
+  historyDetailIndex=i;
+  const state=historyState(h),label=historyLabel(state);
+  const body=document.getElementById('historyDetailBody');
+  document.getElementById('historyDetailTitle').textContent=current+' · '+fmtTime(h.ts);
+  body.innerHTML=
+    '<div class="history-detail-time">Lần đo được lưu tự động sau khi tính kết quả.</div>'+
+    '<div class="hist-status '+state+'" style="font-size:11px;padding:5px 10px">'+label+'</div>'+
+    '<div class="hist-detail-results">'+
+      '<div class="hist-metric"><span>Độ chồng mí</span><b>'+Number(h.overlap).toFixed(3)+' mm</b></div>'+
+      '<div class="hist-metric"><span>% Độ chồng mí</span><b>'+Number(h.overlapPct).toFixed(2)+'%</b></div>'+
+      '<div class="hist-metric"><span>% Móc thân</span><b>'+Number(h.bodyHookPct).toFixed(2)+'%</b></div>'+
+      '<div class="hist-metric"><span>Khoảng trống</span><b>'+Number(h.gap).toFixed(3)+' mm</b></div>'+
+    '</div>'+
+    '<div class="hist-inputs"><b>6 thông số đầu vào</b><br>'+
+      'BH: '+h.BH+' mm · CH: '+h.CH+' mm · SL: '+h.SL+' mm<br>'+
+      'ST: '+h.ST+' mm · Tb: '+h.Tb+' mm · Te: '+h.Te+' mm</div>'+
+    '<div class="history-detail-actions">'+
+      '<button class="btn calc" onclick="loadHistoryEntry('+i+',true)">NẠP LẠI SỐ LIỆU</button>'+
+      '<button class="btn reset" onclick="deleteHistoryEntry('+i+',true)">XÓA LẦN ĐO</button></div>';
+  document.getElementById('historyDetailOverlay').classList.add('open');
+}
+function loadHistoryEntry(i,fromDetail=false){
+  const c=canData[current],h=c.history[i];
   if(!h)return;
   fields.forEach(id=>document.getElementById(id).value=h[id]);
-  calculate();
-  closeHistory();
+  // Nạp lại kết quả đã lưu, không tự tạo thêm một bản ghi lịch sử mới.
+  const result={
+    overlap:fmt(h.overlap,'mm',3), overlapPct:fmt(h.overlapPct,'%',2),
+    bodyHookPct:fmt(h.bodyHookPct,'%',2), gap:fmt(h.gap,'mm',3),
+    overlapNum:h.overlap, overlapPctNum:h.overlapPct, bodyHookPctNum:h.bodyHookPct, gapNum:h.gap,
+    qualityStatus:h.qualityStatus||historyLabel(historyState(h)),
+    qualityState:historyState(h), qualityDetail:'Kết quả được nạp lại từ lịch sử.'
+  };
+  setResults(result);
+  c.lastResult=result;
+  persist();
+  closeHistoryDetail();closeHistory();
   showToast('Đã nạp lại số liệu từ lịch sử');
 }
-function deleteHistoryEntry(i){
+function deleteHistoryEntry(i,fromDetail=false){
+  if(!confirm('Bạn có muốn xóa lần đo này khỏi lịch sử không?'))return;
   const c=canData[current];
   c.history.splice(i,1);
   persist();
-  renderHistory();
   updateHistoryCount();
+  closeHistoryDetail();
+  renderHistory();
+  showToast('Đã xóa lần đo');
 }
 function clearHistory(){
   const c=ensureCan(current);
+  if(!c.history.length){showToast('Chưa có lịch sử để xóa');return}
+  if(!confirm('Xóa toàn bộ lịch sử của '+current+'?'))return;
   c.history=[];
   persist();
   renderHistory();
   updateHistoryCount();
-  showToast('Đã xóa lịch sử của '+current);
+  showToast('Đã xóa toàn bộ lịch sử của '+current);
 }
-function exportHistoryCsv(){
+function exportFilteredHistoryCsv(){
+  const items=filteredHistory();
+  if(!items.length){showToast('Không có dữ liệu phù hợp để xuất');return}
   const rows=[['Loại lon','Thời gian','BH','CH','SL','ST','Tb','Te','Overlap(mm)','%Overlap','%BodyHook','Gap(mm)','Đánh giá']];
-  Object.keys(canData).forEach(name=>{
-    (canData[name].history||[]).forEach(h=>{
-      rows.push([name,new Date(h.ts).toLocaleString('vi-VN'),h.BH,h.CH,h.SL,h.ST,h.Tb,h.Te,
-        h.overlap.toFixed(3),h.overlapPct.toFixed(2),h.bodyHookPct.toFixed(2),h.gap.toFixed(3),h.qualityStatus||'']);
-    });
-  });
-  if(rows.length===1){showToast('Chưa có dữ liệu lịch sử để xuất');return}
+  items.forEach(({h})=>rows.push([
+    current,new Date(h.ts).toLocaleString('vi-VN'),h.BH,h.CH,h.SL,h.ST,h.Tb,h.Te,
+    Number(h.overlap).toFixed(3),Number(h.overlapPct).toFixed(2),Number(h.bodyHookPct).toFixed(2),Number(h.gap).toFixed(3),
+    historyLabel(historyState(h))
+  ]));
   const csv='\uFEFF'+rows.map(r=>r.map(v=>'"'+String(v).replace(/"/g,'""')+'"').join(',')).join('\r\n');
   const blob=new Blob([csv],{type:'text/csv;charset=utf-8;'});
-  const url=URL.createObjectURL(blob);
-  const a=document.createElement('a');
-  a.href=url;a.download='tinh-mi-lon-lich-su.csv';
-  document.body.appendChild(a);a.click();document.body.removeChild(a);
-  setTimeout(()=>URL.revokeObjectURL(url),1000);
+  const url=URL.createObjectURL(blob),a=document.createElement('a');
+  a.href=url;a.download='tinh-mi-lon-'+String(current).replace(/\s+/g,'-')+'-lich-su.csv';
+  document.body.appendChild(a);a.click();a.remove();setTimeout(()=>URL.revokeObjectURL(url),1000);
+  showToast('Đã xuất dữ liệu lịch sử');
 }
+// Giữ tương thích với nút cũ nếu còn tồn tại trong cache/source.
+function exportHistoryCsv(){exportFilteredHistoryCsv();}
 
 /* ---------- Settings sheet ---------- */
 function openSettings(){
@@ -927,12 +1066,12 @@ function getCanMenu(){
 function getExistingCanButtons(){
   const menu=getCanMenu();
   if(!menu)return [];
-  return Array.from(menu.querySelectorAll('.main-btn')).filter(b=>b.dataset.canKey || b.getAttribute('onclick'));
+  return Array.from(menu.querySelectorAll('.main-btn,.sub-btn')).filter(b=>b.dataset.canKey || b.getAttribute('onclick'));
 }
 function inferCanKey(btn){
   if(btn.dataset.canKey)return btn.dataset.canKey;
   const oc=btn.getAttribute('onclick')||'';
-  const m=oc.match(/openCalculator\(['"]([^'"]+)['"]\)/);
+  const m=oc.match(/openCalc(?:ulator)?\(['"]([^'"]+)['"]\)/);
   return m?m[1]:null;
 }
 function ensureCustomCans(){
@@ -967,9 +1106,10 @@ function addCanButton(key,name,custom=true){
   btn.dataset.canName=name;
   if(custom)btn.dataset.custom='1';
   btn.textContent=name;
-  btn.addEventListener('click',()=>openCalculator(key));
+  btn.addEventListener('click',()=>openCalc(key));
   menu.appendChild(btn);
-  if(!canData[key])canData[key]={};
+  ensureCan(key);
+  canData[key].displayName=name;
 }
 function renameCanButton(key,name){
   const btn=document.querySelector(`.main-btn[data-can-key="${CSS.escape(key)}"]`) ||
@@ -1050,7 +1190,7 @@ function saveCanType(){
     let key=canKeyFromName(name);
     let n=2, base=key;
     while(types.some(t=>t.key===key)||canData[key])key=base+'-'+n++;
-    canData[key]={displayName:name,values:{},history:[],standards:{}};
+    canData[key]={displayName:name,inputs:{},thresholds:{},history:[]};
     addCanButton(key,name,true);
     showToast('Đã thêm '+name);
   }
@@ -1081,6 +1221,16 @@ function deleteCanType(key){
 document.addEventListener('DOMContentLoaded',()=>{
   ensureCustomCans();
   renderCanManager();
+});
+
+// Bảo đảm mọi loại lon tự thêm đều có thể mở màn hình tính toán.
+document.addEventListener('DOMContentLoaded',()=>{
+  document.querySelectorAll('.main-btn[data-can-key],.sub-btn[data-can-key]').forEach(btn=>{
+    if(!btn.dataset.calcBound){
+      btn.dataset.calcBound='1';
+      btn.addEventListener('click',()=>openCalc(btn.dataset.canKey));
+    }
+  });
 });
 
 
