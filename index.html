@@ -65,6 +65,7 @@ h1{font-size:31px;line-height:1.08;letter-spacing:-1.1px;margin:16px 2px 4px;fon
   background:linear-gradient(var(--bg) 75%,transparent);
 }
 .icon-btn{border:0;background:transparent;color:var(--blue);font-size:21px;line-height:1;padding:10px;cursor:pointer;border-radius:12px}
+.history-btn{position:relative}.history-count{position:absolute;right:1px;top:1px;min-width:16px;height:16px;padding:0 4px;border-radius:99px;background:var(--blue);color:#fff;font-size:9px;font-weight:800;display:none;align-items:center;justify-content:center}
 .back-icon{font-size:31px;padding:6px 8px 6px 2px}
 .calc-title{flex:1;min-width:0}
 .calc-title h2{margin:0;font-size:22px;letter-spacing:-.7px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
@@ -113,11 +114,26 @@ input::placeholder{color:#c7c7cc}
 .result-right{display:flex;flex-direction:column;align-items:flex-start;gap:4px;margin-top:8px}
 .value{font-size:29px;font-weight:850;letter-spacing:-1px;line-height:1.05;white-space:nowrap}
 .result-card:first-child .value{font-size:38px}
-.blue{color:var(--blue)}.green{color:var(--green)}.orange{color:var(--orange)}
+.blue{color:var(--blue)}.green{color:var(--green)}.orange{color:var(--orange)}.red{color:var(--red)}
 .badge{font-size:10px;font-weight:800;padding:3px 8px;border-radius:999px;white-space:nowrap}
 .badge.ok{background:var(--badge-ok-bg);color:var(--green)}
 .badge.bad{background:var(--badge-bad-bg);color:var(--red)}
 .formula-note{margin:13px 5px 0;color:var(--muted);font-size:11px;line-height:1.45}
+.quality-card{
+  grid-column:1/-1; border-radius:var(--radius); padding:16px 18px; min-height:112px;
+  background:var(--card); box-shadow:var(--shadow); display:flex; align-items:center; gap:14px;
+  border:1px solid var(--line);
+}
+.quality-card.pass{border-color:color-mix(in srgb,var(--green) 45%,var(--line));background:linear-gradient(135deg,var(--card),color-mix(in srgb,var(--green) 8%,var(--card)))}
+.quality-card.fail{border-color:color-mix(in srgb,var(--red) 45%,var(--line));background:linear-gradient(135deg,var(--card),color-mix(in srgb,var(--red) 7%,var(--card)))}
+.quality-card.unset{background:linear-gradient(135deg,var(--card),color-mix(in srgb,var(--orange) 7%,var(--card)))}
+.quality-icon{width:48px;height:48px;border-radius:16px;display:grid;place-items:center;font-size:25px;background:var(--card2);flex:0 0 auto}
+.quality-copy{min-width:0;flex:1}.quality-label{font-size:11px;font-weight:850;text-transform:uppercase;letter-spacing:.55px;color:var(--muted)}
+.quality-status{font-size:26px;font-weight:900;letter-spacing:-.8px;line-height:1.1;margin-top:3px}
+.quality-detail{font-size:11px;color:var(--muted);line-height:1.35;margin-top:4px}
+.badge.warn{background:#fff4db;color:#a16207}
+.badge.neutral{background:var(--card2);color:var(--muted)}
+
 .btn:active,.main-btn:active,.sub-btn:active,.icon-btn:active{transform:scale(.975);opacity:.82}
 
 /* Sheets */
@@ -140,6 +156,152 @@ input::placeholder{color:#c7c7cc}
 .toast{position:fixed;left:50%;bottom:max(28px,env(safe-area-inset-bottom));transform:translate(-50%,10px);background:var(--text);color:var(--bg);padding:11px 18px;border-radius:14px;font-size:12px;font-weight:700;opacity:0;pointer-events:none;transition:.2s;z-index:60;max-width:86%;text-align:center}
 .toast.show{opacity:1;transform:translate(-50%,0)}
 @media(max-width:360px){.container{padding-left:10px;padding-right:10px}.field{padding:11px}.main-btn{min-height:96px}.value{font-size:25px}}
+
+/* Bước 3 — Cảnh báo dữ liệu bất thường */
+.warning-card{display:none;margin:12px 0 0;background:var(--card);border-radius:var(--radius);padding:14px 15px;box-shadow:var(--shadow);border:1px solid var(--line)}
+.warning-card.show{display:block}
+.warning-card.safe{border-color:color-mix(in srgb,var(--green) 35%,var(--line))}
+.warning-card.caution{border-color:color-mix(in srgb,var(--orange) 55%,var(--line))}
+.warning-card.danger{border-color:color-mix(in srgb,var(--red) 55%,var(--line))}
+.warning-head{display:flex;align-items:center;gap:10px}
+.warning-icon{font-size:20px;line-height:1}
+.warning-title{font-size:14px;font-weight:850;letter-spacing:-.15px}
+.warning-card.safe .warning-title{color:var(--green)}
+.warning-card.caution .warning-title{color:var(--orange)}
+.warning-card.danger .warning-title{color:var(--red)}
+.warning-text{font-size:12px;color:var(--muted);line-height:1.45;margin-top:8px}
+.warning-list{margin:9px 0 0;padding-left:18px;color:var(--text);font-size:12px;line-height:1.5}
+.field.is-warning{box-shadow:inset 0 0 0 2px var(--orange)}
+.field.is-danger{box-shadow:inset 0 0 0 2px var(--red)}
+.warning-summary{font-size:11px;color:var(--muted);margin:7px 5px 0}
+
+
+/* Bước 4 — Quản lý loại lon */
+.menu-toolbar{display:flex;align-items:center;justify-content:space-between;margin:3px 2px 10px}
+.menu-toolbar .label{font-size:12px;font-weight:800;color:var(--muted);letter-spacing:.65px}
+.manage-cans-btn{border:0;background:var(--card);color:var(--blue);box-shadow:var(--shadow);border-radius:14px;padding:9px 12px;font-size:12px;font-weight:800}
+.can-manage-list{display:grid;gap:9px}
+.can-manage-item{display:flex;align-items:center;gap:10px;background:var(--card);border-radius:17px;padding:11px 12px;box-shadow:var(--shadow)}
+.can-manage-name{flex:1;font-size:14px;font-weight:800;min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.can-manage-meta{font-size:10px;color:var(--muted);margin-top:3px}
+.can-mini-btn{border:0;border-radius:11px;padding:8px 9px;background:var(--card2);color:var(--blue);font-size:11px;font-weight:800}
+.can-mini-btn.delete{color:var(--red)}
+.add-can-form{display:grid;gap:10px}
+.add-can-form input{background:var(--card);border-radius:15px;padding:13px 14px;font-size:17px}
+.sheet-note{font-size:11px;color:var(--muted);line-height:1.45;margin:5px 2px 12px}
+
+
+/* Bước 5 — Xuất báo cáo */
+.export-btn{background:var(--card);color:var(--blue);box-shadow:var(--shadow)}
+.export-btn:disabled{opacity:.45}
+.report-actions{display:grid;grid-template-columns:1fr 1fr;gap:10px;margin:4px 0 12px}
+.report-preview{background:var(--card);border-radius:18px;padding:14px;box-shadow:var(--shadow);font-size:12px;line-height:1.55}
+.report-preview h4{margin:0 0 8px;font-size:15px}
+.report-preview .rp-title{font-size:10px;color:var(--muted);font-weight:800;text-transform:uppercase;letter-spacing:.6px}
+.report-preview .rp-status{font-size:20px;font-weight:900;margin:4px 0 10px}
+.report-preview table{width:100%;border-collapse:collapse;margin-top:8px}
+.report-preview td{padding:5px 0;border-bottom:1px solid var(--line)}
+.report-preview td:last-child{text-align:right;font-weight:800}
+@media print{
+  body{background:#fff!important;color:#000!important;padding:0!important}
+  body *{visibility:hidden!important}
+  #printReport,#printReport *{visibility:visible!important}
+  #printReport{position:absolute;left:0;top:0;width:100%;padding:24px;background:#fff!important;color:#000!important}
+}
+
+
+/* Bước 6 — PWA Offline & cập nhật */
+.network-pill{display:none;align-items:center;gap:7px;margin:0 2px 10px;padding:9px 12px;border-radius:14px;background:var(--card);box-shadow:var(--shadow);font-size:11px;font-weight:750;color:var(--muted)}
+.network-pill.show{display:flex}
+.network-dot{width:8px;height:8px;border-radius:50%;background:var(--orange)}
+.update-card{display:none;margin:10px 0 0;padding:13px 14px;background:var(--card);border-radius:18px;box-shadow:var(--shadow);align-items:center;gap:10px}
+.update-card.show{display:flex}
+.update-copy{flex:1;min-width:0}
+.update-copy b{display:block;font-size:13px}
+.update-copy span{display:block;font-size:10px;color:var(--muted);margin-top:3px;line-height:1.35}
+.update-card button{border:0;border-radius:12px;padding:9px 11px;background:var(--blue);color:#fff;font-size:11px;font-weight:850}
+.save-indicator{position:fixed;right:12px;bottom:max(18px,env(safe-area-inset-bottom));z-index:55;background:var(--card);box-shadow:var(--shadow);border-radius:999px;padding:8px 11px;font-size:10px;font-weight:750;color:var(--muted);opacity:0;transform:translateY(8px);transition:.2s;pointer-events:none}
+.save-indicator.show{opacity:1;transform:translateY(0)}
+
+
+/* Danh sách loại lon theo chiều dọc */
+.can-grid,
+.can-types,
+.type-grid,
+#canList{
+  grid-template-columns:1fr !important;
+  display:grid !important;
+  gap:12px !important;
+}
+
+.can-card,
+.type-card{
+  width:100% !important;
+  min-height:82px !important;
+  display:flex !important;
+  align-items:center !important;
+  justify-content:flex-start !important;
+  padding:16px 18px !important;
+}
+
+.can-card .arrow,
+.type-card .arrow,
+.can-card .chevron,
+.type-card .chevron{
+  margin-left:auto !important;
+}
+
+.can-card small,
+.type-card small{
+  margin-top:0 !important;
+}
+
+/* Các nút/biến thể của cùng một loại lon vẫn nằm gọn bên trong card nếu có */
+.can-options,
+.size-options,
+.variant-options{
+  grid-template-columns:repeat(3,1fr) !important;
+}
+
+
+/* FIX CHÍNH XÁC: Source này dùng .menu, .main-btn và .submenu */
+#menu .menu{
+  display:grid !important;
+  grid-template-columns:1fr !important;
+  gap:12px !important;
+}
+
+#menu .main-btn{
+  width:100% !important;
+  min-height:92px !important;
+  grid-column:1 !important;
+}
+
+/* Các lựa chọn con của Lon số 3 cũng xếp dọc */
+#menu .submenu{
+  grid-column:1 !important;
+  grid-template-columns:1fr !important;
+  gap:10px !important;
+}
+
+#menu .submenu .sub-btn{
+  width:100% !important;
+  min-height:68px !important;
+}
+
+/* Card động do chức năng Quản lý loại lon tạo ra */
+#menu .custom-can-btn,
+#menu [data-can-key]{
+  width:100% !important;
+  grid-column:1 !important;
+}
+
+/* iPhone: đảm bảo không có breakpoint nào chuyển lại thành 2 cột */
+@media (max-width: 9999px){
+  #menu .menu{grid-template-columns:1fr !important;}
+  #menu .submenu{grid-template-columns:1fr !important;}
+}
+
 </style>
 </head>
 <body>
@@ -147,7 +309,14 @@ input::placeholder{color:#c7c7cc}
 
 <div id="menu">
 <h1>Tính Mí Lon</h1>
-<div class="subtitle">Kiểm tra nhanh thông số mí ghép · tối ưu cho thao tác trên iPhone</div>
+
+<div id="networkPill" class="network-pill"><span class="network-dot"></span><span id="networkText">Bạn đang ngoại tuyến. Dữ liệu vẫn hoạt động trên thiết bị.</span></div>
+<div id="updateCard" class="update-card">
+  <div class="update-copy"><b>Có phiên bản mới</b><span>Bản cập nhật đã sẵn sàng để sử dụng.</span></div>
+  <button onclick="applyAppUpdate()">CẬP NHẬT</button>
+</div>
+
+<div class="menu-toolbar"><div class="label">CHỌN LOẠI LON</div><button class="manage-cans-btn" onclick="openCanManager()">Quản lý</button></div>
 <div class="menu">
 <button class="main-btn" onclick="openCalc('Lon số 2')">Lon số 2</button>
 <button class="main-btn" onclick="toggle('lon3')">Lon số 3</button>
@@ -165,7 +334,8 @@ input::placeholder{color:#c7c7cc}
 <div class="topbar">
   <button class="icon-btn back-icon" aria-label="Quay lại" onclick="back()">‹</button>
   <div class="calc-title"><h2 id="title">Tính mí lon</h2><span>Thông số nhập theo đơn vị mm</span></div>
-  <button class="icon-btn" aria-label="Lịch sử" onclick="openHistory()">🕘</button>
+  <button class="icon-btn history-btn" aria-label="Lịch sử" onclick="openHistory()">🕘<span id="historyCount" class="history-count">0</span></button>
+<button class="icon-btn" aria-label="Xuất báo cáo" onclick="openExport()">⇧</button>
   <button class="icon-btn" aria-label="Cài đặt ngưỡng" onclick="openSettings()">⚙️</button>
 </div>
 
@@ -192,13 +362,20 @@ input::placeholder{color:#c7c7cc}
 
 <div class="section-title">Kết quả tính toán<a onclick="shareResult()">Chia sẻ</a></div>
 <div class="results" aria-live="polite">
-<div class="result-card"><div><div class="name">Độ chồng mí</div><small>Overlap = BH + CH + Te − SL</small></div><div class="result-right"><div id="overlap" class="value blue">-- mm</div></div></div>
-<div class="result-card"><div><div class="name">Phần trăm độ chồng mí</div><small>% Overlap</small></div><div class="result-right"><div id="overlapPct" class="value green">-- %</div><div id="overlapBadge"></div></div></div>
-<div class="result-card"><div><div class="name">Phần trăm độ móc thân</div><small>% Body Hook Width / % BH</small></div><div class="result-right"><div id="bodyHookPct" class="value blue">-- %</div><div id="bodyHookBadge"></div></div></div>
-<div class="result-card"><div><div class="name">Khoảng trống bên trong mí ghép</div><small>Free Space / Gap</small></div><div class="result-right"><div id="gap" class="value orange">-- mm</div></div></div>
+  <div id="qualityCard" class="quality-card unset">
+    <div id="qualityIcon" class="quality-icon">⚙️</div>
+    <div class="quality-copy">
+      <div class="quality-label">Đánh giá tổng thể</div>
+      <div id="qualityStatus" class="quality-status">CHƯA THIẾT LẬP</div>
+      <div id="qualityDetail" class="quality-detail">Thiết lập ngưỡng trong Cài đặt để đánh giá Đạt / Không đạt.</div>
+    </div>
+  </div>
+  <div class="result-card"><div><div class="name">Độ chồng mí</div><small>Overlap = BH + CH + Te − SL</small></div><div class="result-right"><div id="overlap" class="value blue">-- mm</div><div id="overlapValueBadge"></div></div></div>
+  <div class="result-card"><div><div class="name">Phần trăm độ chồng mí</div><small>% Overlap</small></div><div class="result-right"><div id="overlapPct" class="value green">-- %</div><div id="overlapBadge"></div></div></div>
+  <div class="result-card"><div><div class="name">Phần trăm độ móc thân</div><small>% Body Hook Width / % BH</small></div><div class="result-right"><div id="bodyHookPct" class="value blue">-- %</div><div id="bodyHookBadge"></div></div></div>
+  <div class="result-card"><div><div class="name">Khoảng trống bên trong mí ghép</div><small>Free Space / Gap</small></div><div class="result-right"><div id="gap" class="value orange">-- mm</div><div id="gapBadge"></div></div></div>
 </div>
-<div id="message" class="formula-note">Kết quả được tính riêng và lưu trên thiết bị cho từng loại lon.</div>
-</div>
+<div id="message" class="formula-note">Kết quả được tính riêng và lưu trên thiết bị cho từng loại lon.</div></div>
 
 </div>
 
@@ -206,7 +383,7 @@ input::placeholder{color:#c7c7cc}
 <div id="historyOverlay" class="sheet-overlay" onclick="if(event.target===this)closeHistory()">
   <div class="sheet">
     <div class="sheet-handle"></div>
-    <div class="sheet-header"><h3>Lịch sử đo</h3><button class="icon-btn" onclick="closeHistory()">Xong</button></div>
+    <div class="sheet-header"><div><h3>Lịch sử đo</h3><div id="historySubtitle" style="font-size:11px;color:var(--muted);margin-top:3px">Dữ liệu lưu riêng theo từng loại lon</div></div><button class="icon-btn" onclick="closeHistory()">Xong</button></div>
     <div class="sheet-body">
       <div id="historyList"></div>
       <div class="sheet-actions">
@@ -221,24 +398,84 @@ input::placeholder{color:#c7c7cc}
 <div id="settingsOverlay" class="sheet-overlay" onclick="if(event.target===this)closeSettings()">
   <div class="sheet">
     <div class="sheet-handle"></div>
-    <div class="sheet-header"><h3>Ngưỡng đánh giá</h3><button class="icon-btn" onclick="closeSettings()">Xong</button></div>
+    <div class="sheet-header"><h3>Tiêu chuẩn Đạt / Không đạt</h3><button class="icon-btn" onclick="closeSettings()">Xong</button></div>
     <div class="sheet-body">
       <div class="set-field">
-        <label for="thOverlap">Ngưỡng đạt · % Overlap tối thiểu</label>
-        <div class="set-row"><input id="thOverlap" inputmode="decimal" type="number" step="0.1" min="0" placeholder="45"><span class="set-unit">%</span></div>
+        <label>Độ chồng mí · Overlap (mm)</label>
+        <div class="set-row"><input id="thOverlapMin" inputmode="decimal" type="number" step="0.001" placeholder="Tối thiểu"><span class="set-unit">mm</span></div>
+        <div style="height:8px"></div>
+        <div class="set-row"><input id="thOverlapMax" inputmode="decimal" type="number" step="0.001" placeholder="Tối đa"><span class="set-unit">mm</span></div>
       </div>
       <div class="set-field">
-        <label for="thBodyHook">Ngưỡng đạt · % Body Hook tối thiểu</label>
-        <div class="set-row"><input id="thBodyHook" inputmode="decimal" type="number" step="0.1" min="0" placeholder="70"><span class="set-unit">%</span></div>
+        <label for="thOverlap">% Độ chồng mí tối thiểu</label>
+        <div class="set-row"><input id="thOverlap" inputmode="decimal" type="number" step="0.1" placeholder="Ví dụ: 45"><span class="set-unit">%</span></div>
       </div>
-      <div class="set-note">Giá trị mặc định (45% / 70%) chỉ mang tính tham khảo chung. Hãy chỉnh theo tiêu chuẩn kiểm tra mí ghép thực tế của nhà máy/thiết bị bạn đang dùng. Để trống nếu không muốn hiển thị đánh giá Đạt/Chưa đạt.</div>
+      <div class="set-field">
+        <label for="thBodyHook">% Độ móc thân tối thiểu</label>
+        <div class="set-row"><input id="thBodyHook" inputmode="decimal" type="number" step="0.1" placeholder="Ví dụ: 70"><span class="set-unit">%</span></div>
+      </div>
+      <div class="set-field">
+        <label for="thGapMax">Khoảng trống tối đa</label>
+        <div class="set-row"><input id="thGapMax" inputmode="decimal" type="number" step="0.001" placeholder="Tối đa"><span class="set-unit">mm</span></div>
+      </div>
+      <div class="set-note">Các ngưỡng được lưu riêng cho từng loại lon. Để trống một ngưỡng nếu bạn không muốn dùng tiêu chí đó. Ứng dụng chỉ kết luận <b>ĐẠT</b> khi tất cả tiêu chí đã thiết lập đều đạt.</div>
       <div class="sheet-actions">
-        <button class="btn calc" onclick="saveSettings()">Lưu ngưỡng cho loại lon này</button>
+        <button class="btn calc" onclick="saveSettings()">Lưu tiêu chuẩn cho loại lon này</button>
       </div>
     </div>
   </div>
 </div>
 
+
+<div id="canManagerOverlay" class="sheet-overlay" onclick="if(event.target===this)closeCanManager()">
+  <div class="sheet">
+    <div class="sheet-handle"></div>
+    <div class="sheet-header">
+      <div><h3>Quản lý loại lon</h3><div class="sheet-note">Thêm, đổi tên hoặc xóa loại lon. Dữ liệu và tiêu chuẩn của từng loại được lưu riêng.</div></div>
+      <button class="icon-btn" onclick="closeCanManager()">Xong</button>
+    </div>
+    <div class="sheet-body">
+      <div class="can-manage-list" id="canManageList"></div>
+      <div class="sheet-actions">
+        <button class="btn calc" onclick="openAddCan()">＋ THÊM LOẠI LON</button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<div id="addCanOverlay" class="sheet-overlay" onclick="if(event.target===this)closeAddCan()">
+  <div class="sheet">
+    <div class="sheet-handle"></div>
+    <div class="sheet-header"><h3 id="addCanTitle">Thêm loại lon</h3><button class="icon-btn" onclick="closeAddCan()">Xong</button></div>
+    <div class="sheet-body">
+      <div class="add-can-form">
+        <input id="canNameInput" type="text" maxlength="40" placeholder="Ví dụ: Lon 330 ml">
+        <div class="sheet-note">Tên này sẽ xuất hiện ở màn hình chọn loại lon. Mỗi loại lon có dữ liệu, lịch sử và tiêu chuẩn ĐẠT/KHÔNG ĐẠT riêng.</div>
+        <button class="btn calc" id="saveCanBtn" onclick="saveCanType()">LƯU LOẠI LON</button>
+      </div>
+    </div>
+  </div>
+</div>
+
+
+<div id="exportOverlay" class="sheet-overlay" onclick="if(event.target===this)closeExport()">
+  <div class="sheet">
+    <div class="sheet-handle"></div>
+    <div class="sheet-header"><div><h3>Xuất báo cáo</h3><div class="sheet-note">Xuất dữ liệu đo của loại lon đang chọn.</div></div><button class="icon-btn" onclick="closeExport()">Xong</button></div>
+    <div class="sheet-body">
+      <div id="reportPreview" class="report-preview"></div>
+      <div class="report-actions">
+        <button class="btn export-btn" onclick="exportCurrentCSV()">CSV hiện tại</button>
+        <button class="btn export-btn" onclick="exportHistoryCSV()">CSV lịch sử</button>
+        <button class="btn calc" style="grid-column:1/-1" onclick="printCurrentReport()">IN / LƯU PDF</button>
+      </div>
+      <div class="sheet-note">Trên iPhone, sau khi chọn IN / LƯU PDF, bạn có thể dùng menu Chia sẻ của hệ thống để lưu hoặc gửi báo cáo.</div>
+    </div>
+  </div>
+</div>
+<div id="printReport"></div>
+
+<div id="saveIndicator" class="save-indicator">Đã lưu trên thiết bị</div>
 <div id="toast" class="toast"></div>
 
 <script>
@@ -285,8 +522,14 @@ function setResults(data={}){
   document.getElementById('bodyHookPct').textContent=data.bodyHookPct??'-- %';
   document.getElementById('gap').textContent=data.gap??'-- mm';
   document.getElementById('message').textContent=data.message??'Kết quả được tính riêng và lưu trên thiết bị cho từng loại lon.';
-  renderBadge('overlapBadge',data.overlapPctNum,thresholdFor('overlapPct'));
-  renderBadge('bodyHookBadge',data.bodyHookPctNum,thresholdFor('bodyHookPct'));
+
+  const quality=evaluateQuality(data);
+  renderQuality(quality);
+
+  renderRangeBadge('overlapValueBadge', data.overlapNum, thresholdFor('overlapMin'), thresholdFor('overlapMax'));
+  renderMinBadge('overlapBadge', data.overlapPctNum, thresholdFor('overlapPct'));
+  renderMinBadge('bodyHookBadge', data.bodyHookPctNum, thresholdFor('bodyHookPct'));
+  renderMaxBadge('gapBadge', data.gapNum, thresholdFor('gapMax'));
 }
 
 function thresholdFor(key){
@@ -295,12 +538,60 @@ function thresholdFor(key){
   const v=c.thresholds[key];
   return (v===undefined||v===null||v==='')?null:parseFloat(v);
 }
-function renderBadge(elId,valueNum,min){
-  const el=document.getElementById(elId);
-  if(!el)return;
-  if(min===null||!Number.isFinite(valueNum)){el.innerHTML='';return}
+function hasThreshold(v){return v!==null&&Number.isFinite(v)}
+function renderMinBadge(elId,valueNum,min){
+  const el=document.getElementById(elId); if(!el)return;
+  if(!hasThreshold(min)||!Number.isFinite(valueNum)){el.innerHTML='';return}
   const ok=valueNum>=min;
-  el.innerHTML='<span class="badge '+(ok?'ok':'bad')+'">'+(ok?'Đạt':'Chưa đạt')+'</span>';
+  el.innerHTML='<span class="badge '+(ok?'ok':'bad')+'">'+(ok?'Đạt':'Không đạt')+'</span>';
+}
+function renderMaxBadge(elId,valueNum,max){
+  const el=document.getElementById(elId); if(!el)return;
+  if(!hasThreshold(max)||!Number.isFinite(valueNum)){el.innerHTML='';return}
+  const ok=valueNum<=max;
+  el.innerHTML='<span class="badge '+(ok?'ok':'bad')+'">'+(ok?'Đạt':'Không đạt')+'</span>';
+}
+function renderRangeBadge(elId,valueNum,min,max){
+  const el=document.getElementById(elId); if(!el)return;
+  if((!hasThreshold(min)&&!hasThreshold(max))||!Number.isFinite(valueNum)){el.innerHTML='';return}
+  const ok=(!hasThreshold(min)||valueNum>=min)&&(!hasThreshold(max)||valueNum<=max);
+  el.innerHTML='<span class="badge '+(ok?'ok':'bad')+'">'+(ok?'Đạt':'Không đạt')+'</span>';
+}
+function evaluateQuality(data){
+  const checks=[];
+  const overlapMin=thresholdFor('overlapMin'), overlapMax=thresholdFor('overlapMax');
+  const overlapPctMin=thresholdFor('overlapPct'), bodyHookMin=thresholdFor('bodyHookPct'), gapMax=thresholdFor('gapMax');
+
+  if(hasThreshold(overlapMin)||hasThreshold(overlapMax)){
+    const ok=Number.isFinite(data.overlapNum)&&(!hasThreshold(overlapMin)||data.overlapNum>=overlapMin)&&(!hasThreshold(overlapMax)||data.overlapNum<=overlapMax);
+    checks.push({name:'Độ chồng mí',ok});
+  }
+  if(hasThreshold(overlapPctMin)){
+    checks.push({name:'% Độ chồng mí',ok:Number.isFinite(data.overlapPctNum)&&data.overlapPctNum>=overlapPctMin});
+  }
+  if(hasThreshold(bodyHookMin)){
+    checks.push({name:'% Độ móc thân',ok:Number.isFinite(data.bodyHookPctNum)&&data.bodyHookPctNum>=bodyHookMin});
+  }
+  if(hasThreshold(gapMax)){
+    checks.push({name:'Khoảng trống',ok:Number.isFinite(data.gapNum)&&data.gapNum<=gapMax});
+  }
+
+  if(!checks.length)return {state:'unset',status:'CHƯA THIẾT LẬP',icon:'⚙️',detail:'Thiết lập ngưỡng trong Cài đặt để đánh giá Đạt / Không đạt.',checks};
+  const failed=checks.filter(c=>!c.ok);
+  if(!failed.length)return {state:'pass',status:'ĐẠT',icon:'✓',detail:'Tất cả '+checks.length+' tiêu chí đã thiết lập đều đạt.',checks};
+  return {state:'fail',status:'KHÔNG ĐẠT',icon:'!',detail:'Chưa đạt: '+failed.map(c=>c.name).join(' · ')+'.',checks};
+}
+function renderQuality(q){
+  const card=document.getElementById('qualityCard');
+  const icon=document.getElementById('qualityIcon');
+  const status=document.getElementById('qualityStatus');
+  const detail=document.getElementById('qualityDetail');
+  if(!card)return;
+  card.className='quality-card '+q.state;
+  icon.textContent=q.icon;
+  status.textContent=q.status;
+  detail.textContent=q.detail;
+  status.style.color=q.state==='pass'?'var(--green)':q.state==='fail'?'var(--red)':'var(--orange)';
 }
 
 function openCalc(name){
@@ -312,6 +603,7 @@ function openCalc(name){
   document.getElementById('calculator').style.display='block';
   // restore last computed display if present
   if(c.lastResult){setResults(c.lastResult)}else{setResults({})}
+  updateHistoryCount();
   window.scrollTo({top:0,behavior:'smooth'});
 }
 
@@ -328,6 +620,7 @@ function resetCurrent(){
   persist();
   fields.forEach(id=>document.getElementById(id).value='');
   setResults({message:'Đã reset toàn bộ số liệu của '+current+'.'});
+  updateHistoryCount();
 }
 function clearInputs(){
   fields.forEach(id=>document.getElementById(id).value='');
@@ -338,7 +631,86 @@ function back(){saveInputsOnly();document.getElementById('calculator').style.dis
 function num(id){return parseFloat(document.getElementById(id).value)}
 function fmt(v,unit,digits=3){return Number.isFinite(v)?v.toFixed(digits).replace(/\.?(0+)$/,'')+' '+unit:'-- '+unit}
 
-function calculate(){
+
+function clearInputWarnings(){
+  document.querySelectorAll('.field.is-warning,.field.is-danger').forEach(el=>{
+    el.classList.remove('is-warning','is-danger');
+  });
+}
+function getInputById(id){
+  return document.getElementById(id) || document.querySelector(`[name="${id}"]`);
+}
+function markField(id, level){
+  const el=getInputById(id);
+  if(el && el.closest('.field')){
+    el.closest('.field').classList.add(level==='danger'?'is-danger':'is-warning');
+  }
+}
+function renderDataWarning(result, values){
+  const box=document.getElementById('dataWarning');
+  const icon=document.getElementById('warningIcon');
+  const title=document.getElementById('warningTitle');
+  const text=document.getElementById('warningText');
+  const list=document.getElementById('warningList');
+  if(!box||!icon||!title||!text||!list)return;
+  clearInputWarnings();
+  const issues=[];
+  const cautions=[];
+  const addIssue=(msg, ids=[])=>{issues.push(msg); ids.forEach(id=>markField(id,'danger'));};
+  const addCaution=(msg, ids=[])=>{cautions.push(msg); ids.forEach(id=>markField(id,'warning'));};
+
+  const {BH,CH,SL,ST,Tb,Te}=values;
+  const vals=[['BH',BH],['CH',CH],['SL',SL],['ST',ST],['Tb',Tb],['Te',Te]];
+  vals.forEach(([k,v])=>{
+    if(!Number.isFinite(v)) addIssue(`${k}: chưa nhập hoặc không phải là số.`,[k]);
+    else if(v<=0) addIssue(`${k}: phải lớn hơn 0.`,[k]);
+  });
+  if(issues.length===0){
+    // Kiểm tra quan hệ hình học và mẫu số công thức.
+    const overlap = BH+CH+Te-SL;
+    const denomOverlap = SL-(2*Te+Tb);
+    const denomBody = SL-1.1*(2*Te+Tb);
+    const freeSpace = ST-(2*Tb+3*Te);
+
+    if(denomOverlap<=0) addIssue('SL phải lớn hơn (2Te + Tb), nếu không không thể tính % Độ chồng mí hợp lệ.',['SL','Te','Tb']);
+    if(denomBody<=0) addIssue('SL phải lớn hơn 1.1 × (2Te + Tb), nếu không không thể tính % Móc thân hợp lệ.',['SL','Te','Tb']);
+    if(ST < (2*Tb+3*Te)) addCaution('Khoảng trống mí đang âm: ST nhỏ hơn tổng chiều dày vật liệu theo công thức (2Tb + 3Te).',['ST','Tb','Te']);
+    if(overlap<0) addCaution('Độ chồng mí đang âm. Hãy kiểm tra lại BH, CH, Te và SL.',['BH','CH','Te','SL']);
+    if(BH>SL) addCaution('BH lớn hơn chiều dài mí SL, giá trị này cần được kiểm tra lại.',['BH','SL']);
+    if(CH>SL) addCaution('CH lớn hơn chiều dài mí SL, giá trị này cần được kiểm tra lại.',['CH','SL']);
+
+    // Ngưỡng cảnh báo mềm, không coi là lỗi kỹ thuật tuyệt đối.
+    if(Tb>1 || Te>1) addCaution('Độ dày vật liệu lớn hơn 1 mm. Hãy kiểm tra đơn vị và số liệu nhập.',['Tb','Te']);
+    if(SL>10 || ST>10 || BH>10 || CH>10) addCaution('Có kích thước lớn hơn 10 mm. Hãy kiểm tra đơn vị hoặc dữ liệu nhập.',['BH','CH','SL','ST']);
+    if(result && Number.isFinite(result.overlapPercent) && (result.overlapPercent<0 || result.overlapPercent>200))
+      addCaution('% Độ chồng mí nằm ngoài khoảng 0–200%. Hãy kiểm tra số liệu đầu vào.');
+    if(result && Number.isFinite(result.bodyHookPercent) && (result.bodyHookPercent<0 || result.bodyHookPercent>200))
+      addCaution('% Móc thân nằm ngoài khoảng 0–200%. Hãy kiểm tra số liệu đầu vào.');
+  }
+
+  box.classList.remove('show','safe','caution','danger');
+  list.innerHTML='';
+  if(issues.length){
+    box.classList.add('show','danger');
+    icon.textContent='⛔';
+    title.textContent='Dữ liệu không hợp lệ';
+    text.textContent='Hãy sửa các thông số được đánh dấu đỏ trước khi sử dụng kết quả.';
+    issues.forEach(x=>{const li=document.createElement('li');li.textContent=x;list.appendChild(li);});
+  }else if(cautions.length){
+    box.classList.add('show','caution');
+    icon.textContent='⚠️';
+    title.textContent='Cần kiểm tra lại số liệu';
+    text.textContent='Ứng dụng vẫn tính được kết quả, nhưng có một số giá trị hoặc quan hệ cần được xác minh.';
+    cautions.forEach(x=>{const li=document.createElement('li');li.textContent=x;list.appendChild(li);});
+  }else{
+    box.classList.add('show','safe');
+    icon.textContent='✓';
+    title.textContent='Dữ liệu hợp lệ';
+    text.textContent='Không phát hiện bất thường rõ ràng theo các quy tắc kiểm tra của ứng dụng.';
+  }
+}
+
+function calculateOriginal(){
   const BH=num('BH'),CH=num('CH'),SL=num('SL'),ST=num('ST'),Tb=num('Tb'),Te=num('Te');
   const values=[BH,CH,SL,ST,Tb,Te];
   if(values.some(v=>!Number.isFinite(v)||v<0)){setResults({message:'Vui lòng nhập đầy đủ 6 thông số hợp lệ (không âm).'});return}
@@ -355,23 +727,31 @@ function calculate(){
     overlapPct:fmt(overlapPct,'%',2),
     bodyHookPct:fmt(bodyHookPct,'%',2),
     gap:fmt(gap,'mm',3),
+    overlapNum:overlap,
+    gapNum:gap,
     overlapPctNum:overlapPct,
     bodyHookPctNum:bodyHookPct,
     message:'Đã tính kết quả cho '+current+'.'
   };
-  setResults(result);
 
   const c=ensureCan(current);
   fields.forEach(id=>c.inputs[id]=document.getElementById(id).value);
   c.lastResult=result;
+  const quality=evaluateQuality(result);
+  result.qualityStatus=quality.status;
+  result.qualityState=quality.state;
+  result.qualityDetail=quality.detail;
+  setResults(result);
   c.history=c.history||[];
   c.history.unshift({
     ts:Date.now(),
     BH,CH,SL,ST,Tb,Te,
-    overlap:overlap,overlapPct:overlapPct,bodyHookPct:bodyHookPct,gap:gap
+    overlap:overlap,overlapPct:overlapPct,bodyHookPct:bodyHookPct,gap:gap,
+    qualityStatus:quality.status,qualityState:quality.state
   });
   if(c.history.length>50)c.history.length=50;
   persist();
+  updateHistoryCount();
 }
 
 /* ---------- History sheet ---------- */
@@ -385,7 +765,18 @@ function fmtTime(ts){
   const p=n=>String(n).padStart(2,'0');
   return p(d.getDate())+'/'+p(d.getMonth()+1)+' '+p(d.getHours())+':'+p(d.getMinutes());
 }
+function updateHistoryCount(){
+  const el=document.getElementById('historyCount');
+  if(!el)return;
+  const c=canData[current];
+  const n=(c&&c.history&&c.history.length)||0;
+  el.textContent=n>99?'99+':String(n);
+  el.style.display=n?'flex':'none';
+}
 function renderHistory(){
+  updateHistoryCount();
+  const subtitle=document.getElementById('historySubtitle');
+  if(subtitle)subtitle.textContent='Lưu riêng cho '+(current||'loại lon đang chọn')+' · '+(((canData[current]||{}).history||[]).length)+' lần đo';
   const list=document.getElementById('historyList');
   const c=canData[current];
   const hist=(c&&c.history)||[];
@@ -397,7 +788,7 @@ function renderHistory(){
     const vals='BH '+h.BH+' · CH '+h.CH+' · SL '+h.SL+' · ST '+h.ST+' · Tb '+h.Tb+' · Te '+h.Te;
     return '<div class="hist-item" onclick="loadHistoryEntry('+i+')">'+
       '<div class="hi-left"><div class="hi-time">'+fmtTime(h.ts)+'</div><div class="hi-vals">'+vals+'</div></div>'+
-      '<div class="hi-right"><div class="hi-pct green">'+h.overlapPct.toFixed(1)+'%</div>'+
+      '<div class="hi-right"><div class="hi-pct '+(h.qualityState==='fail'?'red':'green')+'">'+(h.qualityStatus||h.overlapPct.toFixed(1)+'%')+'</div>'+
       '<button class="hist-del" onclick="event.stopPropagation();deleteHistoryEntry('+i+')" aria-label="Xóa">✕</button></div>'+
       '</div>';
   }).join('');
@@ -416,20 +807,22 @@ function deleteHistoryEntry(i){
   c.history.splice(i,1);
   persist();
   renderHistory();
+  updateHistoryCount();
 }
 function clearHistory(){
   const c=ensureCan(current);
   c.history=[];
   persist();
   renderHistory();
+  updateHistoryCount();
   showToast('Đã xóa lịch sử của '+current);
 }
 function exportHistoryCsv(){
-  const rows=[['Loại lon','Thời gian','BH','CH','SL','ST','Tb','Te','Overlap(mm)','%Overlap','%BodyHook','Gap(mm)']];
+  const rows=[['Loại lon','Thời gian','BH','CH','SL','ST','Tb','Te','Overlap(mm)','%Overlap','%BodyHook','Gap(mm)','Đánh giá']];
   Object.keys(canData).forEach(name=>{
     (canData[name].history||[]).forEach(h=>{
       rows.push([name,new Date(h.ts).toLocaleString('vi-VN'),h.BH,h.CH,h.SL,h.ST,h.Tb,h.Te,
-        h.overlap.toFixed(3),h.overlapPct.toFixed(2),h.bodyHookPct.toFixed(2),h.gap.toFixed(3)]);
+        h.overlap.toFixed(3),h.overlapPct.toFixed(2),h.bodyHookPct.toFixed(2),h.gap.toFixed(3),h.qualityStatus||'']);
     });
   });
   if(rows.length===1){showToast('Chưa có dữ liệu lịch sử để xuất');return}
@@ -445,21 +838,37 @@ function exportHistoryCsv(){
 /* ---------- Settings sheet ---------- */
 function openSettings(){
   const c=ensureCan(current);
+  document.getElementById('thOverlapMin').value=c.thresholds.overlapMin??'';
+  document.getElementById('thOverlapMax').value=c.thresholds.overlapMax??'';
   document.getElementById('thOverlap').value=c.thresholds.overlapPct??'';
   document.getElementById('thBodyHook').value=c.thresholds.bodyHookPct??'';
+  document.getElementById('thGapMax').value=c.thresholds.gapMax??'';
   document.getElementById('settingsOverlay').classList.add('open');
 }
 function closeSettings(){document.getElementById('settingsOverlay').classList.remove('open')}
+function readThreshold(id){
+  const v=document.getElementById(id).value.trim();
+  if(v==='')return null;
+  const n=parseFloat(v);
+  return Number.isFinite(n)?n:null;
+}
 function saveSettings(){
   const c=ensureCan(current);
-  const ov=document.getElementById('thOverlap').value;
-  const bh=document.getElementById('thBodyHook').value;
-  c.thresholds.overlapPct=ov===''?null:parseFloat(ov);
-  c.thresholds.bodyHookPct=bh===''?null:parseFloat(bh);
+  const min=readThreshold('thOverlapMin');
+  const max=readThreshold('thOverlapMax');
+  if(min!==null&&max!==null&&min>max){
+    showToast('Độ chồng mí tối thiểu không được lớn hơn tối đa');
+    return;
+  }
+  c.thresholds.overlapMin=min;
+  c.thresholds.overlapMax=max;
+  c.thresholds.overlapPct=readThreshold('thOverlap');
+  c.thresholds.bodyHookPct=readThreshold('thBodyHook');
+  c.thresholds.gapMax=readThreshold('thGapMax');
   persist();
   if(c.lastResult)setResults(c.lastResult);
   closeSettings();
-  showToast('Đã lưu ngưỡng đánh giá');
+  showToast('Đã lưu tiêu chuẩn Đạt / Không đạt');
 }
 
 /* ---------- Share ---------- */
@@ -467,7 +876,7 @@ function shareResult(){
   const c=canData[current];
   if(!c||!c.lastResult||!c.lastResult.overlap){showToast('Hãy tính kết quả trước khi chia sẻ');return}
   const r=c.lastResult;
-  const text=current+'\nOverlap: '+r.overlap+' (% '+r.overlapPct+')\n% Body Hook: '+r.bodyHookPct+'\nGap: '+r.gap;
+  const text=current+'\nĐánh giá: '+(r.qualityStatus||'Chưa thiết lập')+'\nOverlap: '+r.overlap+' (% '+r.overlapPct+')\n% Body Hook: '+r.bodyHookPct+'\nGap: '+r.gap;
   if(navigator.share){
     navigator.share({title:'Kết quả '+current,text}).catch(()=>{});
   }else if(navigator.clipboard){
@@ -478,5 +887,404 @@ function shareResult(){
 }
 
 if('serviceWorker' in navigator){window.addEventListener('load',()=>navigator.serviceWorker.register('./sw.js').catch(()=>{}))}
+
+document.addEventListener('DOMContentLoaded',()=>{
+  ['BH','CH','SL','ST','Tb','Te'].forEach(id=>{
+    const el=getInputById(id);
+    if(el) el.addEventListener('input',()=>clearInputWarnings());
+  });
+});
+
+
+function calculate(){
+  const values={};
+  ['BH','CH','SL','ST','Tb','Te'].forEach(id=>{
+    const el=getInputById(id);
+    values[id]=el?parseFloat(String(el.value).replace(',','.')):NaN;
+  });
+  // Validate first. If invalid denominator, still let original UI handle its own error,
+  // then show a precise warning card.
+  calculateOriginal();
+  setTimeout(()=>{
+    const result=(canData && current && canData[current] && canData[current].lastResult) ? canData[current].lastResult : null;
+    renderDataWarning(result,values);
+  },0);
+}
+
+
+// ===== BƯỚC 4: QUẢN LÝ LOẠI LON =====
+let editingCanKey = null;
+
+function normalizeCanName(name){
+  return String(name||'').trim().replace(/\s+/g,' ');
+}
+function canKeyFromName(name){
+  return normalizeCanName(name).toLowerCase().replace(/[^a-z0-9à-ỹ]+/gi,'-').replace(/^-+|-+$/g,'') || ('lon-'+Date.now());
+}
+function getCanMenu(){
+  return document.querySelector('.menu');
+}
+function getExistingCanButtons(){
+  const menu=getCanMenu();
+  if(!menu)return [];
+  return Array.from(menu.querySelectorAll('.main-btn')).filter(b=>b.dataset.canKey || b.getAttribute('onclick'));
+}
+function inferCanKey(btn){
+  if(btn.dataset.canKey)return btn.dataset.canKey;
+  const oc=btn.getAttribute('onclick')||'';
+  const m=oc.match(/openCalculator\(['"]([^'"]+)['"]\)/);
+  return m?m[1]:null;
+}
+function ensureCustomCans(){
+  try{
+    const raw=JSON.parse(localStorage.getItem('tinhMiLonCanTypes')||'[]');
+    if(Array.isArray(raw)){
+      raw.forEach(item=>{
+        if(item&&item.key&&item.name&&!document.querySelector(`.main-btn[data-can-key="${CSS.escape(item.key)}"]`)){
+          addCanButton(item.key,item.name,false);
+        }
+      });
+    }
+  }catch(e){}
+}
+function saveCustomCans(){
+  const builtins=[];
+  const customs=[];
+  getExistingCanButtons().forEach(btn=>{
+    const key=inferCanKey(btn);
+    if(!key)return;
+    if(btn.dataset.custom==='1')customs.push({key,name:btn.dataset.canName||btn.textContent.trim()});
+  });
+  localStorage.setItem('tinhMiLonCanTypes',JSON.stringify(customs));
+}
+function addCanButton(key,name,custom=true){
+  const menu=getCanMenu();
+  if(!menu)return;
+  const btn=document.createElement('button');
+  btn.type='button';
+  btn.className='main-btn';
+  btn.dataset.canKey=key;
+  btn.dataset.canName=name;
+  if(custom)btn.dataset.custom='1';
+  btn.textContent=name;
+  btn.addEventListener('click',()=>openCalculator(key));
+  menu.appendChild(btn);
+  if(!canData[key])canData[key]={};
+}
+function renameCanButton(key,name){
+  const btn=document.querySelector(`.main-btn[data-can-key="${CSS.escape(key)}"]`) ||
+    getExistingCanButtons().find(b=>inferCanKey(b)===key);
+  if(btn){
+    btn.dataset.canName=name;
+    btn.textContent=name;
+  }
+}
+function removeCanButton(key){
+  const btn=document.querySelector(`.main-btn[data-can-key="${CSS.escape(key)}"]`) ||
+    getExistingCanButtons().find(b=>inferCanKey(b)===key);
+  if(btn)btn.remove();
+}
+function listCanTypes(){
+  return getExistingCanButtons().map(btn=>({
+    key:inferCanKey(btn),
+    name:btn.dataset.canName || btn.textContent.trim(),
+    custom:btn.dataset.custom==='1'
+  })).filter(x=>x.key);
+}
+function openCanManager(){
+  renderCanManager();
+  const o=document.getElementById('canManagerOverlay');
+  o.classList.add('open');
+}
+function closeCanManager(){document.getElementById('canManagerOverlay').classList.remove('open')}
+function renderCanManager(){
+  const list=document.getElementById('canManageList');
+  if(!list)return;
+  const types=listCanTypes();
+  list.innerHTML='';
+  types.forEach(t=>{
+    const data=canData[t.key]||{};
+    const hist=(data.history||[]).length;
+    const item=document.createElement('div');
+    item.className='can-manage-item';
+    item.innerHTML=`<div style="font-size:22px">🥫</div>
+      <div class="can-manage-name"><div>${escapeHtml(t.name)}</div><div class="can-manage-meta">${hist} lần đo đã lưu${t.custom?' · Loại lon tự thêm':' · Loại lon có sẵn'}</div></div>
+      <button class="can-mini-btn" onclick="openEditCan('${jsEscape(t.key)}')">Sửa</button>
+      ${t.custom?`<button class="can-mini-btn delete" onclick="deleteCanType('${jsEscape(t.key)}')">Xóa</button>`:''}`;
+    list.appendChild(item);
+  });
+}
+function escapeHtml(s){return String(s).replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]))}
+function jsEscape(s){return String(s).replace(/\\/g,'\\\\').replace(/'/g,"\\'")}
+function openAddCan(){
+  editingCanKey=null;
+  document.getElementById('addCanTitle').textContent='Thêm loại lon';
+  document.getElementById('saveCanBtn').textContent='LƯU LOẠI LON';
+  document.getElementById('canNameInput').value='';
+  document.getElementById('addCanOverlay').classList.add('open');
+  setTimeout(()=>document.getElementById('canNameInput').focus(),150);
+}
+function openEditCan(key){
+  const t=listCanTypes().find(x=>x.key===key);
+  if(!t)return;
+  editingCanKey=key;
+  document.getElementById('addCanTitle').textContent='Đổi tên loại lon';
+  document.getElementById('saveCanBtn').textContent='LƯU THAY ĐỔI';
+  document.getElementById('canNameInput').value=t.name;
+  document.getElementById('addCanOverlay').classList.add('open');
+  setTimeout(()=>document.getElementById('canNameInput').select(),150);
+}
+function closeAddCan(){document.getElementById('addCanOverlay').classList.remove('open')}
+function saveCanType(){
+  const input=document.getElementById('canNameInput');
+  const name=normalizeCanName(input.value);
+  if(!name){showToast('Hãy nhập tên loại lon');input.focus();return;}
+  const types=listCanTypes();
+  const duplicate=types.find(t=>normalizeCanName(t.name).toLowerCase()===name.toLowerCase() && t.key!==editingCanKey);
+  if(duplicate){showToast('Tên loại lon này đã tồn tại');return;}
+  if(editingCanKey){
+    renameCanButton(editingCanKey,name);
+    if(canData[editingCanKey])canData[editingCanKey].displayName=name;
+    showToast('Đã đổi tên loại lon');
+  }else{
+    let key=canKeyFromName(name);
+    let n=2, base=key;
+    while(types.some(t=>t.key===key)||canData[key])key=base+'-'+n++;
+    canData[key]={displayName:name,values:{},history:[],standards:{}};
+    addCanButton(key,name,true);
+    showToast('Đã thêm '+name);
+  }
+  if(typeof persist==='function')persist();
+  saveCustomCans();
+  closeAddCan();
+  renderCanManager();
+}
+function deleteCanType(key){
+  const t=listCanTypes().find(x=>x.key===key);
+  if(!t)return;
+  if(!confirm(`Xóa "${t.name}"?\nDữ liệu, lịch sử và tiêu chuẩn của loại lon này sẽ bị xóa.`))return;
+  if(current===key){
+    const calc=document.querySelector('.calculator');
+    const menu=getCanMenu();
+    if(calc)calc.style.display='none';
+    if(menu)menu.style.display='';
+    current=null;
+  }
+  delete canData[key];
+  removeCanButton(key);
+  if(typeof persist==='function')persist();
+  saveCustomCans();
+  renderCanManager();
+  showToast('Đã xóa '+t.name);
+}
+// Khôi phục các loại lon tự thêm sau khi tải trang.
+document.addEventListener('DOMContentLoaded',()=>{
+  ensureCustomCans();
+  renderCanManager();
+});
+
+
+// ===== BƯỚC 5: XUẤT BÁO CÁO =====
+function reportDisplayName(){
+  const t=(typeof listCanTypes==='function'?listCanTypes():[]).find(x=>x.key===current);
+  return (t&&t.name) || current || 'Loại lon';
+}
+function csvEscape(v){
+  const s=String(v==null?'':v);
+  return '"'+s.replace(/"/g,'""')+'"';
+}
+function makeFilename(prefix, ext){
+  const d=new Date();
+  const stamp=d.getFullYear()+String(d.getMonth()+1).padStart(2,'0')+String(d.getDate()).padStart(2,'0')+'-'+String(d.getHours()).padStart(2,'0')+String(d.getMinutes()).padStart(2,'0');
+  return `${prefix}-${reportDisplayName().replace(/[^\wÀ-ỹ-]+/g,'-')}-${stamp}.${ext}`;
+}
+function getLatestReport(){
+  const c=(canData&&current)?(canData[current]||{}):{};
+  const r=c.lastResult||null;
+  const v=c.values||{};
+  return {values:v,result:r,status:(r&&r.status)||'',time:(r&&r.time)||new Date().toISOString()};
+}
+function openExport(){
+  const o=document.getElementById('exportOverlay');
+  const p=document.getElementById('reportPreview');
+  const data=getLatestReport();
+  if(!current){showToast('Hãy chọn loại lon trước');return;}
+  if(!data.result){
+    p.innerHTML='<div class="rp-title">Chưa có kết quả</div><h4>Hãy nhập số liệu và tính kết quả trước khi xuất báo cáo.</h4>';
+  }else{
+    p.innerHTML=buildReportHTML(data,false);
+  }
+  o.classList.add('open');
+}
+function closeExport(){document.getElementById('exportOverlay').classList.remove('open')}
+function nfmt(v){
+  const n=Number(v);
+  return Number.isFinite(n)?n.toFixed(3).replace(/\.?0+$/,''):'—';
+}
+function resultValue(r, keys){
+  for(const k of keys) if(r&&Number.isFinite(Number(r[k]))) return Number(r[k]);
+  return null;
+}
+function buildReportHTML(data, printable){
+  const v=data.values||{}, r=data.result||{};
+  const overlap=resultValue(r,['overlap','Overlap','doChongMi']);
+  const overlapPct=resultValue(r,['overlapPercent','percentOverlap','overlapPct']);
+  const bodyPct=resultValue(r,['bodyHookPercent','percentBodyHook','bodyPct']);
+  const free=resultValue(r,['freeSpace','gap','FreeSpace']);
+  const status=data.status || r.status || '—';
+  const statusText=status==='pass'||status==='ĐẠT'?'ĐẠT':status==='fail'||status==='KHÔNG ĐẠT'?'KHÔNG ĐẠT':status==='unconfigured'||status==='CHƯA THIẾT LẬP'?'CHƯA THIẾT LẬP':status;
+  const rows=[
+    ['BH – Móc thân',nfmt(v.BH),'mm'],['CH – Móc nắp',nfmt(v.CH),'mm'],['SL – Chiều dài mí',nfmt(v.SL),'mm'],
+    ['ST – Độ dày mí',nfmt(v.ST),'mm'],['Tb – Độ dày thân lon',nfmt(v.Tb),'mm'],['Te – Độ dày nắp lon',nfmt(v.Te),'mm'],
+    ['Độ chồng mí',nfmt(overlap),'mm'],['% Độ chồng mí',nfmt(overlapPct),'%'],['% Móc thân',nfmt(bodyPct),'%'],['Khoảng trống',nfmt(free),'mm']
+  ];
+  return `<div class="rp-title">Báo cáo kiểm tra mí lon</div>
+    <h4>${escapeHtml(reportDisplayName())}</h4>
+    <div>Thời gian: ${new Date(data.time||Date.now()).toLocaleString('vi-VN')}</div>
+    <div class="rp-status">Kết quả: ${escapeHtml(statusText)}</div>
+    <table>${rows.map(x=>`<tr><td>${x[0]}</td><td>${x[1]} ${x[2]}</td></tr>`).join('')}</table>`;
+}
+function downloadCSV(text, filename){
+  const blob=new Blob(['\ufeff'+text],{type:'text/csv;charset=utf-8;'});
+  const url=URL.createObjectURL(blob);
+  const a=document.createElement('a');a.href=url;a.download=filename;
+  document.body.appendChild(a);a.click();a.remove();
+  setTimeout(()=>URL.revokeObjectURL(url),1000);
+}
+function exportCurrentCSV(){
+  const d=getLatestReport();
+  if(!d.result){showToast('Chưa có kết quả để xuất');return;}
+  const v=d.values||{}, r=d.result||{};
+  const rows=[
+    ['BÁO CÁO KIỂM TRA MÍ LON',''],
+    ['Loại lon',reportDisplayName()],
+    ['Thời gian',new Date(d.time||Date.now()).toLocaleString('vi-VN')],
+    ['Trạng thái',d.status||r.status||''],
+    ['BH',v.BH],['CH',v.CH],['SL',v.SL],['ST',v.ST],['Tb',v.Tb],['Te',v.Te],
+    ['Độ chồng mí',resultValue(r,['overlap','Overlap','doChongMi'])],
+    ['% Độ chồng mí',resultValue(r,['overlapPercent','percentOverlap','overlapPct'])],
+    ['% Móc thân',resultValue(r,['bodyHookPercent','percentBodyHook','bodyPct'])],
+    ['Khoảng trống',resultValue(r,['freeSpace','gap','FreeSpace'])]
+  ];
+  downloadCSV(rows.map(row=>row.map(csvEscape).join(',')).join('\n'),makeFilename('bao-cao-mi-lon','csv'));
+  showToast('Đã xuất báo cáo CSV');
+}
+function exportHistoryCSV(){
+  if(!current){showToast('Hãy chọn loại lon trước');return;}
+  const hist=((canData[current]||{}).history||[]);
+  if(!hist.length){showToast('Chưa có lịch sử để xuất');return;}
+  const header=['Thời gian','Loại lon','BH','CH','SL','ST','Tb','Te','Độ chồng mí','% Độ chồng mí','% Móc thân','Khoảng trống','Trạng thái'];
+  const rows=[header];
+  hist.forEach(h=>{
+    const v=h.values||h.input||{}, r=h.result||h;
+    rows.push([
+      new Date(h.time||h.timestamp||Date.now()).toLocaleString('vi-VN'),reportDisplayName(),
+      v.BH,v.CH,v.SL,v.ST,v.Tb,v.Te,
+      resultValue(r,['overlap','Overlap','doChongMi']),
+      resultValue(r,['overlapPercent','percentOverlap','overlapPct']),
+      resultValue(r,['bodyHookPercent','percentBodyHook','bodyPct']),
+      resultValue(r,['freeSpace','gap','FreeSpace']),
+      h.status||(r&&r.status)||''
+    ]);
+  });
+  downloadCSV(rows.map(row=>row.map(csvEscape).join(',')).join('\n'),makeFilename('lich-su-mi-lon','csv'));
+  showToast('Đã xuất lịch sử CSV');
+}
+function printCurrentReport(){
+  const d=getLatestReport();
+  if(!d.result){showToast('Chưa có kết quả để tạo báo cáo');return;}
+  const pr=document.getElementById('printReport');
+  pr.innerHTML='<h2 style="margin:0 0 8px">BÁO CÁO KIỂM TRA MÍ LON</h2>'+buildReportHTML(d,true)+
+    '<p style="margin-top:18px;font-size:11px;color:#555">Ứng dụng Tính Mí Lon</p>';
+  window.print();
+}
+
+
+// ===== BƯỚC 6: PWA OFFLINE + CẬP NHẬT =====
+let pendingServiceWorker = null;
+
+function showSavedIndicator(){
+  const el=document.getElementById('saveIndicator');
+  if(!el)return;
+  el.classList.add('show');
+  clearTimeout(window.__saveIndicatorTimer);
+  window.__saveIndicatorTimer=setTimeout(()=>el.classList.remove('show'),1400);
+}
+function updateNetworkStatus(){
+  const pill=document.getElementById('networkPill');
+  const text=document.getElementById('networkText');
+  if(!pill||!text)return;
+  if(navigator.onLine){
+    pill.classList.remove('show');
+  }else{
+    text.textContent='Bạn đang ngoại tuyến. Dữ liệu và các chức năng đã tải vẫn dùng được.';
+    pill.classList.add('show');
+  }
+}
+function showUpdateCard(){
+  const card=document.getElementById('updateCard');
+  if(card)card.classList.add('show');
+}
+function applyAppUpdate(){
+  if(pendingServiceWorker){
+    pendingServiceWorker.postMessage({type:'SKIP_WAITING'});
+    showToast('Đang cập nhật ứng dụng…');
+  }else{
+    location.reload();
+  }
+}
+async function registerPWA(){
+  if(!('serviceWorker' in navigator))return;
+  try{
+    const reg=await navigator.serviceWorker.register('./sw.js',{updateViaCache:'none'});
+    if(reg.waiting){
+      pendingServiceWorker=reg.waiting;
+      showUpdateCard();
+    }
+    reg.addEventListener('updatefound',()=>{
+      const installing=reg.installing;
+      if(!installing)return;
+      installing.addEventListener('statechange',()=>{
+        if(installing.state==='installed' && navigator.serviceWorker.controller){
+          pendingServiceWorker=reg.waiting;
+          showUpdateCard();
+        }
+      });
+    });
+    navigator.serviceWorker.addEventListener('controllerchange',()=>{
+      if(window.__reloadingAfterUpdate)return;
+      window.__reloadingAfterUpdate=true;
+      location.reload();
+    });
+  }catch(e){
+    console.warn('Không thể đăng ký Service Worker',e);
+  }
+}
+window.addEventListener('online',()=>{updateNetworkStatus();showToast('Đã kết nối Internet');});
+window.addEventListener('offline',()=>{updateNetworkStatus();showToast('Bạn đang dùng chế độ ngoại tuyến');});
+
+// Autosave dữ liệu đang nhập để tránh mất khi đóng ứng dụng.
+function setupAutosave(){
+  ['BH','CH','SL','ST','Tb','Te'].forEach(id=>{
+    const el=(typeof getInputById==='function'?getInputById(id):document.getElementById(id));
+    if(!el)return;
+    el.addEventListener('input',()=>{
+      if(!current || !canData || !canData[current])return;
+      canData[current].values=canData[current].values||{};
+      canData[current].values[id]=el.value;
+      try{
+        if(typeof persist==='function')persist();
+        showSavedIndicator();
+      }catch(e){}
+    });
+  });
+}
+document.addEventListener('DOMContentLoaded',()=>{
+  updateNetworkStatus();
+  setupAutosave();
+  registerPWA();
+});
+
 </script>
 </body></html>
+
