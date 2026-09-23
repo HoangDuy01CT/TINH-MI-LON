@@ -1,4 +1,4 @@
-const CACHE_NAME='tinh-mi-lon-ios-v25';
+const CACHE_NAME='tinh-mi-lon-ios-v28';
 const CORE_ASSETS = [
   './',
   './index.html',
