@@ -1,8 +1,8 @@
-const CACHE_NAME='tinh-mi-lon-mobile-v35';
+const CACHE_NAME='tinh-mi-lon-mobile-v38';
 const CORE_ASSETS = [
   './',
   './index.html',
-  './manifest.webmanifest?v=9'
+  './manifest.webmanifest?v=10'
 ];
 
 self.addEventListener('install', event => {

@@ -1571,6 +1571,8 @@ const LANG_TEXT={
 
 };
 let languageApplying=false;
+const languageOriginalText=new WeakMap();
+const languageOriginalPlaceholder=new WeakMap();
 function applyLanguage(lang){
   lang=['en','zh','th'].includes(lang)?lang:'vi';
   localStorage.setItem('tinhMiLonLanguage',lang);
@@ -1581,16 +1583,18 @@ function applyLanguage(lang){
   const nodes=[];
   while(walker.nextNode())nodes.push(walker.currentNode);
   nodes.forEach(node=>{
-    if(!node.parentElement||['SCRIPT','STYLE'].includes(node.parentElement.tagName))return;
+    if(!node.parentElement||['SCRIPT','STYLE','NOSCRIPT'].includes(node.parentElement.tagName))return;
     const raw=node.nodeValue;
-    const vi=node.dataset.viText||raw;
-    node.dataset.viText=vi;
+    if(!languageOriginalText.has(node)) languageOriginalText.set(node,raw);
+    const vi=languageOriginalText.get(node);
     if(lang==='vi') node.nodeValue=vi;
-    else if(dict[vi]) node.nodeValue=dict[vi];
+    else node.nodeValue=dict[vi]||vi;
   });
   document.querySelectorAll('input[placeholder],textarea[placeholder]').forEach(el=>{
-    const vi=el.dataset.viPlaceholder||el.getAttribute('placeholder'); if(!vi)return;
-    el.dataset.viPlaceholder=vi; if(lang==='en') el.setAttribute('placeholder',dict[vi]||vi); else el.setAttribute('placeholder',vi);
+    if(!languageOriginalPlaceholder.has(el)) languageOriginalPlaceholder.set(el,el.getAttribute('placeholder')||'');
+    const vi=languageOriginalPlaceholder.get(el);
+    if(!vi)return;
+    el.setAttribute('placeholder',lang==='vi'?vi:(dict[vi]||vi));
   });
   document.documentElement.lang=lang;
   languageApplying=false;
@@ -2158,8 +2162,6 @@ function setupAutosave(){
 document.addEventListener('DOMContentLoaded',()=>{
   updateNetworkStatus();
   initAppearance();
-  const langObserver=new MutationObserver(()=>{ if(!languageApplying && getAppearance().language==='en') applyLanguage('en'); });
-  langObserver.observe(document.body,{childList:true,subtree:true});
   setupAutosave();
   registerPWA();
 });
