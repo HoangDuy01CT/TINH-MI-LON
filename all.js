@@ -650,12 +650,12 @@ function exportHistoryCsv(){exportFilteredHistoryCsv();}
 
 /* ---------- Appearance settings ---------- */
 function getAppearance(){
-  return {theme:localStorage.getItem('tinhMiLonTheme')||'default',image:localStorage.getItem('tinhMiLonBgImage')||'',opacity:parseInt(localStorage.getItem('tinhMiLonBgOpacity')||'18',10)};
+  return {theme:localStorage.getItem('tinhMiLonTheme')||'default',image:localStorage.getItem('tinhMiLonBgImage')||'',opacity:parseInt(localStorage.getItem('tinhMiLonBgOpacity')||'18',10),language:localStorage.getItem('tinhMiLonLanguage')||'vi'};
 }
 function applyTheme(theme){
-  const allowed=['default','soft','factory','carbon'];
+  const allowed=['default','factory','carbon','pink','orange','neon'];
   theme=allowed.includes(theme)?theme:'default';
-  document.body.classList.remove('theme-soft','theme-factory','theme-carbon');
+  document.body.classList.remove('theme-soft','theme-factory','theme-carbon','theme-pink','theme-orange','theme-neon');
   if(theme!=='default')document.body.classList.add('theme-'+theme);
   localStorage.setItem('tinhMiLonTheme',theme);
   document.querySelectorAll('[data-theme-choice]').forEach(el=>el.classList.toggle('selected',el.dataset.themeChoice===theme));
@@ -670,7 +670,73 @@ function applyThemeImage(){
   const range=document.getElementById('themeOpacity');if(range)range.value=a.opacity;
   const label=document.getElementById('themeOpacityValue');if(label)label.textContent=a.opacity+'%';
 }
-function openAppearanceSettings(){applyTheme(getAppearance().theme);applyThemeImage();document.getElementById('appearanceOverlay').classList.add('open')}
+
+const LANG_TEXT={
+  en:{
+    'Bạn đang ngoại tuyến. Dữ liệu vẫn hoạt động trên thiết bị.':'You are offline. Data still works on this device.',
+    'Có phiên bản mới':'New version available','Bản cập nhật đã sẵn sàng để sử dụng.':'An update is ready to use.','CẬP NHẬT':'UPDATE',
+    'CHỌN LOẠI LON':'SELECT CAN TYPE','⚙️ Quản lý':'⚙️ Manage','🎨 Giao diện':'🎨 Appearance',
+    'Tính mí lon':'Can seam calculator','Thông số nhập theo đơn vị mm':'Enter measurements in mm','Thông số mí ghép':'Seam measurements',
+    'Móc thân':'Body Hook','Móc nắp':'Cover Hook','Chiều dài mí ghép(Rộng mí)':'Seam Length (Seam Width)','Độ dày mí ghép':'Seam Thickness',
+    'Độ dày vật liệu':'Material Thickness','Độ dày thân lon':'Can body thickness','Độ dày nắp lon':'Can end thickness',
+    'Nhập đủ 6 thông số để tính các chỉ số bên dưới.':'Enter all 6 measurements to calculate the indicators below.',
+    'TÍNH KẾT QUẢ':'CALCULATE','↻ Reset loại lon':'↻ Reset can type','Xóa ô nhập':'Clear inputs','Kết quả tính toán':'Calculation results','Chia sẻ':'Share',
+    'Đánh giá tổng thể':'Overall assessment','CHƯA THIẾT LẬP':'NOT SET','Thiết lập ngưỡng trong Cài đặt để đánh giá Đạt / Không đạt.':'Set thresholds in Settings to assess Pass / Fail.',
+    'Độ chồng mí':'Overlap','Tiêu chuẩn':'Standard','Chưa thiết lập':'Not set','Thiết lập ngưỡng Độ chồng mí trong Cài đặt.':'Set the Overlap threshold in Settings.',
+    'Phần trăm độ chồng mí':'Overlap percentage','Phần trăm độ móc thân':'Body Hook percentage','Móc thân':'Body Hook','Chưa có dữ liệu':'No data',
+    'Khoảng trống bên trong mí ghép':'Free Space inside seam','Thiết lập ngưỡng Khoảng trống trong Cài đặt.':'Set the Free Space threshold in Settings.',
+    'Kết quả được tính riêng và lưu trên thiết bị cho từng loại lon.':'Results are calculated and stored separately on this device for each can type.',
+    'Lịch sử đo':'Measurement history','Dữ liệu lưu riêng theo từng loại lon':'Data is stored separately for each can type','Xong':'Done',
+    '📊 Tổng quan chất lượng':'📊 Quality overview','Tất cả lịch sử':'All history','Đạt':'Pass','Theo dõi':'Monitor','Không đạt':'Fail',
+    'Thông số đạt':'Measurements in range','Thông số ngoài giới hạn':'Measurements out of range','Tỷ lệ Min–Max':'Min–Max rate',
+    'Tỷ lệ đạt được tính trên các lần đo có trạng thái. Tỷ lệ Min–Max tính riêng các thông số đã được thiết lập giới hạn.':'Pass rate is calculated from measurements with a status. Min–Max rate only uses measurements with configured limits.',
+    'Tất cả trạng thái':'All statuses','ĐẠT':'PASS','CẦN THEO DÕI':'MONITOR','KHÔNG ĐẠT':'FAIL','Xu hướng kết quả':'Result trend',
+    'Độ chồng mí (mm)':'Overlap (mm)','Khoảng trống (mm)':'Free Space (mm)','Biểu đồ lấy các lần đo đang được lọc.':'The chart uses the currently filtered measurements.',
+    '⬇︎ Xuất dữ liệu đang lọc':'⬇︎ Export filtered data','Xóa toàn bộ lịch sử':'Delete all history','Chi tiết lần đo':'Measurement details',
+    'Tiêu chuẩn & Cài đặt':'Standards & Settings','THÔNG SỐ ĐO · MIN – MAX':'MEASUREMENT RANGES · MIN – MAX',
+    'Đặt khoảng tiêu chuẩn cho 6 thông số đầu vào của riêng loại lon này. Để trống một phía nếu không muốn giới hạn phía đó.':'Set standard ranges for the 6 inputs for this can type. Leave one side blank if you do not want a limit.',
+    'BẢO VỆ CÀI ĐẶT':'SETTINGS PROTECTION','Khóa tiêu chuẩn & Min–Max':'Lock standards & Min–Max','Khóa thao tác thay đổi tiêu chuẩn bằng mã PIN 4–6 số.':'Protect standard changes with a 4–6 digit PIN.',
+    'Đang mở':'Unlocked','Đặt mã PIN':'Set PIN','Khóa ngay':'Lock now','Tắt khóa':'Disable lock','TIÊU CHÍ KẾT QUẢ':'RESULT CRITERIA',
+    'Các ngưỡng bên dưới tiếp tục dùng cho đánh giá Đạt / Không đạt của kết quả tính.':'The thresholds below are used to assess calculated results as Pass / Fail.',
+    'Độ chồng mí · Overlap (mm)':'Overlap · Overlap (mm)','% Độ chồng mí tối thiểu':'Minimum Overlap %','% Độ móc thân tối thiểu':'Minimum Body Hook %','Khoảng trống tối đa':'Maximum Free Space',
+    'khi tất cả tiêu chí đã thiết lập đều đạt.':'when all configured criteria pass.','Lưu tiêu chuẩn cho loại lon này':'Save standards for this can type',
+    'Tùy chỉnh giao diện cho toàn bộ ứng dụng. Thiết lập được lưu ngay trên điện thoại.':'Customize the entire app. Settings are saved on this device.',
+    'GIAO DIỆN CÓ SẴN':'PRESET THEMES','Mặc định':'Default','Nhà máy':'Factory','Hồng':'Pink','Cam':'Orange','Tím điện':'Electric Purple',
+    'HÌNH NỀN TỪ ĐIỆN THOẠI':'PHONE BACKGROUND','🖼️ Chọn hình nền':'🖼️ Choose background','Chọn ảnh ›':'Choose image ›','Hình nền hiện tại':'Current background',
+    'Độ tối hình nền':'Background darkness','Xóa hình nền':'Remove background','ÁP DỤNG':'APPLY','↺ KHÔI PHỤC GIAO DIỆN MẶC ĐỊNH':'↺ RESET APPEARANCE',
+    'Quản lý loại lon':'Can type management','Thêm, đổi tên hoặc xóa loại lon. Dữ liệu và tiêu chuẩn của từng loại được lưu riêng.':'Add, rename, or delete can types. Data and standards are stored separately.',
+    '＋ THÊM LOẠI LON':'＋ ADD CAN TYPE','Thêm loại lon':'Add can type','LƯU LOẠI LON':'SAVE CAN TYPE','Xuất báo cáo':'Export report','Xuất dữ liệu đo của loại lon đang chọn.':'Export measurements for the selected can type.',
+    'CSV hiện tại':'Current CSV','CSV lịch sử':'History CSV','IN / LƯU PDF':'PRINT / SAVE PDF','Đã lưu trên thiết bị':'Saved on device',
+    'Mở khóa Cài đặt':'Unlock Settings','Nhập mã PIN để thay đổi Min–Max và tiêu chuẩn.':'Enter the PIN to change Min–Max and standards.','Hủy':'Cancel','MỞ KHÓA':'UNLOCK',
+    'NGÔN NGỮ / LANGUAGE':'LANGUAGE / NGÔN NGỮ','Tiếng Việt':'Vietnamese'
+  }
+};
+let languageApplying=false;
+function applyLanguage(lang){
+  lang=lang==='en'?'en':'vi';
+  localStorage.setItem('tinhMiLonLanguage',lang);
+  const dict=LANG_TEXT[lang]||{};
+  languageApplying=true;
+  document.querySelectorAll('[data-language-choice]').forEach(el=>el.classList.toggle('selected',el.dataset.languageChoice===lang));
+  const walker=document.createTreeWalker(document.body,NodeFilter.SHOW_TEXT);
+  const nodes=[];
+  while(walker.nextNode())nodes.push(walker.currentNode);
+  nodes.forEach(node=>{
+    if(!node.parentElement||['SCRIPT','STYLE'].includes(node.parentElement.tagName))return;
+    const raw=node.nodeValue;
+    const vi=node.dataset.viText||raw;
+    node.dataset.viText=vi;
+    if(lang==='vi') node.nodeValue=vi;
+    else if(dict[vi]) node.nodeValue=dict[vi];
+  });
+  document.querySelectorAll('input[placeholder],textarea[placeholder]').forEach(el=>{
+    const vi=el.dataset.viPlaceholder||el.getAttribute('placeholder'); if(!vi)return;
+    el.dataset.viPlaceholder=vi; if(lang==='en') el.setAttribute('placeholder',dict[vi]||vi); else el.setAttribute('placeholder',vi);
+  });
+  document.documentElement.lang=lang;
+  languageApplying=false;
+}
+function openAppearanceSettings(){applyTheme(getAppearance().theme);applyThemeImage();applyLanguage(getAppearance().language);document.getElementById('appearanceOverlay').classList.add('open')}
 function closeAppearanceSettings(){document.getElementById('appearanceOverlay').classList.remove('open')}
 function setThemeOpacity(value){value=Math.max(0,Math.min(55,parseInt(value,10)||0));localStorage.setItem('tinhMiLonBgOpacity',String(value));applyThemeImage()}
 function handleThemeImage(event){
@@ -683,20 +749,16 @@ function handleThemeImage(event){
       const max=1600,scale=Math.min(1,max/Math.max(img.naturalWidth,img.naturalHeight));
       const w=Math.max(1,Math.round(img.naturalWidth*scale)),h=Math.max(1,Math.round(img.naturalHeight*scale));
       const c=document.createElement('canvas');c.width=w;c.height=h;const ctx=c.getContext('2d');ctx.drawImage(img,0,0,w,h);
-      try{
-        const data=c.toDataURL('image/jpeg',.78);localStorage.setItem('tinhMiLonBgImage',data);if(!localStorage.getItem('tinhMiLonBgOpacity'))localStorage.setItem('tinhMiLonBgOpacity','18');applyThemeImage();showToast('Đã đặt hình nền');
-      }catch(e){showToast('Ảnh quá lớn, không thể lưu trên thiết bị')}
-    };
-    img.src=reader.result;
-  };
-  reader.readAsDataURL(file);event.target.value='';
+      try{const data=c.toDataURL('image/jpeg',.78);localStorage.setItem('tinhMiLonBgImage',data);if(!localStorage.getItem('tinhMiLonBgOpacity'))localStorage.setItem('tinhMiLonBgOpacity','18');applyThemeImage();showToast('Đã đặt hình nền')}catch(e){showToast('Ảnh quá lớn, không thể lưu trên thiết bị')}
+    }; img.src=reader.result;
+  }; reader.readAsDataURL(file);event.target.value='';
 }
 function removeThemeImage(){localStorage.removeItem('tinhMiLonBgImage');applyThemeImage();showToast('Đã xóa hình nền')}
 function resetAppearance(){
-  localStorage.removeItem('tinhMiLonTheme');localStorage.removeItem('tinhMiLonBgImage');localStorage.removeItem('tinhMiLonBgOpacity');
-  applyTheme('default');applyThemeImage();showToast('Đã khôi phục giao diện mặc định');
+  localStorage.removeItem('tinhMiLonTheme');localStorage.removeItem('tinhMiLonBgImage');localStorage.removeItem('tinhMiLonBgOpacity');localStorage.removeItem('tinhMiLonLanguage');
+  applyTheme('default');applyThemeImage();applyLanguage('vi');showToast('Đã khôi phục giao diện mặc định');
 }
-function initAppearance(){applyTheme(getAppearance().theme);applyThemeImage()}
+function initAppearance(){applyTheme(getAppearance().theme);applyThemeImage();applyLanguage(getAppearance().language)}
 
 /* ---------- Settings sheet ---------- */
 function settingsLockHash(pin){
@@ -1233,6 +1295,8 @@ function setupAutosave(){
 document.addEventListener('DOMContentLoaded',()=>{
   updateNetworkStatus();
   initAppearance();
+  const langObserver=new MutationObserver(()=>{ if(!languageApplying && getAppearance().language==='en') applyLanguage('en'); });
+  langObserver.observe(document.body,{childList:true,subtree:true});
   setupAutosave();
   registerPWA();
 });

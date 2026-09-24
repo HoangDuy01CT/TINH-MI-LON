@@ -1,22 +1,22 @@
 <!DOCTYPE html>
+
 <html lang="vi">
 <head>
-<meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, viewport-fit=cover">
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1, maximum-scale=1, viewport-fit=cover" name="viewport"/>
 <title>Tính Mí Lon</title>
-<meta name="description" content="Tính tỷ lệ chồng mí lon (BH, CH, SL, ST, Tb, Te) cho lon số 2, số 3, số 5, A10 — lưu lịch sử và đánh giá đạt/chưa đạt.">
-<meta name="theme-color" content="#f2f2f7" media="(prefers-color-scheme: light)">
-<meta name="theme-color" content="#000000" media="(prefers-color-scheme: dark)">
-<meta name="apple-mobile-web-app-capable" content="yes">
-<meta name="mobile-web-app-capable" content="yes">
-<meta name="apple-mobile-web-app-status-bar-style" content="default">
-<meta name="apple-mobile-web-app-title" content="Mí Lon">
-<meta name="format-detection" content="telephone=no">
-<link rel="manifest" href="manifest.webmanifest?v=9">
-<link rel="icon" href="icons/favicon-32-v8.png" sizes="32x32">
-<link rel="apple-touch-icon" href="icons/apple-touch-icon-v8.png">
-<link rel="apple-touch-startup-image" href="icons/splash-1290x2796-v8.png"
-  media="(device-width: 430px) and (device-height: 932px) and (-webkit-device-pixel-ratio: 3) and (orientation: portrait)">
+<meta content="Tính tỷ lệ chồng mí lon (BH, CH, SL, ST, Tb, Te) cho lon số 2, số 3, số 5, A10 — lưu lịch sử và đánh giá đạt/chưa đạt." name="description"/>
+<meta content="#f2f2f7" media="(prefers-color-scheme: light)" name="theme-color"/>
+<meta content="#000000" media="(prefers-color-scheme: dark)" name="theme-color"/>
+<meta content="yes" name="apple-mobile-web-app-capable"/>
+<meta content="yes" name="mobile-web-app-capable"/>
+<meta content="default" name="apple-mobile-web-app-status-bar-style"/>
+<meta content="Mí Lon" name="apple-mobile-web-app-title"/>
+<meta content="telephone=no" name="format-detection"/>
+<link href="manifest.webmanifest?v=10" rel="manifest"/>
+<link href="icons/favicon-32-v8.png" rel="icon" sizes="32x32"/>
+<link href="icons/apple-touch-icon-v8.png" rel="apple-touch-icon"/>
+<link href="icons/splash-1290x2796-v8.png" media="(device-width: 430px) and (device-height: 932px) and (-webkit-device-pixel-ratio: 3) and (orientation: portrait)" rel="apple-touch-startup-image"/>
 <style>
 :root{
   --bg:#f2f4f8; --card:#fff; --card2:#f8f9fb; --text:#111827; --muted:#6b7280;
@@ -24,7 +24,7 @@
   --orange:#f59e0b; --red:#ef4444; --shadow:0 8px 30px rgba(17,24,39,.08);
   --radius:22px; --radius-sm:16px; --overlay:rgba(15,23,42,.36);
   --badge-ok-bg:#eaf8ef; --badge-bad-bg:#fff0ef;
-  --app-bg-image:none; --app-bg-opacity:0;
+  --app-bg-image:none; --app-bg-opacity:0; --app-bg-size:cover; --app-bg-position:center; --app-bg-filter:none;
 }
 @media(prefers-color-scheme:dark){
   :root{
@@ -40,7 +40,7 @@ body{
   font-family:-apple-system,BlinkMacSystemFont,"SF Pro Display","SF Pro Text",system-ui,sans-serif;
   padding-bottom:max(24px,env(safe-area-inset-bottom)); overscroll-behavior:none;
 }
-body::before{content:"";position:fixed;inset:0;z-index:-1;background-image:var(--app-bg-image);background-size:cover;background-position:center;background-repeat:no-repeat;opacity:var(--app-bg-opacity);pointer-events:none}
+body::before{content:"";position:fixed;inset:0;z-index:-1;background-image:var(--app-bg-image);background-size:var(--app-bg-size);background-position:var(--app-bg-position);background-repeat:no-repeat;opacity:var(--app-bg-opacity);filter:var(--app-bg-filter);pointer-events:none}
 body.theme-pink{--bg:#fff1f7;--card:#ffffff;--card2:#fff7fa;--text:#3b1025;--muted:#8a6073;--line:#f3c9da;--blue:#e83e8c;--blue2:#d62f7b;--green:#159957;--orange:#e58b16;--red:#d92d50;--shadow:0 8px 28px rgba(232,62,140,.13);--overlay:rgba(59,16,37,.32)}
 body.theme-orange{--bg:#fff4e8;--card:#ffffff;--card2:#fff8f0;--text:#3a1d08;--muted:#876548;--line:#f2cfaa;--blue:#f07818;--blue2:#df6208;--green:#168c57;--orange:#f07818;--red:#d83a3a;--shadow:0 8px 28px rgba(240,120,24,.14);--overlay:rgba(58,29,8,.32)}
 body.theme-neon{--bg:#10091f;--card:#1b1030;--card2:#25153e;--text:#f7f1ff;--muted:#bca9d1;--line:#493061;--blue:#c44dff;--blue2:#9d2cff;--green:#43e6a1;--orange:#ffbd4a;--red:#ff5577;--shadow:0 10px 32px rgba(196,77,255,.22);--overlay:rgba(10,4,20,.72)}
@@ -546,314 +546,305 @@ input[type=number]::-webkit-inner-spin-button,input[type=number]::-webkit-outer-
 }
 @media (prefers-reduced-motion:reduce){*,*::before,*::after{scroll-behavior:auto!important;transition:none!important;animation:none!important}}
 
+
+.language-grid{display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-top:10px}
+.language-option{appearance:none;border:1px solid var(--border);background:var(--card);color:var(--text);border-radius:14px;padding:12px 10px;font-weight:800;font-size:14px;cursor:pointer}
+.language-option.selected{border-color:var(--blue);box-shadow:0 0 0 2px color-mix(in srgb,var(--blue) 18%,transparent);background:color-mix(in srgb,var(--blue) 10%,var(--card))}
+@media(max-width:360px){.language-grid{grid-template-columns:1fr}}
 </style>
 </head>
 <body>
 <div class="container">
-
 <div id="menu">
 <h1>Tính Mí Lon</h1>
-
-<div id="networkPill" class="network-pill"><span class="network-dot"></span><span id="networkText">Bạn đang ngoại tuyến. Dữ liệu vẫn hoạt động trên thiết bị.</span></div>
-<div id="updateCard" class="update-card">
-  <div class="update-copy"><b>Có phiên bản mới</b><span>Bản cập nhật đã sẵn sàng để sử dụng.</span></div>
-  <button onclick="applyAppUpdate()">CẬP NHẬT</button>
+<div class="network-pill" id="networkPill"><span class="network-dot"></span><span id="networkText">Bạn đang ngoại tuyến. Dữ liệu vẫn hoạt động trên thiết bị.</span></div>
+<div class="update-card" id="updateCard">
+<div class="update-copy"><b>Có phiên bản mới</b><span>Bản cập nhật đã sẵn sàng để sử dụng.</span></div>
+<button onclick="applyAppUpdate()">CẬP NHẬT</button>
 </div>
-
 <div class="menu-toolbar"><div class="label">CHỌN LOẠI LON</div><div style="display:flex;gap:7px"><button class="manage-cans-btn" onclick="openCanManager()">⚙️ Quản lý</button><button class="manage-cans-btn" onclick="openAppearanceSettings()">🎨 Giao diện</button></div></div>
 <div class="menu">
 <button class="main-btn" onclick="openCalc('Lon số 2')">Lon số 2</button>
 <button class="main-btn" onclick="toggle('lon3')">Lon số 3</button>
-<div id="lon3" class="submenu">
-  <button class="sub-btn" onclick="openCalc('Số 3 Dẹp')">Số 3 Dẹp</button>
-  <button class="sub-btn" onclick="openCalc('Số 3 Vừa')">Số 3 Vừa</button>
-  <button class="sub-btn" onclick="openCalc('Số 3 Cao')">Số 3 Cao</button>
+<div class="submenu" id="lon3">
+<button class="sub-btn" onclick="openCalc('Số 3 Dẹp')">Số 3 Dẹp</button>
+<button class="sub-btn" onclick="openCalc('Số 3 Vừa')">Số 3 Vừa</button>
+<button class="sub-btn" onclick="openCalc('Số 3 Cao')">Số 3 Cao</button>
 </div>
 <button class="main-btn" onclick="openCalc('Lon số 5')">Lon số 5</button>
 <button class="main-btn" onclick="openCalc('Lon A10')">Lon A10</button>
 </div>
 </div>
-
-<div id="calculator" class="calculator">
+<div class="calculator" id="calculator">
 <div class="topbar">
-  <button class="icon-btn back-icon" aria-label="Quay lại" onclick="back()">‹</button>
-  <div class="calc-title"><h2 id="title">Tính mí lon</h2><span>Thông số nhập theo đơn vị mm</span></div>
-  <button class="icon-btn history-btn" aria-label="Lịch sử" onclick="openHistory()">🕘<span id="historyCount" class="history-count">0</span></button>
-<button class="icon-btn" aria-label="Xuất báo cáo" onclick="openExport()">⇧</button>
-  <button class="icon-btn" aria-label="Cài đặt ngưỡng" onclick="openSettings()">⚙️</button>
+<button aria-label="Quay lại" class="icon-btn back-icon" onclick="back()">‹</button>
+<div class="calc-title"><h2 id="title">Tính mí lon</h2><span>Thông số nhập theo đơn vị mm</span></div>
+<button aria-label="Lịch sử" class="icon-btn history-btn" onclick="openHistory()">🕘<span class="history-count" id="historyCount">0</span></button>
+<button aria-label="Xuất báo cáo" class="icon-btn" onclick="openExport()">⇧</button>
+<button aria-label="Cài đặt ngưỡng" class="icon-btn" onclick="openSettings()">⚙️</button>
 </div>
-
 <div class="section-title">Thông số mí ghép</div>
 <div class="form-card">
-<div class="field"><label for="BH">Móc thân <span>BH · Body Hook</span></label><input id="BH" inputmode="decimal" enterkeyhint="next" type="number" step="0.01" min="0" placeholder="0.00"></div>
-<div class="field"><label for="CH">Móc nắp <span>CH / EH · Cover Hook</span></label><input id="CH" inputmode="decimal" enterkeyhint="next" type="number" step="0.01" min="0" placeholder="0.00"></div>
-<div class="field"><label for="SL">Chiều dài mí ghép(Rộng mí) <span>SL · Seam Length</span></label><input id="SL" inputmode="decimal" enterkeyhint="next" type="number" step="0.01" min="0" placeholder="0.00"></div>
-<div class="field"><label for="ST">Độ dày mí ghép <span>ST · Seam Thickness</span></label><input id="ST" inputmode="decimal" enterkeyhint="next" type="number" step="0.001" min="0" placeholder="0.000"></div>
+<div class="field"><label for="BH">Móc thân <span>BH · Body Hook</span></label><input enterkeyhint="next" id="BH" inputmode="decimal" min="0" placeholder="0.00" step="0.01" type="number"/></div>
+<div class="field"><label for="CH">Móc nắp <span>CH / EH · Cover Hook</span></label><input enterkeyhint="next" id="CH" inputmode="decimal" min="0" placeholder="0.00" step="0.01" type="number"/></div>
+<div class="field"><label for="SL">Chiều dài mí ghép(Rộng mí) <span>SL · Seam Length</span></label><input enterkeyhint="next" id="SL" inputmode="decimal" min="0" placeholder="0.00" step="0.01" type="number"/></div>
+<div class="field"><label for="ST">Độ dày mí ghép <span>ST · Seam Thickness</span></label><input enterkeyhint="next" id="ST" inputmode="decimal" min="0" placeholder="0.000" step="0.001" type="number"/></div>
 </div>
-
 <div class="section-title">Độ dày vật liệu</div>
 <div class="form-card">
-<div class="field"><label for="Tb">Độ dày thân lon <span>Tb</span></label><input id="Tb" inputmode="decimal" enterkeyhint="next" type="number" step="0.001" min="0" placeholder="0.000"></div>
-<div class="field"><label for="Te">Độ dày nắp lon <span>Te</span></label><input id="Te" inputmode="decimal" enterkeyhint="done" type="number" step="0.001" min="0" placeholder="0.000"></div>
+<div class="field"><label for="Tb">Độ dày thân lon <span>Tb</span></label><input enterkeyhint="next" id="Tb" inputmode="decimal" min="0" placeholder="0.000" step="0.001" type="number"/></div>
+<div class="field"><label for="Te">Độ dày nắp lon <span>Te</span></label><input enterkeyhint="done" id="Te" inputmode="decimal" min="0" placeholder="0.000" step="0.001" type="number"/></div>
 </div>
 <div class="hint">Nhập đủ 6 thông số để tính các chỉ số bên dưới.</div>
-
 <div class="actions">
-  <button class="btn calc" onclick="calculate()">TÍNH KẾT QUẢ</button>
-  <button class="btn reset" onclick="resetCurrent()">↻ Reset loại lon</button>
-  <button class="btn clear-result" onclick="clearInputs()">Xóa ô nhập</button>
+<button class="btn calc" onclick="calculate()">TÍNH KẾT QUẢ</button>
+<button class="btn reset" onclick="resetCurrent()">↻ Reset loại lon</button>
+<button class="btn clear-result" onclick="clearInputs()">Xóa ô nhập</button>
 </div>
-
 <div class="section-title">Kết quả tính toán<a onclick="shareResult()">Chia sẻ</a></div>
-<div class="results" aria-live="polite">
-  <div id="qualityCard" class="quality-card unset">
-    <div id="qualityIcon" class="quality-icon">⚙️</div>
-    <div class="quality-copy">
-      <div class="quality-label">Đánh giá tổng thể</div>
-      <div id="qualityStatus" class="quality-status">CHƯA THIẾT LẬP</div>
-      <div id="qualityDetail" class="quality-detail">Thiết lập ngưỡng trong Cài đặt để đánh giá Đạt / Không đạt.</div>
-    </div>
-  </div>
-  <div class="result-card overlap-card">
-    <div><div class="name">Độ chồng mí</div><small>Overlap = BH + CH + Te − SL</small></div>
-    <div class="overlap-layout">
-      <div class="overlap-value-wrap"><div id="overlap" class="value blue">-- mm</div><div id="overlapValueBadge"></div></div>
-      <div class="overlap-spec">
-        <div class="overlap-spec-title">Tiêu chuẩn</div>
-        <div id="overlapStandard" class="overlap-spec-value">Chưa thiết lập</div>
-        <div id="overlapDetail" class="overlap-spec-note">Thiết lập ngưỡng Độ chồng mí trong Cài đặt.</div>
-        <div id="overlapStatus" class="gap-status"></div>
-      </div>
-    </div>
-  </div>
-  <div class="result-card percent-card">
-    <div><div class="name">Phần trăm độ chồng mí</div><small>% Overlap</small></div>
-    <div class="percent-gauge-wrap">
-      <div class="percent-gauge" id="overlapGauge" style="--gauge:0;--gauge-color:var(--green)" aria-label="Gauge phần trăm độ chồng mí"><span class="percent-gauge-value" id="overlapGaugeCenter">--</span></div>
-      <div class="percent-gauge-copy"><span class="g-label">Độ chồng mí</span><span id="overlapPct" class="g-value green">--%</span><span id="overlapGaugeNote" class="g-note">Chưa có dữ liệu</span><span id="overlapBadge"></span></div>
-    </div>
-  </div>
-  <div class="result-card percent-card">
-    <div><div class="name">Phần trăm độ móc thân</div><small>% Body Hook Width / % BH</small></div>
-    <div class="percent-gauge-wrap">
-      <div class="percent-gauge" id="bodyHookGauge" style="--gauge:0;--gauge-color:var(--blue)" aria-label="Gauge phần trăm độ móc thân"><span class="percent-gauge-value" id="bodyHookGaugeCenter">--</span></div>
-      <div class="percent-gauge-copy"><span class="g-label">Móc thân</span><span id="bodyHookPct" class="g-value blue">--%</span><span id="bodyHookGaugeNote" class="g-note">Chưa có dữ liệu</span><span id="bodyHookBadge"></span></div>
-    </div>
-  </div>
-  <div class="result-card gap-card">
-    <div><div class="name">Khoảng trống bên trong mí ghép</div><small>Free Space / Gap</small></div>
-    <div class="gap-layout">
-      <div class="gap-value-wrap"><div id="gap" class="value orange">-- mm</div><div id="gapBadge" class="gap-status"></div></div>
-      <div class="gap-spec">
-        <div class="gap-spec-title">Tiêu chuẩn</div>
-        <div id="gapStandard" class="gap-spec-value">Chưa thiết lập</div>
-        <div id="gapDetail" class="gap-spec-note">Thiết lập ngưỡng Khoảng trống trong Cài đặt.</div>
-        <div id="gapStatus" class="gap-status"></div>
-      </div>
-    </div>
-  </div>
+<div aria-live="polite" class="results">
+<div class="quality-card unset" id="qualityCard">
+<div class="quality-icon" id="qualityIcon">⚙️</div>
+<div class="quality-copy">
+<div class="quality-label">Đánh giá tổng thể</div>
+<div class="quality-status" id="qualityStatus">CHƯA THIẾT LẬP</div>
+<div class="quality-detail" id="qualityDetail">Thiết lập ngưỡng trong Cài đặt để đánh giá Đạt / Không đạt.</div>
 </div>
-<div id="message" class="formula-note">Kết quả được tính riêng và lưu trên thiết bị cho từng loại lon.</div></div>
-
 </div>
-
+<div class="result-card overlap-card">
+<div><div class="name">Độ chồng mí</div><small>Overlap = BH + CH + Te − SL</small></div>
+<div class="overlap-layout">
+<div class="overlap-value-wrap"><div class="value blue" id="overlap">-- mm</div><div id="overlapValueBadge"></div></div>
+<div class="overlap-spec">
+<div class="overlap-spec-title">Tiêu chuẩn</div>
+<div class="overlap-spec-value" id="overlapStandard">Chưa thiết lập</div>
+<div class="overlap-spec-note" id="overlapDetail">Thiết lập ngưỡng Độ chồng mí trong Cài đặt.</div>
+<div class="gap-status" id="overlapStatus"></div>
+</div>
+</div>
+</div>
+<div class="result-card percent-card">
+<div><div class="name">Phần trăm độ chồng mí</div><small>% Overlap</small></div>
+<div class="percent-gauge-wrap">
+<div aria-label="Gauge phần trăm độ chồng mí" class="percent-gauge" id="overlapGauge" style="--gauge:0;--gauge-color:var(--green)"><span class="percent-gauge-value" id="overlapGaugeCenter">--</span></div>
+<div class="percent-gauge-copy"><span class="g-label">Độ chồng mí</span><span class="g-value green" id="overlapPct">--%</span><span class="g-note" id="overlapGaugeNote">Chưa có dữ liệu</span><span id="overlapBadge"></span></div>
+</div>
+</div>
+<div class="result-card percent-card">
+<div><div class="name">Phần trăm độ móc thân</div><small>% Body Hook Width / % BH</small></div>
+<div class="percent-gauge-wrap">
+<div aria-label="Gauge phần trăm độ móc thân" class="percent-gauge" id="bodyHookGauge" style="--gauge:0;--gauge-color:var(--blue)"><span class="percent-gauge-value" id="bodyHookGaugeCenter">--</span></div>
+<div class="percent-gauge-copy"><span class="g-label">Móc thân</span><span class="g-value blue" id="bodyHookPct">--%</span><span class="g-note" id="bodyHookGaugeNote">Chưa có dữ liệu</span><span id="bodyHookBadge"></span></div>
+</div>
+</div>
+<div class="result-card gap-card">
+<div><div class="name">Khoảng trống bên trong mí ghép</div><small>Free Space / Gap</small></div>
+<div class="gap-layout">
+<div class="gap-value-wrap"><div class="value orange" id="gap">-- mm</div><div class="gap-status" id="gapBadge"></div></div>
+<div class="gap-spec">
+<div class="gap-spec-title">Tiêu chuẩn</div>
+<div class="gap-spec-value" id="gapStandard">Chưa thiết lập</div>
+<div class="gap-spec-note" id="gapDetail">Thiết lập ngưỡng Khoảng trống trong Cài đặt.</div>
+<div class="gap-status" id="gapStatus"></div>
+</div>
+</div>
+</div>
+</div>
+<div class="formula-note" id="message">Kết quả được tính riêng và lưu trên thiết bị cho từng loại lon.</div></div>
+</div>
 <!-- History sheet -->
-<div id="historyOverlay" class="sheet-overlay" onclick="if(event.target===this)closeHistory()">
-  <div class="sheet">
-    <div class="sheet-handle"></div>
-    <div class="sheet-header"><div><h3>Lịch sử đo</h3><div id="historySubtitle" style="font-size:11px;color:var(--muted);margin-top:3px">Dữ liệu lưu riêng theo từng loại lon</div></div><button class="icon-btn" onclick="closeHistory()">Xong</button></div>
-    <div class="sheet-body">
-      
-      <div id="qualityDashboard" class="quality-dashboard">
-        <div class="qd-head"><strong>📊 Tổng quan chất lượng</strong><span id="qdPeriod">Tất cả lịch sử</span></div>
-        <div class="qd-cards">
-          <div class="qd-card pass"><b id="qdPass">0</b><span>Đạt</span></div>
-          <div class="qd-card watch"><b id="qdWatch">0</b><span>Theo dõi</span></div>
-          <div class="qd-card fail"><b id="qdFail">0</b><span>Không đạt</span></div>
-        </div>
-        <div class="qd-rate"><div class="qd-bar"><i id="qdBar" style="width:0%"></i></div><strong id="qdRate">0%</strong></div>
-        <div class="qd-inputs">
-          <div><b id="qdInputPass">0</b><span>Thông số đạt</span></div>
-          <div><b id="qdInputFail">0</b><span>Thông số ngoài giới hạn</span></div>
-          <div><b id="qdInputRate">--</b><span>Tỷ lệ Min–Max</span></div>
-        </div>
-        <div class="qd-note">Tỷ lệ đạt được tính trên các lần đo có trạng thái. Tỷ lệ Min–Max tính riêng các thông số đã được thiết lập giới hạn.</div>
-      </div>
-
-      <div class="history-tools">
-        <input id="historyDateFilter" type="date" onchange="renderHistory()">
-        <select id="historyStatusFilter" onchange="renderHistory()">
-          <option value="all">Tất cả trạng thái</option>
-          <option value="pass">ĐẠT</option>
-          <option value="watch">CẦN THEO DÕI</option>
-          <option value="fail">KHÔNG ĐẠT</option>
-          <option value="unset">CHƯA THIẾT LẬP</option>
-        </select>
-      </div>
-      <div id="historySummary" class="history-summary"></div>
-      <div class="history-chart-card">
-        <div class="history-chart-head"><div class="history-chart-title">Xu hướng kết quả</div><select id="historyChartMetric" class="history-chart-select" onchange="renderHistoryChart()"><option value="overlapPct">% Độ chồng mí</option><option value="bodyHookPct">% Móc thân</option><option value="overlap">Độ chồng mí (mm)</option><option value="gap">Khoảng trống (mm)</option></select></div>
-        <div class="history-chart-wrap"><svg id="historyChart" class="history-chart" viewBox="0 0 600 190" role="img" aria-label="Biểu đồ lịch sử đo"></svg></div>
-        <div id="historyChartStats" class="history-chart-stats"></div>
-        <div id="historyChartNote" class="history-chart-note">Biểu đồ lấy các lần đo đang được lọc.</div>
-      </div>
-      <div id="historyList"></div>
-      <div class="sheet-actions">
-        <button class="btn clear-result" onclick="exportFilteredHistoryCsv()">⬇︎ Xuất dữ liệu đang lọc</button>
-        <button class="btn reset" onclick="clearHistory()">Xóa toàn bộ lịch sử</button>
-      </div>
-    </div>
-  </div>
+<div class="sheet-overlay" id="historyOverlay" onclick="if(event.target===this)closeHistory()">
+<div class="sheet">
+<div class="sheet-handle"></div>
+<div class="sheet-header"><div><h3>Lịch sử đo</h3><div id="historySubtitle" style="font-size:11px;color:var(--muted);margin-top:3px">Dữ liệu lưu riêng theo từng loại lon</div></div><button class="icon-btn" onclick="closeHistory()">Xong</button></div>
+<div class="sheet-body">
+<div class="quality-dashboard" id="qualityDashboard">
+<div class="qd-head"><strong>📊 Tổng quan chất lượng</strong><span id="qdPeriod">Tất cả lịch sử</span></div>
+<div class="qd-cards">
+<div class="qd-card pass"><b id="qdPass">0</b><span>Đạt</span></div>
+<div class="qd-card watch"><b id="qdWatch">0</b><span>Theo dõi</span></div>
+<div class="qd-card fail"><b id="qdFail">0</b><span>Không đạt</span></div>
 </div>
-
-
+<div class="qd-rate"><div class="qd-bar"><i id="qdBar" style="width:0%"></i></div><strong id="qdRate">0%</strong></div>
+<div class="qd-inputs">
+<div><b id="qdInputPass">0</b><span>Thông số đạt</span></div>
+<div><b id="qdInputFail">0</b><span>Thông số ngoài giới hạn</span></div>
+<div><b id="qdInputRate">--</b><span>Tỷ lệ Min–Max</span></div>
+</div>
+<div class="qd-note">Tỷ lệ đạt được tính trên các lần đo có trạng thái. Tỷ lệ Min–Max tính riêng các thông số đã được thiết lập giới hạn.</div>
+</div>
+<div class="history-tools">
+<input id="historyDateFilter" onchange="renderHistory()" type="date"/>
+<select id="historyStatusFilter" onchange="renderHistory()">
+<option value="all">Tất cả trạng thái</option>
+<option value="pass">ĐẠT</option>
+<option value="watch">CẦN THEO DÕI</option>
+<option value="fail">KHÔNG ĐẠT</option>
+<option value="unset">CHƯA THIẾT LẬP</option>
+</select>
+</div>
+<div class="history-summary" id="historySummary"></div>
+<div class="history-chart-card">
+<div class="history-chart-head"><div class="history-chart-title">Xu hướng kết quả</div><select class="history-chart-select" id="historyChartMetric" onchange="renderHistoryChart()"><option value="overlapPct">% Độ chồng mí</option><option value="bodyHookPct">% Móc thân</option><option value="overlap">Độ chồng mí (mm)</option><option value="gap">Khoảng trống (mm)</option></select></div>
+<div class="history-chart-wrap"><svg aria-label="Biểu đồ lịch sử đo" class="history-chart" id="historyChart" role="img" viewbox="0 0 600 190"></svg></div>
+<div class="history-chart-stats" id="historyChartStats"></div>
+<div class="history-chart-note" id="historyChartNote">Biểu đồ lấy các lần đo đang được lọc.</div>
+</div>
+<div id="historyList"></div>
+<div class="sheet-actions">
+<button class="btn clear-result" onclick="exportFilteredHistoryCsv()">⬇︎ Xuất dữ liệu đang lọc</button>
+<button class="btn reset" onclick="clearHistory()">Xóa toàn bộ lịch sử</button>
+</div>
+</div>
+</div>
+</div>
 <!-- History detail sheet -->
-<div id="historyDetailOverlay" class="sheet-overlay" onclick="if(event.target===this)closeHistoryDetail()">
-  <div class="sheet">
-    <div class="sheet-handle"></div>
-    <div class="sheet-header"><div><h3>Chi tiết lần đo</h3><div id="historyDetailTitle" class="sheet-note"></div></div><button class="icon-btn" onclick="closeHistoryDetail()">Xong</button></div>
-    <div class="sheet-body"><div id="historyDetailBody"></div></div>
-  </div>
+<div class="sheet-overlay" id="historyDetailOverlay" onclick="if(event.target===this)closeHistoryDetail()">
+<div class="sheet">
+<div class="sheet-handle"></div>
+<div class="sheet-header"><div><h3>Chi tiết lần đo</h3><div class="sheet-note" id="historyDetailTitle"></div></div><button class="icon-btn" onclick="closeHistoryDetail()">Xong</button></div>
+<div class="sheet-body"><div id="historyDetailBody"></div></div>
 </div>
-
+</div>
 <!-- Settings sheet -->
-<div id="settingsOverlay" class="sheet-overlay" onclick="if(event.target===this)closeSettings()">
-  <div class="sheet">
-    <div class="sheet-handle"></div>
-    <div class="sheet-header"><h3>Tiêu chuẩn & Cài đặt</h3><button class="icon-btn" onclick="closeSettings()">Xong</button></div>
-    <div class="sheet-body">
-      <div class="set-section-title">THÔNG SỐ ĐO · MIN – MAX</div>
-      <div class="set-note set-note-top">Đặt khoảng tiêu chuẩn cho 6 thông số đầu vào của riêng loại lon này. Để trống một phía nếu không muốn giới hạn phía đó.</div>
-      <div class="set-section-title">BẢO VỆ CÀI ĐẶT</div>
-      <div class="lock-status"><div><b>Khóa tiêu chuẩn & Min–Max</b><div class="set-note" style="margin:4px 0 0">Khóa thao tác thay đổi tiêu chuẩn bằng mã PIN 4–6 số.</div></div><span id="settingsLockBadge" class="lock-badge">Đang mở</span></div>
-      <div class="lock-actions"><button class="lock-btn primary" id="setPinBtn" onclick="setSettingsPin()">Đặt mã PIN</button><button class="lock-btn" id="lockNowBtn" onclick="lockSettingsNow()">Khóa ngay</button><button class="lock-btn" id="disableLockBtn" onclick="disableSettingsLock()" style="display:none">Tắt khóa</button></div>
-      <div class="set-divider"></div>
-      <div class="range-grid">
-        <div class="set-field range-field"><label>BH · Móc thân</label><div class="range-pair"><input id="limBHMin" inputmode="decimal" type="number" step="0.01" placeholder="Min"><span>–</span><input id="limBHMax" inputmode="decimal" type="number" step="0.01" placeholder="Max"><b>mm</b></div></div>
-        <div class="set-field range-field"><label>CH / EH · Móc nắp</label><div class="range-pair"><input id="limCHMin" inputmode="decimal" type="number" step="0.01" placeholder="Min"><span>–</span><input id="limCHMax" inputmode="decimal" type="number" step="0.01" placeholder="Max"><b>mm</b></div></div>
-        <div class="set-field range-field"><label>SL · Rộng mí</label><div class="range-pair"><input id="limSLMin" inputmode="decimal" type="number" step="0.01" placeholder="Min"><span>–</span><input id="limSLMax" inputmode="decimal" type="number" step="0.01" placeholder="Max"><b>mm</b></div></div>
-        <div class="set-field range-field"><label>ST · Độ dày mí</label><div class="range-pair"><input id="limSTMin" inputmode="decimal" type="number" step="0.001" placeholder="Min"><span>–</span><input id="limSTMax" inputmode="decimal" type="number" step="0.001" placeholder="Max"><b>mm</b></div></div>
-        <div class="set-field range-field"><label>Tb · Độ dày thân</label><div class="range-pair"><input id="limTbMin" inputmode="decimal" type="number" step="0.001" placeholder="Min"><span>–</span><input id="limTbMax" inputmode="decimal" type="number" step="0.001" placeholder="Max"><b>mm</b></div></div>
-        <div class="set-field range-field"><label>Te · Độ dày nắp</label><div class="range-pair"><input id="limTeMin" inputmode="decimal" type="number" step="0.001" placeholder="Min"><span>–</span><input id="limTeMax" inputmode="decimal" type="number" step="0.001" placeholder="Max"><b>mm</b></div></div>
-      </div>
-      <div class="set-divider"></div>
-      <div class="set-section-title">TIÊU CHÍ KẾT QUẢ</div>
-      <div class="set-note set-note-top">Các ngưỡng bên dưới tiếp tục dùng cho đánh giá Đạt / Không đạt của kết quả tính.</div>
-      <div class="set-field">
-        <label>Độ chồng mí · Overlap (mm)</label>
-        <div class="set-row"><input id="thOverlapMin" inputmode="decimal" type="number" step="0.001" placeholder="Tối thiểu"><span class="set-unit">mm</span></div>
-        <div style="height:8px"></div>
-        <div class="set-row"><input id="thOverlapMax" inputmode="decimal" type="number" step="0.001" placeholder="Tối đa"><span class="set-unit">mm</span></div>
-      </div>
-      <div class="set-field">
-        <label for="thOverlap">% Độ chồng mí tối thiểu</label>
-        <div class="set-row"><input id="thOverlap" inputmode="decimal" type="number" step="0.1" placeholder="Ví dụ: 45"><span class="set-unit">%</span></div>
-      </div>
-      <div class="set-field">
-        <label for="thBodyHook">% Độ móc thân tối thiểu</label>
-        <div class="set-row"><input id="thBodyHook" inputmode="decimal" type="number" step="0.1" placeholder="Ví dụ: 70"><span class="set-unit">%</span></div>
-      </div>
-      <div class="set-field">
-        <label for="thGapMax">Khoảng trống tối đa</label>
-        <div class="set-row"><input id="thGapMax" inputmode="decimal" type="number" step="0.001" placeholder="Tối đa"><span class="set-unit">mm</span></div>
-      </div>
-      <div class="set-note">Các ngưỡng được lưu riêng cho từng loại lon. Để trống một ngưỡng nếu bạn không muốn dùng tiêu chí đó. Ứng dụng chỉ kết luận <b>ĐẠT</b> khi tất cả tiêu chí đã thiết lập đều đạt.</div>
-      <div class="sheet-actions">
-        <button class="btn calc" onclick="saveSettings()">Lưu tiêu chuẩn cho loại lon này</button>
-      </div>
-    </div>
-  </div>
+<div class="sheet-overlay" id="settingsOverlay" onclick="if(event.target===this)closeSettings()">
+<div class="sheet">
+<div class="sheet-handle"></div>
+<div class="sheet-header"><h3>Tiêu chuẩn &amp; Cài đặt</h3><button class="icon-btn" onclick="closeSettings()">Xong</button></div>
+<div class="sheet-body">
+<div class="set-section-title">THÔNG SỐ ĐO · MIN – MAX</div>
+<div class="set-note set-note-top">Đặt khoảng tiêu chuẩn cho 6 thông số đầu vào của riêng loại lon này. Để trống một phía nếu không muốn giới hạn phía đó.</div>
+<div class="set-section-title">BẢO VỆ CÀI ĐẶT</div>
+<div class="lock-status"><div><b>Khóa tiêu chuẩn &amp; Min–Max</b><div class="set-note" style="margin:4px 0 0">Khóa thao tác thay đổi tiêu chuẩn bằng mã PIN 4–6 số.</div></div><span class="lock-badge" id="settingsLockBadge">Đang mở</span></div>
+<div class="lock-actions"><button class="lock-btn primary" id="setPinBtn" onclick="setSettingsPin()">Đặt mã PIN</button><button class="lock-btn" id="lockNowBtn" onclick="lockSettingsNow()">Khóa ngay</button><button class="lock-btn" id="disableLockBtn" onclick="disableSettingsLock()" style="display:none">Tắt khóa</button></div>
+<div class="set-divider"></div>
+<div class="range-grid">
+<div class="set-field range-field"><label>BH · Móc thân</label><div class="range-pair"><input id="limBHMin" inputmode="decimal" placeholder="Min" step="0.01" type="number"/><span>–</span><input id="limBHMax" inputmode="decimal" placeholder="Max" step="0.01" type="number"/><b>mm</b></div></div>
+<div class="set-field range-field"><label>CH / EH · Móc nắp</label><div class="range-pair"><input id="limCHMin" inputmode="decimal" placeholder="Min" step="0.01" type="number"/><span>–</span><input id="limCHMax" inputmode="decimal" placeholder="Max" step="0.01" type="number"/><b>mm</b></div></div>
+<div class="set-field range-field"><label>SL · Rộng mí</label><div class="range-pair"><input id="limSLMin" inputmode="decimal" placeholder="Min" step="0.01" type="number"/><span>–</span><input id="limSLMax" inputmode="decimal" placeholder="Max" step="0.01" type="number"/><b>mm</b></div></div>
+<div class="set-field range-field"><label>ST · Độ dày mí</label><div class="range-pair"><input id="limSTMin" inputmode="decimal" placeholder="Min" step="0.001" type="number"/><span>–</span><input id="limSTMax" inputmode="decimal" placeholder="Max" step="0.001" type="number"/><b>mm</b></div></div>
+<div class="set-field range-field"><label>Tb · Độ dày thân</label><div class="range-pair"><input id="limTbMin" inputmode="decimal" placeholder="Min" step="0.001" type="number"/><span>–</span><input id="limTbMax" inputmode="decimal" placeholder="Max" step="0.001" type="number"/><b>mm</b></div></div>
+<div class="set-field range-field"><label>Te · Độ dày nắp</label><div class="range-pair"><input id="limTeMin" inputmode="decimal" placeholder="Min" step="0.001" type="number"/><span>–</span><input id="limTeMax" inputmode="decimal" placeholder="Max" step="0.001" type="number"/><b>mm</b></div></div>
 </div>
-
-
-<div id="appearanceOverlay" class="sheet-overlay" onclick="if(event.target===this)closeAppearanceSettings()">
-  <div class="sheet">
-    <div class="sheet-handle"></div>
-    <div class="sheet-header"><div><h3>🎨 Giao diện</h3><div class="sheet-note">Tùy chỉnh giao diện cho toàn bộ ứng dụng. Thiết lập được lưu ngay trên điện thoại.</div></div><button class="icon-btn" onclick="closeAppearanceSettings()">Xong</button></div>
-    <div class="sheet-body">
-      <div class="set-section-title">GIAO DIỆN CÓ SẴN</div>
-      <div class="theme-grid">
-        <div class="theme-preview" data-theme-choice="default" onclick="applyTheme('default')"><div class="tp-bar"></div><div class="tp-card"></div><div class="tp-card"></div><span class="theme-name">Mặc định</span></div>
-        <div class="theme-preview" data-theme-choice="factory" onclick="applyTheme('factory')"><div class="tp-bar"></div><div class="tp-card"></div><div class="tp-card"></div><span class="theme-name">Nhà máy</span></div>
-        <div class="theme-preview" data-theme-choice="carbon" onclick="applyTheme('carbon')"><div class="tp-bar"></div><div class="tp-card"></div><div class="tp-card"></div><span class="theme-name">Carbon</span></div>
-        <div class="theme-preview" data-theme-choice="pink" onclick="applyTheme('pink')"><div class="tp-bar"></div><div class="tp-card"></div><div class="tp-card"></div><span class="theme-name">Hồng</span></div>
-        <div class="theme-preview" data-theme-choice="orange" onclick="applyTheme('orange')"><div class="tp-bar"></div><div class="tp-card"></div><div class="tp-card"></div><span class="theme-name">Cam</span></div>
-        <div class="theme-preview" data-theme-choice="neon" onclick="applyTheme('neon')"><div class="tp-bar"></div><div class="tp-card"></div><div class="tp-card"></div><span class="theme-name">Tím điện</span></div>
-      </div>
-      <div class="set-divider"></div>
-      <div class="set-section-title">HÌNH NỀN TỪ ĐIỆN THOẠI</div>
-      <label class="theme-picker-label">🖼️ Chọn hình nền <span style="color:var(--blue)">Chọn ảnh ›<input id="themeImageInput" type="file" accept="image/*" onchange="handleThemeImage(event)"></span></label>
-      <div id="themeImagePreview" class="theme-image-preview"><span>Hình nền hiện tại</span></div>
-      <div id="themeImageControls" style="display:none;margin-top:12px">
-        <div class="set-field"><label>Độ tối hình nền <span id="themeOpacityValue">18%</span></label><input id="themeOpacity" class="theme-range" type="range" min="0" max="55" step="1" value="18" oninput="setThemeOpacity(this.value)"></div>
-        <div class="theme-actions"><button class="btn clear-result" onclick="removeThemeImage()">Xóa hình nền</button><button class="btn calc" onclick="closeAppearanceSettings()">ÁP DỤNG</button></div>
-      </div>
-      <div class="set-divider"></div>
-      <div class="sheet-actions"><button class="btn reset" onclick="resetAppearance()">↺ KHÔI PHỤC GIAO DIỆN MẶC ĐỊNH</button></div>
-    </div>
-  </div>
+<div class="set-divider"></div>
+<div class="set-section-title">TIÊU CHÍ KẾT QUẢ</div>
+<div class="set-note set-note-top">Các ngưỡng bên dưới tiếp tục dùng cho đánh giá Đạt / Không đạt của kết quả tính.</div>
+<div class="set-field">
+<label>Độ chồng mí · Overlap (mm)</label>
+<div class="set-row"><input id="thOverlapMin" inputmode="decimal" placeholder="Tối thiểu" step="0.001" type="number"/><span class="set-unit">mm</span></div>
+<div style="height:8px"></div>
+<div class="set-row"><input id="thOverlapMax" inputmode="decimal" placeholder="Tối đa" step="0.001" type="number"/><span class="set-unit">mm</span></div>
 </div>
-
-<div id="canManagerOverlay" class="sheet-overlay" onclick="if(event.target===this)closeCanManager()">
-  <div class="sheet">
-    <div class="sheet-handle"></div>
-    <div class="sheet-header">
-      <div><h3>Quản lý loại lon</h3><div class="sheet-note">Thêm, đổi tên hoặc xóa loại lon. Dữ liệu và tiêu chuẩn của từng loại được lưu riêng.</div></div>
-      <button class="icon-btn" onclick="closeCanManager()">Xong</button>
-    </div>
-    <div class="sheet-body">
-      <div class="can-feature-note">Bạn có thể <b>đổi tên</b>, <b>nhân bản</b> một loại lon để giữ nguyên Min–Max/tiêu chuẩn, hoặc thêm ghi chú riêng.</div><div class="can-manage-list" id="canManageList"></div>
-      <div class="sheet-actions">
-        <button class="btn calc" onclick="openAddCan()">＋ THÊM LOẠI LON</button>
-      </div>
-    </div>
-  </div>
+<div class="set-field">
+<label for="thOverlap">% Độ chồng mí tối thiểu</label>
+<div class="set-row"><input id="thOverlap" inputmode="decimal" placeholder="Ví dụ: 45" step="0.1" type="number"/><span class="set-unit">%</span></div>
 </div>
-
-<div id="addCanOverlay" class="sheet-overlay" onclick="if(event.target===this)closeAddCan()">
-  <div class="sheet">
-    <div class="sheet-handle"></div>
-    <div class="sheet-header"><h3 id="addCanTitle">Thêm loại lon</h3><button class="icon-btn" onclick="closeAddCan()">Xong</button></div>
-    <div class="sheet-body">
-      <div class="add-can-form">
-        <input id="canNameInput" type="text" maxlength="40" placeholder="Ví dụ: Lon 330 ml">
-        <textarea id="canNoteInput" class="add-can-note" maxlength="160" placeholder="Ghi chú cho loại lon này (tùy chọn)"></textarea>
-        <div class="sheet-note">Tên, ghi chú, dữ liệu đo, lịch sử và tiêu chuẩn được lưu riêng cho từng loại lon.</div>
-        <button class="btn calc" id="saveCanBtn" onclick="saveCanType()">LƯU LOẠI LON</button>
-      </div>
-    </div>
-  </div>
+<div class="set-field">
+<label for="thBodyHook">% Độ móc thân tối thiểu</label>
+<div class="set-row"><input id="thBodyHook" inputmode="decimal" placeholder="Ví dụ: 70" step="0.1" type="number"/><span class="set-unit">%</span></div>
 </div>
-
-
-<div id="exportOverlay" class="sheet-overlay" onclick="if(event.target===this)closeExport()">
-  <div class="sheet">
-    <div class="sheet-handle"></div>
-    <div class="sheet-header"><div><h3>Xuất báo cáo</h3><div class="sheet-note">Xuất dữ liệu đo của loại lon đang chọn.</div></div><button class="icon-btn" onclick="closeExport()">Xong</button></div>
-    <div class="sheet-body">
-      <div class="report-actions">
-        <button class="btn export-btn" onclick="exportCurrentCSV()">CSV hiện tại</button>
-        <button class="btn export-btn" onclick="exportHistoryCSV()">CSV lịch sử</button>
-        <button class="btn calc" style="grid-column:1/-1" onclick="printCurrentReport()">IN / LƯU PDF</button>
-      </div>
-      <div class="sheet-note">Trên iPhone, sau khi chọn IN / LƯU PDF, bạn có thể dùng menu Chia sẻ của hệ thống để lưu hoặc gửi báo cáo.</div>
-    </div>
-  </div>
+<div class="set-field">
+<label for="thGapMax">Khoảng trống tối đa</label>
+<div class="set-row"><input id="thGapMax" inputmode="decimal" placeholder="Tối đa" step="0.001" type="number"/><span class="set-unit">mm</span></div>
+</div>
+<div class="set-note">Các ngưỡng được lưu riêng cho từng loại lon. Để trống một ngưỡng nếu bạn không muốn dùng tiêu chí đó. Ứng dụng chỉ kết luận <b>ĐẠT</b> khi tất cả tiêu chí đã thiết lập đều đạt.</div>
+<div class="sheet-actions">
+<button class="btn calc" onclick="saveSettings()">Lưu tiêu chuẩn cho loại lon này</button>
+</div>
+</div>
+</div>
+</div>
+<div class="sheet-overlay" id="appearanceOverlay" onclick="if(event.target===this)closeAppearanceSettings()">
+<div class="sheet">
+<div class="sheet-handle"></div>
+<div class="sheet-header"><div><h3>🎨 Giao diện</h3><div class="sheet-note">Tùy chỉnh giao diện cho toàn bộ ứng dụng. Thiết lập được lưu ngay trên điện thoại.</div></div><button class="icon-btn" onclick="closeAppearanceSettings()">Xong</button></div>
+<div class="sheet-body">
+<div class="set-section-title">NGÔN NGỮ / LANGUAGE</div>
+<div class="language-grid">
+<button class="language-option" data-language-choice="vi" onclick="applyLanguage('vi')">🇻🇳 Tiếng Việt</button>
+<button class="language-option" data-language-choice="en" onclick="applyLanguage('en')">🇬🇧 English</button>
+<button class="language-option" data-language-choice="zh" onclick="applyLanguage('zh')">🇨🇳 中文</button>
+<button class="language-option" data-language-choice="th" onclick="applyLanguage('th')">🇹🇭 ไทย</button>
+</div>
+<div class="set-divider"></div>
+<div class="set-section-title">GIAO DIỆN CÓ SẴN</div>
+<div class="theme-grid">
+<div class="theme-preview" data-theme-choice="default" onclick="applyTheme('default')"><div class="tp-bar"></div><div class="tp-card"></div><div class="tp-card"></div><span class="theme-name">Mặc định</span></div>
+<div class="theme-preview" data-theme-choice="factory" onclick="applyTheme('factory')"><div class="tp-bar"></div><div class="tp-card"></div><div class="tp-card"></div><span class="theme-name">Nhà máy</span></div>
+<div class="theme-preview" data-theme-choice="carbon" onclick="applyTheme('carbon')"><div class="tp-bar"></div><div class="tp-card"></div><div class="tp-card"></div><span class="theme-name">Carbon</span></div>
+<div class="theme-preview" data-theme-choice="pink" onclick="applyTheme('pink')"><div class="tp-bar"></div><div class="tp-card"></div><div class="tp-card"></div><span class="theme-name">Hồng</span></div>
+<div class="theme-preview" data-theme-choice="orange" onclick="applyTheme('orange')"><div class="tp-bar"></div><div class="tp-card"></div><div class="tp-card"></div><span class="theme-name">Cam</span></div>
+<div class="theme-preview" data-theme-choice="neon" onclick="applyTheme('neon')"><div class="tp-bar"></div><div class="tp-card"></div><div class="tp-card"></div><span class="theme-name">Tím điện</span></div>
+</div>
+<div class="set-divider"></div>
+<div class="set-section-title">HÌNH NỀN TỪ ĐIỆN THOẠI</div>
+<label class="theme-picker-label">🖼️ Chọn hình nền <span style="color:var(--blue)">Chọn ảnh ›<input accept="image/*" id="themeImageInput" onchange="handleThemeImage(event)" type="file"/></span></label>
+<div class="theme-image-preview" id="themeImagePreview"><span>Hình nền hiện tại</span></div>
+<div id="themeImageControls" style="display:none;margin-top:12px">
+<div class="set-field"><label>Độ rõ hình nền <span id="themeOpacityValue">18%</span></label><input class="theme-range" id="themeOpacity" max="55" min="0" oninput="setThemeOpacity(this.value)" step="1" type="range" value="18"/></div>
+<div class="set-field"><label>Độ phóng to <span id="themeZoomValue">100%</span></label><input class="theme-range" id="themeZoom" max="140" min="80" oninput="setThemeZoom(this.value)" step="1" type="range" value="100"/></div>
+<div class="set-field"><label>Vị trí hình nền</label><select id="themePosition" onchange="setThemePosition(this.value)"><option value="center">Giữa</option><option value="top">Phía trên</option><option value="bottom">Phía dưới</option><option value="left">Bên trái</option><option value="right">Bên phải</option></select></div>
+<div class="theme-actions"><button class="btn clear-result" onclick="removeThemeImage()">Xóa hình nền</button><button class="btn calc" onclick="resetThemeImageView()">Đặt lại ảnh</button></div>
+</div>
+<div class="set-divider"></div>
+<div class="sheet-actions"><button class="btn reset" onclick="resetAppearance()">↺ KHÔI PHỤC GIAO DIỆN MẶC ĐỊNH</button></div>
+</div>
+</div>
+</div>
+<div class="sheet-overlay" id="canManagerOverlay" onclick="if(event.target===this)closeCanManager()">
+<div class="sheet">
+<div class="sheet-handle"></div>
+<div class="sheet-header">
+<div><h3>Quản lý loại lon</h3><div class="sheet-note">Thêm, đổi tên hoặc xóa loại lon. Dữ liệu và tiêu chuẩn của từng loại được lưu riêng.</div></div>
+<button class="icon-btn" onclick="closeCanManager()">Xong</button>
+</div>
+<div class="sheet-body">
+<div class="can-feature-note">Bạn có thể <b>đổi tên</b>, <b>nhân bản</b> một loại lon để giữ nguyên Min–Max/tiêu chuẩn, hoặc thêm ghi chú riêng.</div><div class="can-manage-list" id="canManageList"></div>
+<div class="sheet-actions">
+<button class="btn calc" onclick="openAddCan()">＋ THÊM LOẠI LON</button>
+</div>
+</div>
+</div>
+</div>
+<div class="sheet-overlay" id="addCanOverlay" onclick="if(event.target===this)closeAddCan()">
+<div class="sheet">
+<div class="sheet-handle"></div>
+<div class="sheet-header"><h3 id="addCanTitle">Thêm loại lon</h3><button class="icon-btn" onclick="closeAddCan()">Xong</button></div>
+<div class="sheet-body">
+<div class="add-can-form">
+<input id="canNameInput" maxlength="40" placeholder="Ví dụ: Lon 330 ml" type="text"/>
+<textarea class="add-can-note" id="canNoteInput" maxlength="160" placeholder="Ghi chú cho loại lon này (tùy chọn)"></textarea>
+<div class="sheet-note">Tên, ghi chú, dữ liệu đo, lịch sử và tiêu chuẩn được lưu riêng cho từng loại lon.</div>
+<button class="btn calc" id="saveCanBtn" onclick="saveCanType()">LƯU LOẠI LON</button>
+</div>
+</div>
+</div>
+</div>
+<div class="sheet-overlay" id="exportOverlay" onclick="if(event.target===this)closeExport()">
+<div class="sheet">
+<div class="sheet-handle"></div>
+<div class="sheet-header"><div><h3>Xuất báo cáo</h3><div class="sheet-note">Xuất dữ liệu đo của loại lon đang chọn.</div></div><button class="icon-btn" onclick="closeExport()">Xong</button></div>
+<div class="sheet-body">
+<div class="report-actions">
+<button class="btn export-btn" onclick="exportCurrentCSV()">CSV hiện tại</button>
+<button class="btn export-btn" onclick="exportHistoryCSV()">CSV lịch sử</button>
+<button class="btn calc" onclick="printCurrentReport()" style="grid-column:1/-1">IN / LƯU PDF</button>
+</div>
+<div class="sheet-note">Trên iPhone, sau khi chọn IN / LƯU PDF, bạn có thể dùng menu Chia sẻ của hệ thống để lưu hoặc gửi báo cáo.</div>
+</div>
+</div>
 </div>
 <div id="printReport"></div>
-
-<div id="saveIndicator" class="save-indicator">Đã lưu trên thiết bị</div>
-<div id="pinOverlay" class="pin-overlay" onclick="if(event.target===this)closePinPrompt()">
-  <div class="pin-sheet">
-    <h3 id="pinTitle">Mở khóa Cài đặt</h3>
-    <div id="pinNote" class="pin-note">Nhập mã PIN để thay đổi Min–Max và tiêu chuẩn.</div>
-    <input id="pinInput" class="pin-input" type="password" inputmode="numeric" pattern="[0-9]*" maxlength="6" placeholder="••••" autocomplete="one-time-code">
-    <div class="pin-actions"><button class="btn clear-result" onclick="closePinPrompt()">Hủy</button><button class="btn calc" id="pinSubmitBtn" onclick="submitPinPrompt()">MỞ KHÓA</button></div>
-  </div>
+<div class="save-indicator" id="saveIndicator">Đã lưu trên thiết bị</div>
+<div class="pin-overlay" id="pinOverlay" onclick="if(event.target===this)closePinPrompt()">
+<div class="pin-sheet">
+<h3 id="pinTitle">Mở khóa Cài đặt</h3>
+<div class="pin-note" id="pinNote">Nhập mã PIN để thay đổi Min–Max và tiêu chuẩn.</div>
+<input autocomplete="one-time-code" class="pin-input" id="pinInput" inputmode="numeric" maxlength="6" pattern="[0-9]*" placeholder="••••" type="password"/>
+<div class="pin-actions"><button class="btn clear-result" onclick="closePinPrompt()">Hủy</button><button class="btn calc" id="pinSubmitBtn" onclick="submitPinPrompt()">MỞ KHÓA</button></div>
 </div>
-
-<div id="toast" class="toast"></div>
-
+</div>
+<div class="toast" id="toast"></div>
 <script>
 let current='';
 const fields=['BH','CH','SL','ST','Tb','Te'];
@@ -1506,7 +1497,7 @@ function exportHistoryCsv(){exportFilteredHistoryCsv();}
 
 /* ---------- Appearance settings ---------- */
 function getAppearance(){
-  return {theme:localStorage.getItem('tinhMiLonTheme')||'default',image:localStorage.getItem('tinhMiLonBgImage')||'',opacity:parseInt(localStorage.getItem('tinhMiLonBgOpacity')||'18',10)};
+  return {theme:localStorage.getItem('tinhMiLonTheme')||'default',image:localStorage.getItem('tinhMiLonBgImage')||'',opacity:parseInt(localStorage.getItem('tinhMiLonBgOpacity')||'18',10),zoom:parseInt(localStorage.getItem('tinhMiLonBgZoom')||'100',10),position:localStorage.getItem('tinhMiLonBgPosition')||'center',language:localStorage.getItem('tinhMiLonLanguage')||'vi'};
 }
 function applyTheme(theme){
   const allowed=['default','factory','carbon','pink','orange','neon'];
@@ -1520,15 +1511,97 @@ function applyThemeImage(){
   const a=getAppearance();
   document.documentElement.style.setProperty('--app-bg-image',a.image?`url("${a.image}")`:'none');
   document.documentElement.style.setProperty('--app-bg-opacity',a.image?String(a.opacity/100):'0');
+  document.documentElement.style.setProperty('--app-bg-size',a.image?(a.zoom===100?'cover':String(a.zoom)+'% auto'):'cover');
+  document.documentElement.style.setProperty('--app-bg-position',a.position||'center');
   const preview=document.getElementById('themeImagePreview'),controls=document.getElementById('themeImageControls');
   if(preview){preview.classList.toggle('show',!!a.image);if(a.image)preview.style.backgroundImage=`url("${a.image}")`;}
   if(controls)controls.style.display=a.image?'block':'none';
   const range=document.getElementById('themeOpacity');if(range)range.value=a.opacity;
   const label=document.getElementById('themeOpacityValue');if(label)label.textContent=a.opacity+'%';
+  const zoom=document.getElementById('themeZoom');if(zoom)zoom.value=a.zoom;
+  const zoomLabel=document.getElementById('themeZoomValue');if(zoomLabel)zoomLabel.textContent=a.zoom+'%';
+  const pos=document.getElementById('themePosition');if(pos)pos.value=a.position||'center';
 }
-function openAppearanceSettings(){applyTheme(getAppearance().theme);applyThemeImage();document.getElementById('appearanceOverlay').classList.add('open')}
+
+const LANG_TEXT={
+  en:{
+    'Bạn đang ngoại tuyến. Dữ liệu vẫn hoạt động trên thiết bị.':'You are offline. Data still works on this device.',
+    'Có phiên bản mới':'New version available','Bản cập nhật đã sẵn sàng để sử dụng.':'An update is ready to use.','CẬP NHẬT':'UPDATE',
+    'CHỌN LOẠI LON':'SELECT CAN TYPE','⚙️ Quản lý':'⚙️ Manage','🎨 Giao diện':'🎨 Appearance',
+    'Tính mí lon':'Can seam calculator','Thông số nhập theo đơn vị mm':'Enter measurements in mm','Thông số mí ghép':'Seam measurements',
+    'Móc thân':'Body Hook','Móc nắp':'Cover Hook','Chiều dài mí ghép(Rộng mí)':'Seam Length (Seam Width)','Độ dày mí ghép':'Seam Thickness',
+    'Độ dày vật liệu':'Material Thickness','Độ dày thân lon':'Can body thickness','Độ dày nắp lon':'Can end thickness',
+    'Nhập đủ 6 thông số để tính các chỉ số bên dưới.':'Enter all 6 measurements to calculate the indicators below.',
+    'TÍNH KẾT QUẢ':'CALCULATE','↻ Reset loại lon':'↻ Reset can type','Xóa ô nhập':'Clear inputs','Kết quả tính toán':'Calculation results','Chia sẻ':'Share',
+    'Đánh giá tổng thể':'Overall assessment','CHƯA THIẾT LẬP':'NOT SET','Thiết lập ngưỡng trong Cài đặt để đánh giá Đạt / Không đạt.':'Set thresholds in Settings to assess Pass / Fail.',
+    'Độ chồng mí':'Overlap','Tiêu chuẩn':'Standard','Chưa thiết lập':'Not set','Thiết lập ngưỡng Độ chồng mí trong Cài đặt.':'Set the Overlap threshold in Settings.',
+    'Phần trăm độ chồng mí':'Overlap percentage','Phần trăm độ móc thân':'Body Hook percentage','Móc thân':'Body Hook','Chưa có dữ liệu':'No data',
+    'Khoảng trống bên trong mí ghép':'Free Space inside seam','Thiết lập ngưỡng Khoảng trống trong Cài đặt.':'Set the Free Space threshold in Settings.',
+    'Kết quả được tính riêng và lưu trên thiết bị cho từng loại lon.':'Results are calculated and stored separately on this device for each can type.',
+    'Lịch sử đo':'Measurement history','Dữ liệu lưu riêng theo từng loại lon':'Data is stored separately for each can type','Xong':'Done',
+    '📊 Tổng quan chất lượng':'📊 Quality overview','Tất cả lịch sử':'All history','Đạt':'Pass','Theo dõi':'Monitor','Không đạt':'Fail',
+    'Thông số đạt':'Measurements in range','Thông số ngoài giới hạn':'Measurements out of range','Tỷ lệ Min–Max':'Min–Max rate',
+    'Tỷ lệ đạt được tính trên các lần đo có trạng thái. Tỷ lệ Min–Max tính riêng các thông số đã được thiết lập giới hạn.':'Pass rate is calculated from measurements with a status. Min–Max rate only uses measurements with configured limits.',
+    'Tất cả trạng thái':'All statuses','ĐẠT':'PASS','CẦN THEO DÕI':'MONITOR','KHÔNG ĐẠT':'FAIL','Xu hướng kết quả':'Result trend',
+    'Độ chồng mí (mm)':'Overlap (mm)','Khoảng trống (mm)':'Free Space (mm)','Biểu đồ lấy các lần đo đang được lọc.':'The chart uses the currently filtered measurements.',
+    '⬇︎ Xuất dữ liệu đang lọc':'⬇︎ Export filtered data','Xóa toàn bộ lịch sử':'Delete all history','Chi tiết lần đo':'Measurement details',
+    'Tiêu chuẩn & Cài đặt':'Standards & Settings','THÔNG SỐ ĐO · MIN – MAX':'MEASUREMENT RANGES · MIN – MAX',
+    'Đặt khoảng tiêu chuẩn cho 6 thông số đầu vào của riêng loại lon này. Để trống một phía nếu không muốn giới hạn phía đó.':'Set standard ranges for the 6 inputs for this can type. Leave one side blank if you do not want a limit.',
+    'BẢO VỆ CÀI ĐẶT':'SETTINGS PROTECTION','Khóa tiêu chuẩn & Min–Max':'Lock standards & Min–Max','Khóa thao tác thay đổi tiêu chuẩn bằng mã PIN 4–6 số.':'Protect standard changes with a 4–6 digit PIN.',
+    'Đang mở':'Unlocked','Đặt mã PIN':'Set PIN','Khóa ngay':'Lock now','Tắt khóa':'Disable lock','TIÊU CHÍ KẾT QUẢ':'RESULT CRITERIA',
+    'Các ngưỡng bên dưới tiếp tục dùng cho đánh giá Đạt / Không đạt của kết quả tính.':'The thresholds below are used to assess calculated results as Pass / Fail.',
+    'Độ chồng mí · Overlap (mm)':'Overlap · Overlap (mm)','% Độ chồng mí tối thiểu':'Minimum Overlap %','% Độ móc thân tối thiểu':'Minimum Body Hook %','Khoảng trống tối đa':'Maximum Free Space',
+    'khi tất cả tiêu chí đã thiết lập đều đạt.':'when all configured criteria pass.','Lưu tiêu chuẩn cho loại lon này':'Save standards for this can type',
+    'Tùy chỉnh giao diện cho toàn bộ ứng dụng. Thiết lập được lưu ngay trên điện thoại.':'Customize the entire app. Settings are saved on this device.',
+    'GIAO DIỆN CÓ SẴN':'PRESET THEMES','Mặc định':'Default','Nhà máy':'Factory','Hồng':'Pink','Cam':'Orange','Tím điện':'Electric Purple',
+    'HÌNH NỀN TỪ ĐIỆN THOẠI':'PHONE BACKGROUND','🖼️ Chọn hình nền':'🖼️ Choose background','Chọn ảnh ›':'Choose image ›','Hình nền hiện tại':'Current background',
+    'Độ tối hình nền':'Background darkness','Độ phóng to':'Zoom','Vị trí hình nền':'Background position','Giữa':'Center','Phía trên':'Top','Phía dưới':'Bottom','Bên trái':'Left','Bên phải':'Right','Xóa hình nền':'Remove background','ÁP DỤNG':'APPLY','↺ KHÔI PHỤC GIAO DIỆN MẶC ĐỊNH':'↺ RESET APPEARANCE',
+    'Quản lý loại lon':'Can type management','Thêm, đổi tên hoặc xóa loại lon. Dữ liệu và tiêu chuẩn của từng loại được lưu riêng.':'Add, rename, or delete can types. Data and standards are stored separately.',
+    '＋ THÊM LOẠI LON':'＋ ADD CAN TYPE','Thêm loại lon':'Add can type','LƯU LOẠI LON':'SAVE CAN TYPE','Xuất báo cáo':'Export report','Xuất dữ liệu đo của loại lon đang chọn.':'Export measurements for the selected can type.',
+    'CSV hiện tại':'Current CSV','CSV lịch sử':'History CSV','IN / LƯU PDF':'PRINT / SAVE PDF','Đã lưu trên thiết bị':'Saved on device',
+    'Mở khóa Cài đặt':'Unlock Settings','Nhập mã PIN để thay đổi Min–Max và tiêu chuẩn.':'Enter the PIN to change Min–Max and standards.','Hủy':'Cancel','MỞ KHÓA':'UNLOCK',
+    'NGÔN NGỮ / LANGUAGE':'LANGUAGE / NGÔN NGỮ','Tiếng Việt':'Vietnamese'
+  },
+  zh:{
+    'CHỌN LOẠI LON':'选择罐型','⚙️ Quản lý':'⚙️ 管理','🎨 Giao diện':'🎨 界面','Tính mí lon':'罐缝计算','Thông số nhập theo đơn vị mm':'输入单位：mm','Thông số mí ghép':'罐缝参数','Móc thân':'罐身钩','Móc nắp':'罐盖钩','Chiều dài mí ghép(Rộng mí)':'罐缝长度（缝宽）','Độ dày mí ghép':'罐缝厚度','Độ dày vật liệu':'材料厚度','Độ dày thân lon':'罐身材料厚度','Độ dày nắp lon':'罐盖材料厚度','TÍNH KẾT QUẢ':'计算结果','↻ Reset loại lon':'↻ 重置罐型','Xóa ô nhập':'清除输入','Kết quả tính toán':'计算结果','Đánh giá tổng thể':'总体评价','Độ chồng mí':'搭接量','Phần trăm độ chồng mí':'搭接百分比','Phần trăm độ móc thân':'罐身钩百分比','Khoảng trống bên trong mí ghép':'罐缝间隙','Lịch sử đo':'测量历史','Xong':'完成','Đạt':'合格','Theo dõi':'关注','Không đạt':'不合格','Xu hướng kết quả':'结果趋势','Tiêu chuẩn & Cài đặt':'标准与设置','Quản lý loại lon':'罐型管理','Thêm loại lon':'添加罐型','LƯU LOẠI LON':'保存罐型','GIAO DIỆN CÓ SẴN':'预设主题','Mặc định':'默认','Nhà máy':'工厂','Hồng':'粉色','Cam':'橙色','Tím điện':'电光紫','HÌNH NỀN TỪ ĐIỆN THOẠI':'手机背景','🖼️ Chọn hình nền':'🖼️ 选择背景','Chọn ảnh ›':'选择图片 ›','Hình nền hiện tại':'当前背景','Độ phóng to':'缩放','Vị trí hình nền':'背景位置','Giữa':'居中','Phía trên':'顶部','Phía dưới':'底部','Bên trái':'左侧','Bên phải':'右侧','Độ rõ hình nền':'背景显示强度','Xóa hình nền':'删除背景','ÁP DỤNG':'应用','NGÔN NGỮ / LANGUAGE':'语言 / LANGUAGE','Tiếng Việt':'越南语','English':'英语'
+  },
+  th:{
+    'CHỌN LOẠI LON':'เลือกประเภทกระป๋อง','⚙️ Quản lý':'⚙️ จัดการ','🎨 Giao diện':'🎨 รูปแบบ','Tính mí lon':'คำนวณตะเข็บกระป๋อง','Thông số nhập theo đơn vị mm':'ป้อนค่าเป็นมม.','Thông số mí ghép':'ค่าตะเข็บกระป๋อง','Móc thân':'ขอเกี่ยวตัวกระป๋อง','Móc nắp':'ขอเกี่ยวฝา','Chiều dài mí ghép(Rộng mí)':'ความยาวตะเข็บ (ความกว้างตะเข็บ)','Độ dày mí ghép':'ความหนาตะเข็บ','Độ dày vật liệu':'ความหนาวัสดุ','Độ dày thân lon':'ความหนาตัวกระป๋อง','Độ dày nắp lon':'ความหนาฝากระป๋อง','TÍNH KẾT QUẢ':'คำนวณผล','↻ Reset loại lon':'↻ รีเซ็ตประเภทกระป๋อง','Xóa ô nhập':'ล้างข้อมูล','Kết quả tính toán':'ผลการคำนวณ','Đánh giá tổng thể':'การประเมินโดยรวม','Độ chồng mí':'ระยะซ้อน','Phần trăm độ chồng mí':'เปอร์เซ็นต์การซ้อน','Phần trăm độ móc thân':'เปอร์เซ็นต์ขอเกี่ยวตัว','Khoảng trống bên trong mí ghép':'ช่องว่างในตะเข็บ','Lịch sử đo':'ประวัติการวัด','Xong':'เสร็จ','Đạt':'ผ่าน','Theo dõi':'ติดตาม','Không đạt':'ไม่ผ่าน','Xu hướng kết quả':'แนวโน้มผลลัพธ์','Tiêu chuẩn & Cài đặt':'มาตรฐานและการตั้งค่า','Quản lý loại lon':'จัดการประเภทกระป๋อง','Thêm loại lon':'เพิ่มประเภทกระป๋อง','LƯU LOẠI LON':'บันทึกประเภทกระป๋อง','GIAO DIỆN CÓ SẴN':'ธีมสำเร็จรูป','Mặc định':'ค่าเริ่มต้น','Nhà máy':'โรงงาน','Hồng':'ชมพู','Cam':'ส้ม','Tím điện':'ม่วงไฟฟ้า','HÌNH NỀN TỪ ĐIỆN THOẠI':'พื้นหลังจากโทรศัพท์','🖼️ Chọn hình nền':'🖼️ เลือกพื้นหลัง','Chọn ảnh ›':'เลือกรูป ›','Hình nền hiện tại':'พื้นหลังปัจจุบัน','Độ phóng to':'ซูม','Vị trí hình nền':'ตำแหน่งพื้นหลัง','Giữa':'ตรงกลาง','Phía trên':'ด้านบน','Phía dưới':'ด้านล่าง','Bên trái':'ด้านซ้าย','Bên phải':'ด้านขวา','Độ rõ hình nền':'ความเข้มของพื้นหลัง','Xóa hình nền':'ลบพื้นหลัง','ÁP DỤNG':'ใช้','NGÔN NGỮ / LANGUAGE':'ภาษา / LANGUAGE','Tiếng Việt':'เวียดนาม','English':'อังกฤษ'
+  }
+
+};
+let languageApplying=false;
+function applyLanguage(lang){
+  lang=['en','zh','th'].includes(lang)?lang:'vi';
+  localStorage.setItem('tinhMiLonLanguage',lang);
+  const dict=LANG_TEXT[lang]||{};
+  languageApplying=true;
+  document.querySelectorAll('[data-language-choice]').forEach(el=>el.classList.toggle('selected',el.dataset.languageChoice===lang));
+  const walker=document.createTreeWalker(document.body,NodeFilter.SHOW_TEXT);
+  const nodes=[];
+  while(walker.nextNode())nodes.push(walker.currentNode);
+  nodes.forEach(node=>{
+    if(!node.parentElement||['SCRIPT','STYLE'].includes(node.parentElement.tagName))return;
+    const raw=node.nodeValue;
+    const vi=node.dataset.viText||raw;
+    node.dataset.viText=vi;
+    if(lang==='vi') node.nodeValue=vi;
+    else if(dict[vi]) node.nodeValue=dict[vi];
+  });
+  document.querySelectorAll('input[placeholder],textarea[placeholder]').forEach(el=>{
+    const vi=el.dataset.viPlaceholder||el.getAttribute('placeholder'); if(!vi)return;
+    el.dataset.viPlaceholder=vi; if(lang==='en') el.setAttribute('placeholder',dict[vi]||vi); else el.setAttribute('placeholder',vi);
+  });
+  document.documentElement.lang=lang;
+  languageApplying=false;
+}
+function openAppearanceSettings(){applyTheme(getAppearance().theme);applyThemeImage();applyLanguage(getAppearance().language);document.getElementById('appearanceOverlay').classList.add('open')}
 function closeAppearanceSettings(){document.getElementById('appearanceOverlay').classList.remove('open')}
 function setThemeOpacity(value){value=Math.max(0,Math.min(55,parseInt(value,10)||0));localStorage.setItem('tinhMiLonBgOpacity',String(value));applyThemeImage()}
+function setThemeZoom(value){value=Math.max(80,Math.min(140,parseInt(value,10)||100));localStorage.setItem('tinhMiLonBgZoom',String(value));applyThemeImage()}
+function setThemePosition(value){const allowed=['center','top','bottom','left','right'];value=allowed.includes(value)?value:'center';localStorage.setItem('tinhMiLonBgPosition',value);applyThemeImage()}
+function resetThemeImageView(){localStorage.setItem('tinhMiLonBgOpacity','18');localStorage.setItem('tinhMiLonBgZoom','100');localStorage.setItem('tinhMiLonBgPosition','center');applyThemeImage();showToast('Đã đặt lại cách hiển thị hình nền')}
+
 function handleThemeImage(event){
   const file=event.target.files&&event.target.files[0];if(!file)return;
   if(!file.type.startsWith('image/')){showToast('Vui lòng chọn một hình ảnh');return}
@@ -1539,20 +1612,16 @@ function handleThemeImage(event){
       const max=1600,scale=Math.min(1,max/Math.max(img.naturalWidth,img.naturalHeight));
       const w=Math.max(1,Math.round(img.naturalWidth*scale)),h=Math.max(1,Math.round(img.naturalHeight*scale));
       const c=document.createElement('canvas');c.width=w;c.height=h;const ctx=c.getContext('2d');ctx.drawImage(img,0,0,w,h);
-      try{
-        const data=c.toDataURL('image/jpeg',.78);localStorage.setItem('tinhMiLonBgImage',data);if(!localStorage.getItem('tinhMiLonBgOpacity'))localStorage.setItem('tinhMiLonBgOpacity','18');applyThemeImage();showToast('Đã đặt hình nền');
-      }catch(e){showToast('Ảnh quá lớn, không thể lưu trên thiết bị')}
-    };
-    img.src=reader.result;
-  };
-  reader.readAsDataURL(file);event.target.value='';
+      try{const data=c.toDataURL('image/jpeg',.78);localStorage.setItem('tinhMiLonBgImage',data);if(!localStorage.getItem('tinhMiLonBgOpacity'))localStorage.setItem('tinhMiLonBgOpacity','18');applyThemeImage();showToast('Đã đặt hình nền')}catch(e){showToast('Ảnh quá lớn, không thể lưu trên thiết bị')}
+    }; img.src=reader.result;
+  }; reader.readAsDataURL(file);event.target.value='';
 }
 function removeThemeImage(){localStorage.removeItem('tinhMiLonBgImage');applyThemeImage();showToast('Đã xóa hình nền')}
 function resetAppearance(){
-  localStorage.removeItem('tinhMiLonTheme');localStorage.removeItem('tinhMiLonBgImage');localStorage.removeItem('tinhMiLonBgOpacity');
-  applyTheme('default');applyThemeImage();showToast('Đã khôi phục giao diện mặc định');
+  localStorage.removeItem('tinhMiLonTheme');localStorage.removeItem('tinhMiLonBgImage');localStorage.removeItem('tinhMiLonBgOpacity');localStorage.removeItem('tinhMiLonBgZoom');localStorage.removeItem('tinhMiLonBgPosition');localStorage.removeItem('tinhMiLonLanguage');
+  applyTheme('default');applyThemeImage();applyLanguage('vi');showToast('Đã khôi phục giao diện mặc định');
 }
-function initAppearance(){applyTheme(getAppearance().theme);applyThemeImage()}
+function initAppearance(){applyTheme(getAppearance().theme);applyThemeImage();applyLanguage(getAppearance().language)}
 
 /* ---------- Settings sheet ---------- */
 function settingsLockHash(pin){
@@ -2089,12 +2158,36 @@ function setupAutosave(){
 document.addEventListener('DOMContentLoaded',()=>{
   updateNetworkStatus();
   initAppearance();
+  const langObserver=new MutationObserver(()=>{ if(!languageApplying && getAppearance().language==='en') applyLanguage('en'); });
+  langObserver.observe(document.body,{childList:true,subtree:true});
   setupAutosave();
   registerPWA();
 });
 
-</script>
 
+
+// Mobile keyboard polish for iOS Safari and Android Chrome.
+(function(){
+  const ids=['BH','CH','SL','ST','Tb','Te'];
+  ids.forEach((id,i)=>{
+    const el=document.getElementById(id); if(!el) return;
+    el.addEventListener('keydown',e=>{
+      if(e.key==='Enter'){
+        e.preventDefault();
+        const next=document.getElementById(ids[i+1]);
+        if(next){ next.focus(); next.select?.(); }
+        else { document.getElementById('calcBtn')?.click(); }
+      }
+    });
+  });
+  // Keep bottom sheets above the on-screen keyboard on modern mobile browsers.
+  if(window.visualViewport){
+    const sync=()=>document.documentElement.style.setProperty('--vvh',window.visualViewport.height+'px');
+    window.visualViewport.addEventListener('resize',sync,{passive:true});
+    sync();
+  }
+})();
+</script>
 <script>
 // Mobile keyboard polish for iOS Safari and Android Chrome.
 (function(){
@@ -2118,6 +2211,4 @@ document.addEventListener('DOMContentLoaded',()=>{
   }
 })();
 </script>
-
 </body></html>
-
