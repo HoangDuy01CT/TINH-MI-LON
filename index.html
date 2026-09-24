@@ -99,39 +99,62 @@ input::placeholder{color:#c7c7cc}
 .calc{grid-column:1/-1;background:linear-gradient(135deg,var(--blue),var(--blue2));color:white;box-shadow:0 9px 20px color-mix(in srgb,var(--blue) 25%,transparent)}
 .reset{background:var(--card);color:var(--red);box-shadow:var(--shadow)}
 .clear-result{background:var(--card);color:var(--text);box-shadow:var(--shadow)}
-.results{display:grid;grid-template-columns:1fr;gap:10px;margin-top:4px}
-/* ===== BƯỚC 8 — GAUGE TỶ LỆ % ===== */
-.percent-card{position:relative;grid-column:1/-1;min-height:146px;padding:17px 18px;overflow:hidden;background:linear-gradient(135deg,var(--card),color-mix(in srgb,var(--blue) 4%,var(--card)))}
-.percent-card .name{padding-right:6px;font-size:14px}
-.percent-gauge-wrap{display:flex;align-items:center;gap:20px;margin-top:12px;min-width:0}
-.percent-gauge{--gauge:0;--gauge-color:var(--green);width:86px;height:86px;border-radius:50%;background:conic-gradient(var(--gauge-color) calc(var(--gauge)*1%), var(--line) 0);display:grid;place-items:center;flex:0 0 auto;box-shadow:inset 0 0 0 1px color-mix(in srgb,var(--line) 70%,transparent),0 5px 14px color-mix(in srgb,var(--gauge-color) 12%,transparent)}
-.percent-gauge::before{content:"";width:64px;height:64px;border-radius:50%;background:var(--card);box-shadow:inset 0 0 0 1px var(--line)}
-.percent-gauge-value{position:absolute;font-size:16px;font-weight:900;letter-spacing:-.4px}
-.percent-gauge-copy{min-width:0;display:flex;flex-direction:column;gap:3px;justify-content:center}
-.percent-gauge-copy .g-label{font-size:11px;color:var(--muted);font-weight:750}
-.percent-gauge-copy .g-value{font-size:30px;font-weight:900;letter-spacing:-1px;line-height:1;white-space:nowrap;display:block}
-.percent-gauge-copy .g-note{font-size:10px;color:var(--muted);line-height:1.3}
-.percent-card .result-right{display:none}
-@media(max-width:380px){.percent-card{min-height:132px;padding:14px 15px}.percent-gauge{width:76px;height:76px}.percent-gauge::before{width:56px;height:56px}.percent-gauge-value{font-size:14px}.percent-gauge-wrap{gap:14px}.percent-gauge-copy .g-value{font-size:26px;white-space:nowrap}.result-card{padding:15px;min-height:112px}.result-card:first-child{min-height:112px}.result-right{margin-top:13px}}
-
+.results{display:grid;grid-template-columns:1fr;gap:12px;margin-top:4px}
+/* ===== RESULT CARDS — ĐỒNG BỘ TOÀN BỘ ===== */
 .result-card{
-  background:var(--card);border-radius:var(--radius);padding:17px 18px;box-shadow:var(--shadow);
-  min-height:122px;display:flex;flex-direction:column;justify-content:flex-start
+  grid-column:1/-1;width:100%;box-sizing:border-box;
+  background:var(--card);border-radius:var(--radius);padding:18px 20px;box-shadow:var(--shadow);
+  min-height:150px;display:flex;flex-direction:column;justify-content:space-between;overflow:hidden
 }
-.result-card:first-child{
-  grid-column:1/-1;min-height:122px;padding:17px 18px;
-  background:linear-gradient(135deg,var(--card),color-mix(in srgb,var(--blue) 8%,var(--card)))
-}
-.result-card:last-child{grid-column:1/-1;min-height:112px}
-.result-card .name{font-size:13px;font-weight:800;line-height:1.25}
-.result-card small{display:block;color:var(--muted);font-size:10px;line-height:1.35;margin-top:4px}
-.result-right{display:flex;flex-direction:column;align-items:flex-start;gap:4px;margin-top:16px}
-.value{font-size:29px;font-weight:850;letter-spacing:-1px;line-height:1.05;white-space:nowrap}
-.result-card:first-child .value{font-size:38px;margin-top:1px}
+.result-card .name{font-size:15px;font-weight:850;line-height:1.25}
+.result-card small{display:block;color:var(--muted);font-size:11px;line-height:1.35;margin-top:5px}
+.result-right{display:flex;flex-direction:column;align-items:flex-start;gap:4px;margin-top:10px}
+.value{font-size:32px;font-weight:900;letter-spacing:-1.1px;line-height:1.05;white-space:nowrap}
+.result-card:first-of-type:not(.percent-card):not(.gap-card){min-height:158px;padding:19px 20px;background:linear-gradient(135deg,var(--card),color-mix(in srgb,var(--blue) 7%,var(--card)))}
+.result-card:first-of-type:not(.percent-card):not(.gap-card) .value{font-size:42px}
 .blue{color:var(--blue)}.green{color:var(--green)}.orange{color:var(--orange)}.red{color:var(--red)}
-.badge{font-size:10px;font-weight:800;padding:3px 8px;border-radius:999px;white-space:nowrap}
+.badge{font-size:10px;font-weight:800;padding:4px 9px;border-radius:999px;white-space:nowrap}
 .badge.ok{background:var(--badge-ok-bg);color:var(--green)}
 .badge.bad{background:var(--badge-bad-bg);color:var(--red)}
+/* Percentage cards: full-width, same card language, gauge + value */
+.percent-card{position:relative;min-height:178px;padding:18px 20px;overflow:hidden;background:linear-gradient(135deg,var(--card),color-mix(in srgb,var(--blue) 4%,var(--card)))}
+.percent-card .name{padding-right:6px;font-size:15px}
+.percent-gauge-wrap{display:flex;align-items:center;gap:22px;margin-top:12px;min-width:0}
+.percent-gauge{--gauge:0;--gauge-color:var(--green);width:104px;height:104px;border-radius:50%;background:conic-gradient(var(--gauge-color) calc(var(--gauge)*1%), var(--line) 0);display:grid;place-items:center;flex:0 0 auto;position:relative;box-shadow:inset 0 0 0 1px color-mix(in srgb,var(--line) 70%,transparent),0 6px 18px color-mix(in srgb,var(--gauge-color) 12%,transparent)}
+.percent-gauge::before{content:"";width:78px;height:78px;border-radius:50%;background:var(--card);box-shadow:inset 0 0 0 1px var(--line)}
+.percent-gauge-value{position:absolute;font-size:19px;font-weight:900;letter-spacing:-.5px;z-index:1}
+.percent-gauge-copy{min-width:0;display:flex;flex-direction:column;gap:5px;justify-content:center}
+.percent-gauge-copy .g-label{font-size:12px;color:var(--muted);font-weight:800}
+.percent-gauge-copy .g-value{font-size:36px;font-weight:950;letter-spacing:-1.4px;line-height:1;white-space:nowrap;display:block}
+.percent-gauge-copy .g-note{font-size:11px;color:var(--muted);line-height:1.3}
+.percent-card .result-right{display:none}
+/* Gap card */
+.gap-card{min-height:158px !important;padding:18px 20px !important}
+.gap-layout{display:grid;grid-template-columns:minmax(0,1.05fr) minmax(190px,.95fr);gap:22px;align-items:center;margin-top:12px}
+.gap-value-wrap{min-width:0;display:flex;flex-direction:column;justify-content:center}
+.gap-value-wrap .value{font-size:38px}
+.gap-spec{border-left:1px solid var(--line);padding-left:20px;min-width:0;display:flex;flex-direction:column;gap:5px}
+.gap-spec-title{font-size:10px;color:var(--muted);font-weight:850;text-transform:uppercase;letter-spacing:.7px}
+.gap-spec-value{font-size:16px;font-weight:850;color:var(--text);white-space:nowrap}
+.gap-spec-note{font-size:10px;color:var(--muted);line-height:1.35}
+.gap-status{margin-top:3px}
+/* Make the overlap result visually match the same wide-card language */
+.result-card.overlap-card{min-height:158px}
+.overlap-layout{display:grid;grid-template-columns:minmax(0,1.05fr) minmax(190px,.95fr);gap:22px;align-items:center;margin-top:12px}
+.overlap-value-wrap{min-width:0;display:flex;flex-direction:column;justify-content:center}
+.overlap-value-wrap .value{font-size:42px}
+.overlap-spec{border-left:1px solid var(--line);padding-left:20px;min-width:0;display:flex;flex-direction:column;gap:5px}
+.overlap-spec-title{font-size:10px;color:var(--muted);font-weight:850;text-transform:uppercase;letter-spacing:.7px}
+.overlap-spec-value{font-size:16px;font-weight:850;color:var(--text);white-space:nowrap}
+.overlap-spec-note{font-size:10px;color:var(--muted);line-height:1.35}
+@media(max-width:380px){
+  .results{gap:10px}
+  .result-card,.percent-card,.gap-card,.result-card.overlap-card{min-height:148px;padding:16px !important}
+  .percent-gauge{width:86px;height:86px}.percent-gauge::before{width:64px;height:64px}.percent-gauge-value{font-size:16px}.percent-gauge-wrap{gap:15px}
+  .percent-gauge-copy .g-value{font-size:30px;white-space:nowrap}
+  .gap-layout,.overlap-layout{grid-template-columns:minmax(0,1fr) minmax(145px,.9fr);gap:13px}
+  .gap-spec,.overlap-spec{padding-left:13px}.gap-value-wrap .value{font-size:32px}.overlap-value-wrap .value{font-size:36px}.gap-spec-value,.overlap-spec-value{font-size:13px}
+}
 .formula-note{margin:13px 5px 0;color:var(--muted);font-size:11px;line-height:1.45}
 .quality-card{
   grid-column:1/-1; border-radius:var(--radius); padding:16px 18px; min-height:112px;
@@ -412,6 +435,96 @@ input::placeholder{color:#c7c7cc}
 .add-can-note{width:100%;min-height:72px;resize:vertical;border:1px solid var(--line);border-radius:14px;padding:10px 12px;font:inherit;font-size:13px;background:var(--bg);color:var(--text);box-sizing:border-box}
 .can-feature-note{margin:0 0 10px;padding:10px 12px;border-radius:14px;background:var(--soft);font-size:11px;color:var(--muted);line-height:1.45}
 #printReport{display:none;}
+
+/* ===== CROSS-PLATFORM MOBILE OPTIMIZATION: iOS + Android ===== */
+html{
+  -webkit-text-size-adjust:100%;
+  text-size-adjust:100%;
+  width:100%;
+  min-height:100%;
+  background:var(--bg);
+}
+body{
+  width:100%;
+  min-height:100dvh;
+  padding-left:max(0px, env(safe-area-inset-left));
+  padding-right:max(0px, env(safe-area-inset-right));
+  -webkit-font-smoothing:antialiased;
+  text-rendering:optimizeLegibility;
+}
+button,input,select,textarea{-webkit-appearance:none;appearance:none;-webkit-user-select:text;user-select:text}
+button,.btn,.main-btn,.sub-btn,.icon-btn,.lock-btn{ -webkit-user-select:none; user-select:none; }
+input,select,button{font-size:16px}
+input[type=number]{-moz-appearance:textfield}
+input[type=number]::-webkit-inner-spin-button,input[type=number]::-webkit-outer-spin-button{-webkit-appearance:none;margin:0}
+.container{padding-left:max(14px,env(safe-area-inset-left));padding-right:max(14px,env(safe-area-inset-right));padding-bottom:max(28px,env(safe-area-inset-bottom))}
+.topbar{padding-top:6px;padding-left:max(0px,env(safe-area-inset-left));padding-right:max(0px,env(safe-area-inset-right))}
+.icon-btn{min-width:44px;min-height:44px;display:grid;place-items:center}
+.btn,.main-btn,.sub-btn{touch-action:manipulation;-webkit-touch-callout:none}
+.field input{min-height:40px;caret-color:var(--blue)}
+.actions .btn{min-height:52px}
+.sheet{max-height:calc(100dvh - env(safe-area-inset-top));}
+.sheet-body{padding-bottom:max(18px,env(safe-area-inset-bottom))}
+.pin-sheet{max-height:calc(100dvh - env(safe-area-inset-top));overflow:auto}
+@media (max-width:520px){
+  .container{max-width:100%;}
+  .menu{grid-template-columns:1fr 1fr;gap:10px}
+  .main-btn{min-height:96px;padding:14px;font-size:16px}
+  .form-card{border-radius:20px}
+  .field{min-height:100px;padding:12px 13px}
+  .results{gap:11px}
+  .result-card,.percent-card,.gap-card,.result-card.overlap-card{border-radius:20px}
+}
+@media (min-width:521px) and (max-width:900px){
+  .container{max-width:620px;padding-left:20px;padding-right:20px}
+  .result-card,.percent-card,.gap-card,.result-card.overlap-card{padding-left:22px!important;padding-right:22px!important}
+}
+@media (max-width:430px){
+  h1{font-size:29px}
+  .calc-title h2{font-size:21px}
+  .form-card{gap:1px}
+  .field label{font-size:12.5px}
+  .field label span{font-size:9.5px}
+  input{font-size:24px}
+  .result-card,.percent-card,.gap-card,.result-card.overlap-card{padding:17px 17px!important}
+  .percent-gauge-wrap{gap:18px}
+  .percent-gauge{width:96px;height:96px}
+  .percent-gauge::before{width:72px;height:72px}
+  .percent-gauge-copy .g-value{font-size:34px}
+  .gap-layout,.overlap-layout{gap:18px}
+  .gap-spec,.overlap-spec{padding-left:16px}
+}
+@media (max-width:380px){
+  .container{padding-left:12px;padding-right:12px}
+  .menu{gap:8px}
+  .main-btn{min-height:90px;padding:12px;font-size:15px}
+  .main-btn::before{font-size:24px;margin-bottom:7px}
+  .field{min-height:94px;padding:11px 12px}
+  input{font-size:22px}
+  .actions{gap:8px}
+  .result-card,.percent-card,.gap-card,.result-card.overlap-card{padding:15px!important;border-radius:18px}
+  .percent-gauge-wrap{gap:13px}
+  .percent-gauge{width:84px;height:84px}
+  .percent-gauge::before{width:62px;height:62px}
+  .percent-gauge-value{font-size:15px}
+  .percent-gauge-copy .g-value{font-size:29px}
+  .gap-layout,.overlap-layout{grid-template-columns:minmax(0,1fr) minmax(135px,.9fr);gap:11px}
+  .gap-value-wrap .value{font-size:31px}
+  .overlap-value-wrap .value{font-size:34px}
+  .gap-spec,.overlap-spec{padding-left:11px}
+  .gap-spec-value,.overlap-spec-value{font-size:13px}
+}
+@media (orientation:landscape) and (max-height:600px){
+  .container{max-width:900px;padding-top:8px}
+  .topbar{position:relative;margin-bottom:8px}
+  .form-card{grid-template-columns:repeat(3,1fr)}
+  .field{min-height:90px}
+  .results{grid-template-columns:1fr 1fr}
+  .result-card,.percent-card,.gap-card,.result-card.overlap-card{grid-column:auto;min-height:150px}
+  .gap-card{grid-column:1/-1}
+}
+@media (prefers-reduced-motion:reduce){*,*::before,*::after{scroll-behavior:auto!important;transition:none!important;animation:none!important}}
+
 </style>
 </head>
 <body>
@@ -451,16 +564,16 @@ input::placeholder{color:#c7c7cc}
 
 <div class="section-title">Thông số mí ghép</div>
 <div class="form-card">
-<div class="field"><label for="BH">Móc thân <span>BH · Body Hook</span></label><input id="BH" inputmode="decimal" type="number" step="0.01" min="0" placeholder="0.00"></div>
-<div class="field"><label for="CH">Móc nắp <span>CH / EH · Cover Hook</span></label><input id="CH" inputmode="decimal" type="number" step="0.01" min="0" placeholder="0.00"></div>
-<div class="field"><label for="SL">Chiều dài mí ghép(Rộng mí) <span>SL · Seam Length</span></label><input id="SL" inputmode="decimal" type="number" step="0.01" min="0" placeholder="0.00"></div>
-<div class="field"><label for="ST">Độ dày mí ghép <span>ST · Seam Thickness</span></label><input id="ST" inputmode="decimal" type="number" step="0.001" min="0" placeholder="0.000"></div>
+<div class="field"><label for="BH">Móc thân <span>BH · Body Hook</span></label><input id="BH" inputmode="decimal" enterkeyhint="next" type="number" step="0.01" min="0" placeholder="0.00"></div>
+<div class="field"><label for="CH">Móc nắp <span>CH / EH · Cover Hook</span></label><input id="CH" inputmode="decimal" enterkeyhint="next" type="number" step="0.01" min="0" placeholder="0.00"></div>
+<div class="field"><label for="SL">Chiều dài mí ghép(Rộng mí) <span>SL · Seam Length</span></label><input id="SL" inputmode="decimal" enterkeyhint="next" type="number" step="0.01" min="0" placeholder="0.00"></div>
+<div class="field"><label for="ST">Độ dày mí ghép <span>ST · Seam Thickness</span></label><input id="ST" inputmode="decimal" enterkeyhint="next" type="number" step="0.001" min="0" placeholder="0.000"></div>
 </div>
 
 <div class="section-title">Độ dày vật liệu</div>
 <div class="form-card">
-<div class="field"><label for="Tb">Độ dày thân lon <span>Tb</span></label><input id="Tb" inputmode="decimal" type="number" step="0.001" min="0" placeholder="0.000"></div>
-<div class="field"><label for="Te">Độ dày nắp lon <span>Te</span></label><input id="Te" inputmode="decimal" type="number" step="0.001" min="0" placeholder="0.000"></div>
+<div class="field"><label for="Tb">Độ dày thân lon <span>Tb</span></label><input id="Tb" inputmode="decimal" enterkeyhint="next" type="number" step="0.001" min="0" placeholder="0.000"></div>
+<div class="field"><label for="Te">Độ dày nắp lon <span>Te</span></label><input id="Te" inputmode="decimal" enterkeyhint="done" type="number" step="0.001" min="0" placeholder="0.000"></div>
 </div>
 <div class="hint">Nhập đủ 6 thông số để tính các chỉ số bên dưới.</div>
 
@@ -480,7 +593,18 @@ input::placeholder{color:#c7c7cc}
       <div id="qualityDetail" class="quality-detail">Thiết lập ngưỡng trong Cài đặt để đánh giá Đạt / Không đạt.</div>
     </div>
   </div>
-  <div class="result-card"><div><div class="name">Độ chồng mí</div><small>Overlap = BH + CH + Te − SL</small></div><div class="result-right"><div id="overlap" class="value blue">-- mm</div><div id="overlapValueBadge"></div></div></div>
+  <div class="result-card overlap-card">
+    <div><div class="name">Độ chồng mí</div><small>Overlap = BH + CH + Te − SL</small></div>
+    <div class="overlap-layout">
+      <div class="overlap-value-wrap"><div id="overlap" class="value blue">-- mm</div><div id="overlapValueBadge"></div></div>
+      <div class="overlap-spec">
+        <div class="overlap-spec-title">Tiêu chuẩn</div>
+        <div id="overlapStandard" class="overlap-spec-value">Chưa thiết lập</div>
+        <div id="overlapDetail" class="overlap-spec-note">Thiết lập ngưỡng Độ chồng mí trong Cài đặt.</div>
+        <div id="overlapStatus" class="gap-status"></div>
+      </div>
+    </div>
+  </div>
   <div class="result-card percent-card">
     <div><div class="name">Phần trăm độ chồng mí</div><small>% Overlap</small></div>
     <div class="percent-gauge-wrap">
@@ -495,7 +619,18 @@ input::placeholder{color:#c7c7cc}
       <div class="percent-gauge-copy"><span class="g-label">Móc thân</span><span id="bodyHookPct" class="g-value blue">--%</span><span id="bodyHookGaugeNote" class="g-note">Chưa có dữ liệu</span><span id="bodyHookBadge"></span></div>
     </div>
   </div>
-  <div class="result-card"><div><div class="name">Khoảng trống bên trong mí ghép</div><small>Free Space / Gap</small></div><div class="result-right"><div id="gap" class="value orange">-- mm</div><div id="gapBadge"></div></div></div>
+  <div class="result-card gap-card">
+    <div><div class="name">Khoảng trống bên trong mí ghép</div><small>Free Space / Gap</small></div>
+    <div class="gap-layout">
+      <div class="gap-value-wrap"><div id="gap" class="value orange">-- mm</div><div id="gapBadge" class="gap-status"></div></div>
+      <div class="gap-spec">
+        <div class="gap-spec-title">Tiêu chuẩn</div>
+        <div id="gapStandard" class="gap-spec-value">Chưa thiết lập</div>
+        <div id="gapDetail" class="gap-spec-note">Thiết lập ngưỡng Khoảng trống trong Cài đặt.</div>
+        <div id="gapStatus" class="gap-status"></div>
+      </div>
+    </div>
+  </div>
 </div>
 <div id="message" class="formula-note">Kết quả được tính riêng và lưu trên thiết bị cho từng loại lon.</div></div>
 
@@ -722,6 +857,8 @@ function setResults(data={}){
   document.getElementById('overlapPct').textContent=data.overlapPct??'--%';
   document.getElementById('bodyHookPct').textContent=data.bodyHookPct??'--%';
   document.getElementById('gap').textContent=data.gap??'-- mm';
+  renderGapStandard(data.gapNum);
+  renderOverlapStandard(data.overlapNum);
   document.getElementById('message').textContent=data.message??'Kết quả được tính riêng và lưu trên thiết bị cho từng loại lon.';
 
   const inputValues={BH:data.BH,CH:data.CH,SL:data.SL,ST:data.ST,Tb:data.Tb,Te:data.Te};
@@ -833,6 +970,53 @@ function renderRangeBadge(elId,valueNum,min,max){
   if((!hasThreshold(min)&&!hasThreshold(max))||!Number.isFinite(valueNum)){el.innerHTML='';return}
   const ok=(!hasThreshold(min)||valueNum>=min)&&(!hasThreshold(max)||valueNum<=max);
   el.innerHTML='<span class="badge '+(ok?'ok':'bad')+'">'+(ok?'Đạt':'Không đạt')+'</span>';
+}
+function renderOverlapStandard(valueNum){
+  const standard=document.getElementById('overlapStandard');
+  const detail=document.getElementById('overlapDetail');
+  const status=document.getElementById('overlapStatus');
+  if(!standard||!detail||!status)return;
+  const min=thresholdFor('overlapMin'), max=thresholdFor('overlapMax');
+  status.innerHTML='';
+  if(!hasThreshold(min)&&!hasThreshold(max)){
+    standard.textContent='Chưa thiết lập';
+    detail.textContent='Thiết lập ngưỡng Độ chồng mí trong Cài đặt.';
+    return;
+  }
+  if(hasThreshold(min)&&hasThreshold(max)) standard.textContent=fmt(min,'mm',3).trim()+' – '+fmt(max,'mm',3).trim();
+  else if(hasThreshold(min)) standard.textContent='≥ '+fmt(min,'mm',3).trim();
+  else standard.textContent='≤ '+fmt(max,'mm',3).trim();
+  if(!Number.isFinite(valueNum)){
+    detail.textContent='Chưa có kết quả để đánh giá.';
+    return;
+  }
+  const ok=(!hasThreshold(min)||valueNum>=min)&&(!hasThreshold(max)||valueNum<=max);
+  detail.textContent=ok?'Giá trị hiện tại nằm trong giới hạn.':'Giá trị hiện tại nằm ngoài giới hạn.';
+  status.innerHTML='<span class="badge '+(ok?'ok':'bad')+'">'+(ok?'✓ ĐẠT':'✕ KHÔNG ĐẠT')+'</span>';
+}
+
+function renderGapStandard(valueNum){
+  const standard=document.getElementById('gapStandard');
+  const detail=document.getElementById('gapDetail');
+  const status=document.getElementById('gapStatus');
+  const badge=document.getElementById('gapBadge');
+  if(!standard||!detail||!status)return;
+  const max=thresholdFor('gapMax');
+  status.innerHTML='';
+  if(!hasThreshold(max)){
+    standard.textContent='Chưa thiết lập';
+    detail.textContent='Thiết lập ngưỡng Khoảng trống trong Cài đặt.';
+    return;
+  }
+  standard.textContent='≤ '+fmt(max,'mm',3).trim();
+  if(!Number.isFinite(valueNum)){
+    detail.textContent='Chưa có kết quả để đánh giá.';
+    return;
+  }
+  const ok=valueNum<=max;
+  detail.textContent=ok?'Giá trị hiện tại nằm trong giới hạn.':'Giá trị hiện tại vượt giới hạn '+fmt(max,'mm',3).trim()+'.';
+  status.innerHTML='<span class="badge '+(ok?'ok':'bad')+'">'+(ok?'✓ ĐẠT':'✕ KHÔNG ĐẠT')+'</span>';
+  if(badge && !badge.innerHTML)badge.innerHTML=status.innerHTML;
 }
 function evaluateQuality(data){
   const checks=[];
@@ -1810,5 +1994,30 @@ document.addEventListener('DOMContentLoaded',()=>{
 });
 
 </script>
+
+<script>
+// Mobile keyboard polish for iOS Safari and Android Chrome.
+(function(){
+  const ids=['BH','CH','SL','ST','Tb','Te'];
+  ids.forEach((id,i)=>{
+    const el=document.getElementById(id); if(!el) return;
+    el.addEventListener('keydown',e=>{
+      if(e.key==='Enter'){
+        e.preventDefault();
+        const next=document.getElementById(ids[i+1]);
+        if(next){ next.focus(); next.select?.(); }
+        else { document.getElementById('calcBtn')?.click(); }
+      }
+    });
+  });
+  // Keep bottom sheets above the on-screen keyboard on modern mobile browsers.
+  if(window.visualViewport){
+    const sync=()=>document.documentElement.style.setProperty('--vvh',window.visualViewport.height+'px');
+    window.visualViewport.addEventListener('resize',sync,{passive:true});
+    sync();
+  }
+})();
+</script>
+
 </body></html>
 

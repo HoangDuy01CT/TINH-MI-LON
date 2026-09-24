@@ -1,8 +1,8 @@
-const CACHE_NAME='tinh-mi-lon-ios-v29';
+const CACHE_NAME='tinh-mi-lon-mobile-v32';
 const CORE_ASSETS = [
   './',
   './index.html',
-  './manifest.webmanifest?v=8'
+  './manifest.webmanifest?v=9'
 ];
 
 self.addEventListener('install', event => {

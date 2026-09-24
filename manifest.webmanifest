@@ -8,6 +8,7 @@
   "id": "./",
   "display": "standalone",
   "display_override": [
+    "window-controls-overlay",
     "standalone",
     "minimal-ui"
   ],
@@ -43,5 +44,12 @@
       "type": "image/png",
       "purpose": "any"
     }
-  ]
+  ],
+  "prefer_related_applications": false,
+  "launch_handler": {
+    "client_mode": [
+      "navigate-existing",
+      "auto"
+    ]
+  }
 }
