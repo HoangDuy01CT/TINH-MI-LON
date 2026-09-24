@@ -13,7 +13,7 @@
 <meta content="default" name="apple-mobile-web-app-status-bar-style"/>
 <meta content="Mí Lon" name="apple-mobile-web-app-title"/>
 <meta content="telephone=no" name="format-detection"/>
-<link href="manifest.webmanifest?v=10" rel="manifest"/>
+<link href="manifest.webmanifest?v=11" rel="manifest"/>
 <link href="icons/favicon-32-v8.png" rel="icon" sizes="32x32"/>
 <link href="icons/apple-touch-icon-v8.png" rel="apple-touch-icon"/>
 <link href="icons/splash-1290x2796-v8.png" media="(device-width: 430px) and (device-height: 932px) and (-webkit-device-pixel-ratio: 3) and (orientation: portrait)" rel="apple-touch-startup-image"/>
@@ -777,15 +777,6 @@ input[type=number]::-webkit-inner-spin-button,input[type=number]::-webkit-outer-
 <div class="theme-preview" data-theme-choice="neon" onclick="applyTheme('neon')"><div class="tp-bar"></div><div class="tp-card"></div><div class="tp-card"></div><span class="theme-name">Tím điện</span></div>
 </div>
 <div class="set-divider"></div>
-<div class="set-section-title">HÌNH NỀN TỪ ĐIỆN THOẠI</div>
-<label class="theme-picker-label">🖼️ Chọn hình nền <span style="color:var(--blue)">Chọn ảnh ›<input accept="image/*" id="themeImageInput" onchange="handleThemeImage(event)" type="file"/></span></label>
-<div class="theme-image-preview" id="themeImagePreview"><span>Hình nền hiện tại</span></div>
-<div id="themeImageControls" style="display:none;margin-top:12px">
-<div class="set-field"><label>Độ rõ hình nền <span id="themeOpacityValue">18%</span></label><input class="theme-range" id="themeOpacity" max="55" min="0" oninput="setThemeOpacity(this.value)" step="1" type="range" value="18"/></div>
-<div class="set-field"><label>Độ phóng to <span id="themeZoomValue">100%</span></label><input class="theme-range" id="themeZoom" max="140" min="80" oninput="setThemeZoom(this.value)" step="1" type="range" value="100"/></div>
-<div class="set-field"><label>Vị trí hình nền</label><select id="themePosition" onchange="setThemePosition(this.value)"><option value="center">Giữa</option><option value="top">Phía trên</option><option value="bottom">Phía dưới</option><option value="left">Bên trái</option><option value="right">Bên phải</option></select></div>
-<div class="theme-actions"><button class="btn clear-result" onclick="removeThemeImage()">Xóa hình nền</button><button class="btn calc" onclick="resetThemeImageView()">Đặt lại ảnh</button></div>
-</div>
 <div class="set-divider"></div>
 <div class="sheet-actions"><button class="btn reset" onclick="resetAppearance()">↺ KHÔI PHỤC GIAO DIỆN MẶC ĐỊNH</button></div>
 </div>
@@ -1497,7 +1488,7 @@ function exportHistoryCsv(){exportFilteredHistoryCsv();}
 
 /* ---------- Appearance settings ---------- */
 function getAppearance(){
-  return {theme:localStorage.getItem('tinhMiLonTheme')||'default',image:localStorage.getItem('tinhMiLonBgImage')||'',opacity:parseInt(localStorage.getItem('tinhMiLonBgOpacity')||'18',10),zoom:parseInt(localStorage.getItem('tinhMiLonBgZoom')||'100',10),position:localStorage.getItem('tinhMiLonBgPosition')||'center',language:localStorage.getItem('tinhMiLonLanguage')||'vi'};
+  return {theme:localStorage.getItem('tinhMiLonTheme')||'default',language:localStorage.getItem('tinhMiLonLanguage')||'vi'};
 }
 function applyTheme(theme){
   const allowed=['default','factory','carbon','pink','orange','neon'];
@@ -1508,19 +1499,8 @@ function applyTheme(theme){
   document.querySelectorAll('[data-theme-choice]').forEach(el=>el.classList.toggle('selected',el.dataset.themeChoice===theme));
 }
 function applyThemeImage(){
-  const a=getAppearance();
-  document.documentElement.style.setProperty('--app-bg-image',a.image?`url("${a.image}")`:'none');
-  document.documentElement.style.setProperty('--app-bg-opacity',a.image?String(a.opacity/100):'0');
-  document.documentElement.style.setProperty('--app-bg-size',a.image?(a.zoom===100?'cover':String(a.zoom)+'% auto'):'cover');
-  document.documentElement.style.setProperty('--app-bg-position',a.position||'center');
-  const preview=document.getElementById('themeImagePreview'),controls=document.getElementById('themeImageControls');
-  if(preview){preview.classList.toggle('show',!!a.image);if(a.image)preview.style.backgroundImage=`url("${a.image}")`;}
-  if(controls)controls.style.display=a.image?'block':'none';
-  const range=document.getElementById('themeOpacity');if(range)range.value=a.opacity;
-  const label=document.getElementById('themeOpacityValue');if(label)label.textContent=a.opacity+'%';
-  const zoom=document.getElementById('themeZoom');if(zoom)zoom.value=a.zoom;
-  const zoomLabel=document.getElementById('themeZoomValue');if(zoomLabel)zoomLabel.textContent=a.zoom+'%';
-  const pos=document.getElementById('themePosition');if(pos)pos.value=a.position||'center';
+  document.documentElement.style.setProperty('--app-bg-image','none');
+  document.documentElement.style.setProperty('--app-bg-opacity','0');
 }
 
 const LANG_TEXT={
@@ -1560,44 +1540,67 @@ const LANG_TEXT={
     '＋ THÊM LOẠI LON':'＋ ADD CAN TYPE','Thêm loại lon':'Add can type','LƯU LOẠI LON':'SAVE CAN TYPE','Xuất báo cáo':'Export report','Xuất dữ liệu đo của loại lon đang chọn.':'Export measurements for the selected can type.',
     'CSV hiện tại':'Current CSV','CSV lịch sử':'History CSV','IN / LƯU PDF':'PRINT / SAVE PDF','Đã lưu trên thiết bị':'Saved on device',
     'Mở khóa Cài đặt':'Unlock Settings','Nhập mã PIN để thay đổi Min–Max và tiêu chuẩn.':'Enter the PIN to change Min–Max and standards.','Hủy':'Cancel','MỞ KHÓA':'UNLOCK',
-    'NGÔN NGỮ / LANGUAGE':'LANGUAGE / NGÔN NGỮ','Tiếng Việt':'Vietnamese'
+    'NGÔN NGỮ / LANGUAGE':'LANGUAGE / NGÔN NGỮ','Tiếng Việt':'Vietnamese','History sheet':'History','History detail sheet':'Measurement details','Settings sheet':'Settings','Lon số 2':'Can No. 2','Lon số 3':'Can No. 3','Số 3 Dẹp':'No. 3 Flat','Số 3 Vừa':'No. 3 Regular','Số 3 Cao':'No. 3 Tall','Lon số 5':'Can No. 5','Lon A10':'Can A10','Overlap = BH + CH + Te − SL':'Overlap = BH + CH + Te − SL','-- mm':'-- mm','--%':'--%','% Overlap':'% Overlap','% Body Hook Width / % BH':'% Body Hook Width / % BH','Free Space / Gap':'Free Space / Gap','BẢO VỆ CÀI ĐẶT':'SETTINGS PROTECTION','BH · Móc thân':'BH · Body Hook','CH / EH · Móc nắp':'CH / EH · Cover Hook','SL · Rộng mí':'SL · Seam Width','ST · Độ dày mí':'ST · Seam Thickness','Tb · Độ dày thân':'Tb · Body Thickness','Te · Độ dày nắp':'Te · End Thickness','Độ chồng mí · Overlap (mm)':'Overlap · Overlap (mm)','% Độ chồng mí tối thiểu':'Minimum Overlap %','% Độ móc thân tối thiểu':'Minimum Body Hook %','Khoảng trống tối đa':'Maximum Free Space','Các ngưỡng được lưu riêng cho từng loại lon. Để trống một ngưỡng nếu bạn không muốn dùng tiêu chí đó. Ứng dụng chỉ kết luận':'Thresholds are stored separately for each can type. Leave a threshold blank if you do not want to use it. The app only marks Pass','khi tất cả tiêu chí đã thiết lập đều đạt.':'when all configured criteria pass.','Thêm loại lon':'Add can type','Tên, ghi chú, dữ liệu đo, lịch sử và tiêu chuẩn được lưu riêng cho từng loại lon.':'Name, notes, measurements, history, and standards are stored separately for each can type.','Xuất báo cáo':'Export report','Xuất dữ liệu đo của loại lon đang chọn.':'Export measurements for the selected can type.','CSV hiện tại':'Current CSV','CSV lịch sử':'History CSV','IN / LƯU PDF':'PRINT / SAVE PDF','Trên iPhone, sau khi chọn IN / LƯU PDF, bạn có thể dùng menu Chia sẻ của hệ thống để lưu hoặc gửi báo cáo.':'On iPhone, after choosing PRINT / SAVE PDF, use the system Share menu to save or send the report.','Đã lưu trên thiết bị':'Saved on device','Mở khóa Cài đặt':'Unlock Settings','Nhập mã PIN để thay đổi Min–Max và tiêu chuẩn.':'Enter the PIN to change Min–Max and standards.','Hủy':'Cancel','MỞ KHÓA':'UNLOCK','English':'English','中文':'Chinese','ไทย':'Thai'
   },
   zh:{
-    'CHỌN LOẠI LON':'选择罐型','⚙️ Quản lý':'⚙️ 管理','🎨 Giao diện':'🎨 界面','Tính mí lon':'罐缝计算','Thông số nhập theo đơn vị mm':'输入单位：mm','Thông số mí ghép':'罐缝参数','Móc thân':'罐身钩','Móc nắp':'罐盖钩','Chiều dài mí ghép(Rộng mí)':'罐缝长度（缝宽）','Độ dày mí ghép':'罐缝厚度','Độ dày vật liệu':'材料厚度','Độ dày thân lon':'罐身材料厚度','Độ dày nắp lon':'罐盖材料厚度','TÍNH KẾT QUẢ':'计算结果','↻ Reset loại lon':'↻ 重置罐型','Xóa ô nhập':'清除输入','Kết quả tính toán':'计算结果','Đánh giá tổng thể':'总体评价','Độ chồng mí':'搭接量','Phần trăm độ chồng mí':'搭接百分比','Phần trăm độ móc thân':'罐身钩百分比','Khoảng trống bên trong mí ghép':'罐缝间隙','Lịch sử đo':'测量历史','Xong':'完成','Đạt':'合格','Theo dõi':'关注','Không đạt':'不合格','Xu hướng kết quả':'结果趋势','Tiêu chuẩn & Cài đặt':'标准与设置','Quản lý loại lon':'罐型管理','Thêm loại lon':'添加罐型','LƯU LOẠI LON':'保存罐型','GIAO DIỆN CÓ SẴN':'预设主题','Mặc định':'默认','Nhà máy':'工厂','Hồng':'粉色','Cam':'橙色','Tím điện':'电光紫','HÌNH NỀN TỪ ĐIỆN THOẠI':'手机背景','🖼️ Chọn hình nền':'🖼️ 选择背景','Chọn ảnh ›':'选择图片 ›','Hình nền hiện tại':'当前背景','Độ phóng to':'缩放','Vị trí hình nền':'背景位置','Giữa':'居中','Phía trên':'顶部','Phía dưới':'底部','Bên trái':'左侧','Bên phải':'右侧','Độ rõ hình nền':'背景显示强度','Xóa hình nền':'删除背景','ÁP DỤNG':'应用','NGÔN NGỮ / LANGUAGE':'语言 / LANGUAGE','Tiếng Việt':'越南语','English':'英语'
+    'CHỌN LOẠI LON':'选择罐型','⚙️ Quản lý':'⚙️ 管理','🎨 Giao diện':'🎨 界面','Tính mí lon':'罐缝计算','Thông số nhập theo đơn vị mm':'输入单位：mm','Thông số mí ghép':'罐缝参数','Móc thân':'罐身钩','Móc nắp':'罐盖钩','Chiều dài mí ghép(Rộng mí)':'罐缝长度（缝宽）','Độ dày mí ghép':'罐缝厚度','Độ dày vật liệu':'材料厚度','Độ dày thân lon':'罐身材料厚度','Độ dày nắp lon':'罐盖材料厚度','TÍNH KẾT QUẢ':'计算结果','↻ Reset loại lon':'↻ 重置罐型','Xóa ô nhập':'清除输入','Kết quả tính toán':'计算结果','Đánh giá tổng thể':'总体评价','Độ chồng mí':'搭接量','Phần trăm độ chồng mí':'搭接百分比','Phần trăm độ móc thân':'罐身钩百分比','Khoảng trống bên trong mí ghép':'罐缝间隙','Lịch sử đo':'测量历史','Xong':'完成','Đạt':'合格','Theo dõi':'关注','Không đạt':'不合格','Xu hướng kết quả':'结果趋势','Tiêu chuẩn & Cài đặt':'标准与设置','Quản lý loại lon':'罐型管理','Thêm loại lon':'添加罐型','LƯU LOẠI LON':'保存罐型','GIAO DIỆN CÓ SẴN':'预设主题','Mặc định':'默认','Nhà máy':'工厂','Hồng':'粉色','Cam':'橙色','Tím điện':'电光紫','HÌNH NỀN TỪ ĐIỆN THOẠI':'手机背景','🖼️ Chọn hình nền':'🖼️ 选择背景','Chọn ảnh ›':'选择图片 ›','Hình nền hiện tại':'当前背景','Độ phóng to':'缩放','Vị trí hình nền':'背景位置','Giữa':'居中','Phía trên':'顶部','Phía dưới':'底部','Bên trái':'左侧','Bên phải':'右侧','Độ rõ hình nền':'背景显示强度','Xóa hình nền':'删除背景','ÁP DỤNG':'应用','NGÔN NGỮ / LANGUAGE':'语言 / LANGUAGE','Tiếng Việt':'越南语','English':'英语','History sheet':'历史','History detail sheet':'测量详情','Settings sheet':'设置','Lon số 2':'2号罐','Lon số 3':'3号罐','Số 3 Dẹp':'3号扁罐','Số 3 Vừa':'3号标准罐','Số 3 Cao':'3号高罐','Lon số 5':'5号罐','Lon A10':'A10罐','Tính Mí Lon':'罐缝计算','Bạn đang ngoại tuyến. Dữ liệu vẫn hoạt động trên thiết bị.':'您当前处于离线状态。数据仍可在本设备上使用。','Có phiên bản mới':'有新版本','Bản cập nhật đã sẵn sàng để sử dụng.':'更新已准备就绪。','CẬP NHẬT':'更新','Thông số nhập theo đơn vị mm':'输入单位：mm','BH · Body Hook':'BH · 罐身钩','CH / EH · Cover Hook':'CH / EH · 罐盖钩','SL · Seam Length':'SL · 罐缝长度','ST · Seam Thickness':'ST · 罐缝厚度','Overlap = BH + CH + Te − SL':'搭接量 = BH + CH + Te − SL','-- mm':'-- 毫米','--%':'--%','% Overlap':'% 搭接量','% Body Hook Width / % BH':'% 罐身钩宽度 / % BH','Free Space / Gap':'内部间隙 / Gap','BẢO VỆ CÀI ĐẶT':'设置保护','BH · Móc thân':'BH · 罐身钩','CH / EH · Móc nắp':'CH / EH · 罐盖钩','SL · Rộng mí':'SL · 缝宽','ST · Độ dày mí':'ST · 缝厚','Tb · Độ dày thân':'Tb · 罐身厚度','Te · Độ dày nắp':'Te · 罐盖厚度','Độ chồng mí · Overlap (mm)':'搭接量 · Overlap (mm)','% Độ chồng mí tối thiểu':'最小搭接百分比','% Độ móc thân tối thiểu':'最小罐身钩百分比','Khoảng trống tối đa':'最大内部间隙','Các ngưỡng được lưu riêng cho từng loại lon. Để trống một ngưỡng nếu bạn không muốn dùng tiêu chí đó. Ứng dụng chỉ kết luận':'阈值按罐型分别保存。无需使用的阈值可留空。应用仅在','khi tất cả tiêu chí đã thiết lập đều đạt.':'所有已设置的标准均通过时判定为合格。','Tên, ghi chú, dữ liệu đo, lịch sử và tiêu chuẩn được lưu riêng cho từng loại lon.':'名称、备注、测量数据、历史记录和标准均按罐型分别保存。','Xuất báo cáo':'导出报告','Xuất dữ liệu đo của loại lon đang chọn.':'导出当前罐型的测量数据。','CSV hiện tại':'当前 CSV','CSV lịch sử':'历史 CSV','IN / LƯU PDF':'打印 / 保存 PDF','Trên iPhone, sau khi chọn IN / LƯU PDF, bạn có thể dùng menu Chia sẻ của hệ thống để lưu hoặc gửi báo cáo.':'在 iPhone 上选择打印/保存 PDF 后，可使用系统分享菜单保存或发送报告。','Đã lưu trên thiết bị':'已保存在设备上','Mở khóa Cài đặt':'解锁设置','Nhập mã PIN để thay đổi Min–Max và tiêu chuẩn.':'输入 PIN 以修改 Min–Max 和标准。','Hủy':'取消','MỞ KHÓA':'解锁','English':'英语','中文':'中文','ไทย':'泰语'
   },
   th:{
-    'CHỌN LOẠI LON':'เลือกประเภทกระป๋อง','⚙️ Quản lý':'⚙️ จัดการ','🎨 Giao diện':'🎨 รูปแบบ','Tính mí lon':'คำนวณตะเข็บกระป๋อง','Thông số nhập theo đơn vị mm':'ป้อนค่าเป็นมม.','Thông số mí ghép':'ค่าตะเข็บกระป๋อง','Móc thân':'ขอเกี่ยวตัวกระป๋อง','Móc nắp':'ขอเกี่ยวฝา','Chiều dài mí ghép(Rộng mí)':'ความยาวตะเข็บ (ความกว้างตะเข็บ)','Độ dày mí ghép':'ความหนาตะเข็บ','Độ dày vật liệu':'ความหนาวัสดุ','Độ dày thân lon':'ความหนาตัวกระป๋อง','Độ dày nắp lon':'ความหนาฝากระป๋อง','TÍNH KẾT QUẢ':'คำนวณผล','↻ Reset loại lon':'↻ รีเซ็ตประเภทกระป๋อง','Xóa ô nhập':'ล้างข้อมูล','Kết quả tính toán':'ผลการคำนวณ','Đánh giá tổng thể':'การประเมินโดยรวม','Độ chồng mí':'ระยะซ้อน','Phần trăm độ chồng mí':'เปอร์เซ็นต์การซ้อน','Phần trăm độ móc thân':'เปอร์เซ็นต์ขอเกี่ยวตัว','Khoảng trống bên trong mí ghép':'ช่องว่างในตะเข็บ','Lịch sử đo':'ประวัติการวัด','Xong':'เสร็จ','Đạt':'ผ่าน','Theo dõi':'ติดตาม','Không đạt':'ไม่ผ่าน','Xu hướng kết quả':'แนวโน้มผลลัพธ์','Tiêu chuẩn & Cài đặt':'มาตรฐานและการตั้งค่า','Quản lý loại lon':'จัดการประเภทกระป๋อง','Thêm loại lon':'เพิ่มประเภทกระป๋อง','LƯU LOẠI LON':'บันทึกประเภทกระป๋อง','GIAO DIỆN CÓ SẴN':'ธีมสำเร็จรูป','Mặc định':'ค่าเริ่มต้น','Nhà máy':'โรงงาน','Hồng':'ชมพู','Cam':'ส้ม','Tím điện':'ม่วงไฟฟ้า','HÌNH NỀN TỪ ĐIỆN THOẠI':'พื้นหลังจากโทรศัพท์','🖼️ Chọn hình nền':'🖼️ เลือกพื้นหลัง','Chọn ảnh ›':'เลือกรูป ›','Hình nền hiện tại':'พื้นหลังปัจจุบัน','Độ phóng to':'ซูม','Vị trí hình nền':'ตำแหน่งพื้นหลัง','Giữa':'ตรงกลาง','Phía trên':'ด้านบน','Phía dưới':'ด้านล่าง','Bên trái':'ด้านซ้าย','Bên phải':'ด้านขวา','Độ rõ hình nền':'ความเข้มของพื้นหลัง','Xóa hình nền':'ลบพื้นหลัง','ÁP DỤNG':'ใช้','NGÔN NGỮ / LANGUAGE':'ภาษา / LANGUAGE','Tiếng Việt':'เวียดนาม','English':'อังกฤษ'
+    'CHỌN LOẠI LON':'เลือกประเภทกระป๋อง','⚙️ Quản lý':'⚙️ จัดการ','🎨 Giao diện':'🎨 รูปแบบ','Tính mí lon':'คำนวณตะเข็บกระป๋อง','Thông số nhập theo đơn vị mm':'ป้อนค่าเป็นมม.','Thông số mí ghép':'ค่าตะเข็บกระป๋อง','Móc thân':'ขอเกี่ยวตัวกระป๋อง','Móc nắp':'ขอเกี่ยวฝา','Chiều dài mí ghép(Rộng mí)':'ความยาวตะเข็บ (ความกว้างตะเข็บ)','Độ dày mí ghép':'ความหนาตะเข็บ','Độ dày vật liệu':'ความหนาวัสดุ','Độ dày thân lon':'ความหนาตัวกระป๋อง','Độ dày nắp lon':'ความหนาฝากระป๋อง','TÍNH KẾT QUẢ':'คำนวณผล','↻ Reset loại lon':'↻ รีเซ็ตประเภทกระป๋อง','Xóa ô nhập':'ล้างข้อมูล','Kết quả tính toán':'ผลการคำนวณ','Đánh giá tổng thể':'การประเมินโดยรวม','Độ chồng mí':'ระยะซ้อน','Phần trăm độ chồng mí':'เปอร์เซ็นต์การซ้อน','Phần trăm độ móc thân':'เปอร์เซ็นต์ขอเกี่ยวตัว','Khoảng trống bên trong mí ghép':'ช่องว่างในตะเข็บ','Lịch sử đo':'ประวัติการวัด','Xong':'เสร็จ','Đạt':'ผ่าน','Theo dõi':'ติดตาม','Không đạt':'ไม่ผ่าน','Xu hướng kết quả':'แนวโน้มผลลัพธ์','Tiêu chuẩn & Cài đặt':'มาตรฐานและการตั้งค่า','Quản lý loại lon':'จัดการประเภทกระป๋อง','Thêm loại lon':'เพิ่มประเภทกระป๋อง','LƯU LOẠI LON':'บันทึกประเภทกระป๋อง','GIAO DIỆN CÓ SẴN':'ธีมสำเร็จรูป','Mặc định':'ค่าเริ่มต้น','Nhà máy':'โรงงาน','Hồng':'ชมพู','Cam':'ส้ม','Tím điện':'ม่วงไฟฟ้า','HÌNH NỀN TỪ ĐIỆN THOẠI':'พื้นหลังจากโทรศัพท์','🖼️ Chọn hình nền':'🖼️ เลือกพื้นหลัง','Chọn ảnh ›':'เลือกรูป ›','Hình nền hiện tại':'พื้นหลังปัจจุบัน','Độ phóng to':'ซูม','Vị trí hình nền':'ตำแหน่งพื้นหลัง','Giữa':'ตรงกลาง','Phía trên':'ด้านบน','Phía dưới':'ด้านล่าง','Bên trái':'ด้านซ้าย','Bên phải':'ด้านขวา','Độ rõ hình nền':'ความเข้มของพื้นหลัง','Xóa hình nền':'ลบพื้นหลัง','ÁP DỤNG':'ใช้','NGÔN NGỮ / LANGUAGE':'ภาษา / LANGUAGE','Tiếng Việt':'เวียดนาม','English':'อังกฤษ','History sheet':'ประวัติ','History detail sheet':'รายละเอียดการวัด','Settings sheet':'การตั้งค่า','Lon số 2':'กระป๋องหมายเลข 2','Lon số 3':'กระป๋องหมายเลข 3','Số 3 Dẹp':'หมายเลข 3 แบบเตี้ย','Số 3 Vừa':'หมายเลข 3 มาตรฐาน','Số 3 Cao':'หมายเลข 3 สูง','Lon số 5':'กระป๋องหมายเลข 5','Lon A10':'กระป๋อง A10','Tính Mí Lon':'คำนวณตะเข็บกระป๋อง','Bạn đang ngoại tuyến. Dữ liệu vẫn hoạt động trên thiết bị.':'คุณออฟไลน์อยู่ ข้อมูลยังใช้งานได้บนอุปกรณ์นี้','Có phiên bản mới':'มีเวอร์ชันใหม่','Bản cập nhật đã sẵn sàng để sử dụng.':'มีการอัปเดตพร้อมใช้งาน','CẬP NHẬT':'อัปเดต','Thông số nhập theo đơn vị mm':'ป้อนค่าเป็นมม.','BH · Body Hook':'BH · ขอเกี่ยวตัวกระป๋อง','CH / EH · Cover Hook':'CH / EH · ขอเกี่ยวฝา','SL · Seam Length':'SL · ความยาวตะเข็บ','ST · Seam Thickness':'ST · ความหนาตะเข็บ','Overlap = BH + CH + Te − SL':'ระยะซ้อน = BH + CH + Te − SL','-- mm':'-- มม.','--%':'--%','% Overlap':'% การซ้อน','% Body Hook Width / % BH':'% ความกว้างขอเกี่ยวตัว / % BH','Free Space / Gap':'ช่องว่างภายใน / Gap','BẢO VỆ CÀI ĐẶT':'การป้องกันการตั้งค่า','BH · Móc thân':'BH · ขอเกี่ยวตัว','CH / EH · Móc nắp':'CH / EH · ขอเกี่ยวฝา','SL · Rộng mí':'SL · ความกว้างตะเข็บ','ST · Độ dày mí':'ST · ความหนาตะเข็บ','Tb · Độ dày thân':'Tb · ความหนาตัวกระป๋อง','Te · Độ dày nắp':'Te · ความหนาฝา','Độ chồng mí · Overlap (mm)':'ระยะซ้อน · Overlap (มม.)','% Độ chồng mí tối thiểu':'เปอร์เซ็นต์การซ้อนขั้นต่ำ','% Độ móc thân tối thiểu':'เปอร์เซ็นต์ขอเกี่ยวตัวขั้นต่ำ','Khoảng trống tối đa':'ช่องว่างสูงสุด','Các ngưỡng được lưu riêng cho từng loại lon. Để trống một ngưỡng nếu bạn không muốn dùng tiêu chí đó. Ứng dụng chỉ kết luận':'เกณฑ์จะบันทึกแยกตามประเภทกระป๋อง เว้นว่างเกณฑ์ที่ไม่ต้องการใช้ แอปจะตัดสินผ่านเมื่อ','khi tất cả tiêu chí đã thiết lập đều đạt.':'เกณฑ์ที่ตั้งไว้ทั้งหมดผ่าน','Tên, ghi chú, dữ liệu đo, lịch sử và tiêu chuẩn được lưu riêng cho từng loại lon.':'ชื่อ หมายเหตุ ข้อมูลการวัด ประวัติ และมาตรฐานจะบันทึกแยกตามประเภทกระป๋อง','Xuất báo cáo':'ส่งออกรายงาน','Xuất dữ liệu đo của loại lon đang chọn.':'ส่งออกข้อมูลการวัดของประเภทกระป๋องที่เลือก','CSV hiện tại':'CSV ปัจจุบัน','CSV lịch sử':'CSV ประวัติ','IN / LƯU PDF':'พิมพ์ / บันทึก PDF','Trên iPhone, sau khi chọn IN / LƯU PDF, bạn có thể dùng menu Chia sẻ của hệ thống để lưu hoặc gửi báo cáo.':'บน iPhone หลังเลือกพิมพ์/บันทึก PDF ให้ใช้เมนูแชร์ของระบบเพื่อบันทึกหรือส่งรายงาน','Đã lưu trên thiết bị':'บันทึกในอุปกรณ์แล้ว','Mở khóa Cài đặt':'ปลดล็อกการตั้งค่า','Nhập mã PIN để thay đổi Min–Max và tiêu chuẩn.':'ป้อน PIN เพื่อแก้ไข Min–Max และมาตรฐาน','Hủy':'ยกเลิก','MỞ KHÓA':'ปลดล็อก','English':'อังกฤษ','中文':'จีน','ไทย':'ไทย'
   }
 
 };
 let languageApplying=false;
 const languageOriginalText=new WeakMap();
 const languageOriginalPlaceholder=new WeakMap();
+function buildLanguageReverse(lang){
+  const rev={};
+  Object.keys(LANG_TEXT).forEach(l=>{const d=LANG_TEXT[l]||{};Object.keys(d).forEach(k=>{rev[k]=k;rev[d[k]]=k;});});
+  return rev;
+}
+function translateNodeText(node,lang,dict,reverse){
+  if(!node||!node.parentElement||['SCRIPT','STYLE','NOSCRIPT'].includes(node.parentElement.tagName))return;
+  const raw=node.nodeValue;
+  const base=languageOriginalText.get(node) || reverse[raw] || raw;
+  if(!languageOriginalText.has(node))languageOriginalText.set(node,base);
+  const out=lang==='vi'?base:(dict[base]||base);
+  if(node.nodeValue!==out)node.nodeValue=out;
+}
 function applyLanguage(lang){
   lang=['en','zh','th'].includes(lang)?lang:'vi';
   localStorage.setItem('tinhMiLonLanguage',lang);
   const dict=LANG_TEXT[lang]||{};
+  const reverse=buildLanguageReverse(lang);
   languageApplying=true;
   document.querySelectorAll('[data-language-choice]').forEach(el=>el.classList.toggle('selected',el.dataset.languageChoice===lang));
   const walker=document.createTreeWalker(document.body,NodeFilter.SHOW_TEXT);
-  const nodes=[];
-  while(walker.nextNode())nodes.push(walker.currentNode);
-  nodes.forEach(node=>{
-    if(!node.parentElement||['SCRIPT','STYLE','NOSCRIPT'].includes(node.parentElement.tagName))return;
-    const raw=node.nodeValue;
-    if(!languageOriginalText.has(node)) languageOriginalText.set(node,raw);
-    const vi=languageOriginalText.get(node);
-    if(lang==='vi') node.nodeValue=vi;
-    else node.nodeValue=dict[vi]||vi;
-  });
+  const nodes=[];while(walker.nextNode())nodes.push(walker.currentNode);
+  nodes.forEach(n=>translateNodeText(n,lang,dict,reverse));
   document.querySelectorAll('input[placeholder],textarea[placeholder]').forEach(el=>{
-    if(!languageOriginalPlaceholder.has(el)) languageOriginalPlaceholder.set(el,el.getAttribute('placeholder')||'');
-    const vi=languageOriginalPlaceholder.get(el);
-    if(!vi)return;
-    el.setAttribute('placeholder',lang==='vi'?vi:(dict[vi]||vi));
+    const current=el.getAttribute('placeholder')||'';
+    const base=languageOriginalPlaceholder.get(el)||reverse[current]||current;
+    if(!languageOriginalPlaceholder.has(el))languageOriginalPlaceholder.set(el,base);
+    el.setAttribute('placeholder',lang==='vi'?base:(dict[base]||base));
   });
   document.documentElement.lang=lang;
   languageApplying=false;
+}
+let languageObserver;
+function initLanguageObserver(){
+  if(languageObserver)languageObserver.disconnect();
+  languageObserver=new MutationObserver(muts=>{
+    if(languageApplying)return;
+    const lang=getAppearance().language,dict=LANG_TEXT[lang]||{},reverse=buildLanguageReverse(lang);
+    muts.forEach(m=>{
+      m.addedNodes&&m.addedNodes.forEach(n=>{
+        if(n.nodeType===Node.TEXT_NODE)translateNodeText(n,lang,dict,reverse);
+        else if(n.nodeType===Node.ELEMENT_NODE){
+          const w=document.createTreeWalker(n,NodeFilter.SHOW_TEXT);const a=[];while(w.nextNode())a.push(w.currentNode);a.forEach(x=>translateNodeText(x,lang,dict,reverse));
+        }
+      });
+    });
+  });
+  languageObserver.observe(document.body,{childList:true,subtree:true});
 }
 function openAppearanceSettings(){applyTheme(getAppearance().theme);applyThemeImage();applyLanguage(getAppearance().language);document.getElementById('appearanceOverlay').classList.add('open')}
 function closeAppearanceSettings(){document.getElementById('appearanceOverlay').classList.remove('open')}
@@ -1622,10 +1625,10 @@ function handleThemeImage(event){
 }
 function removeThemeImage(){localStorage.removeItem('tinhMiLonBgImage');applyThemeImage();showToast('Đã xóa hình nền')}
 function resetAppearance(){
-  localStorage.removeItem('tinhMiLonTheme');localStorage.removeItem('tinhMiLonBgImage');localStorage.removeItem('tinhMiLonBgOpacity');localStorage.removeItem('tinhMiLonBgZoom');localStorage.removeItem('tinhMiLonBgPosition');localStorage.removeItem('tinhMiLonLanguage');
+  localStorage.removeItem('tinhMiLonTheme');localStorage.removeItem('tinhMiLonLanguage');
   applyTheme('default');applyThemeImage();applyLanguage('vi');showToast('Đã khôi phục giao diện mặc định');
 }
-function initAppearance(){applyTheme(getAppearance().theme);applyThemeImage();applyLanguage(getAppearance().language)}
+function initAppearance(){applyTheme(getAppearance().theme);applyThemeImage();applyLanguage(getAppearance().language);initLanguageObserver()}
 
 /* ---------- Settings sheet ---------- */
 function settingsLockHash(pin){
