@@ -121,17 +121,17 @@ function inputLimitText(id, value){
   if(hasThreshold(max))el.setAttribute('max',max);
   if(!hasThreshold(min)&&!hasThreshold(max)){
     badge.className='input-range-status none';
-    badge.textContent='Chưa thiết lập Min–Max';
+    badge.textContent=tr('Chưa thiết lập Min–Max');
     return;
   }
   if(!Number.isFinite(value)){
     badge.className='input-range-status none';
-    badge.textContent='Nhập giá trị để kiểm tra';
+    badge.textContent=tr('Nhập giá trị để kiểm tra');
     return;
   }
   const ok=(!hasThreshold(min)||value>=min)&&(!hasThreshold(max)||value<=max);
   badge.className='input-range-status '+(ok?'pass':'fail');
-  badge.textContent=ok?'✓ Trong giới hạn':('✕ Ngoài giới hạn'+
+  badge.textContent=ok?tr('✓ Trong giới hạn'):(tr('✕ Ngoài giới hạn')+
     (hasThreshold(min)&&hasThreshold(max)?' · '+min+'–'+max:
      hasThreshold(min)?' · ≥ '+min:' · ≤ '+max));
   field.classList.add(ok?'range-pass':'range-fail');
@@ -172,19 +172,19 @@ function renderOverlapStandard(valueNum){
   const min=thresholdFor('overlapMin'), max=thresholdFor('overlapMax');
   status.innerHTML='';
   if(!hasThreshold(min)&&!hasThreshold(max)){
-    standard.textContent='Chưa thiết lập';
-    detail.textContent='Thiết lập ngưỡng Độ chồng mí trong Cài đặt.';
+    standard.textContent=tr('Chưa thiết lập');
+    detail.textContent=tr('Thiết lập ngưỡng Độ chồng mí trong Cài đặt.');
     return;
   }
   if(hasThreshold(min)&&hasThreshold(max)) standard.textContent=fmt(min,'mm',3).trim()+' – '+fmt(max,'mm',3).trim();
   else if(hasThreshold(min)) standard.textContent='≥ '+fmt(min,'mm',3).trim();
   else standard.textContent='≤ '+fmt(max,'mm',3).trim();
   if(!Number.isFinite(valueNum)){
-    detail.textContent='Chưa có kết quả để đánh giá.';
+    detail.textContent=tr('Chưa có kết quả để đánh giá.');
     return;
   }
   const ok=(!hasThreshold(min)||valueNum>=min)&&(!hasThreshold(max)||valueNum<=max);
-  detail.textContent=ok?'Giá trị hiện tại nằm trong giới hạn.':'Giá trị hiện tại nằm ngoài giới hạn.';
+  detail.textContent=ok?tr('Giá trị hiện tại nằm trong giới hạn.'):tr('Giá trị hiện tại nằm ngoài giới hạn.');
   status.innerHTML='<span class="badge '+(ok?'ok':'bad')+'">'+(ok?'✓ ĐẠT':'✕ KHÔNG ĐẠT')+'</span>';
 }
 
@@ -197,17 +197,17 @@ function renderGapStandard(valueNum){
   const max=thresholdFor('gapMax');
   status.innerHTML='';
   if(!hasThreshold(max)){
-    standard.textContent='Chưa thiết lập';
-    detail.textContent='Thiết lập ngưỡng Khoảng trống trong Cài đặt.';
+    standard.textContent=tr('Chưa thiết lập');
+    detail.textContent=tr('Thiết lập ngưỡng Khoảng trống trong Cài đặt.');
     return;
   }
   standard.textContent='≤ '+fmt(max,'mm',3).trim();
   if(!Number.isFinite(valueNum)){
-    detail.textContent='Chưa có kết quả để đánh giá.';
+    detail.textContent=tr('Chưa có kết quả để đánh giá.');
     return;
   }
   const ok=valueNum<=max;
-  detail.textContent=ok?'Giá trị hiện tại nằm trong giới hạn.':'Giá trị hiện tại vượt giới hạn '+fmt(max,'mm',3).trim()+'.';
+  detail.textContent=ok?tr('Giá trị hiện tại nằm trong giới hạn.'):(tr('Giá trị hiện tại vượt giới hạn ')+fmt(max,'mm',3).trim()+'.');
   status.innerHTML='<span class="badge '+(ok?'ok':'bad')+'">'+(ok?'✓ ĐẠT':'✕ KHÔNG ĐẠT')+'</span>';
   if(badge && !badge.innerHTML)badge.innerHTML=status.innerHTML;
 }
@@ -265,8 +265,8 @@ function renderQuality(q){
   if(!card)return;
   card.className='quality-card '+q.state;
   icon.textContent=q.icon;
-  status.textContent=q.status;
-  detail.textContent=q.detail;
+  status.textContent=tr(q.status);
+  detail.textContent=tr(q.detail);
   status.style.color=q.state==='pass'?'var(--green)':q.state==='fail'?'var(--red)':'var(--orange)';
 }
 
@@ -804,7 +804,38 @@ const LANG_EXTRA={
   th:{
     'Mức tỷ lệ hiện tại':'อัตราส่วนปัจจุบัน','Dưới 0%':'ต่ำกว่า 0%','Trên 100%':'สูงกว่า 100%','Cài đặt ngưỡng':'การตั้งค่าเกณฑ์','Dữ liệu hợp lệ':'ข้อมูลถูกต้อง','Lưu riêng cho':'บันทึกแยกสำหรับ','Theo bộ lọc':'ตามตัวกรอง','Hiển thị ':'แสดง ',' lần đo':' ครั้ง',' lần đo gần nhất · ':' ครั้งล่าสุด · ','Ngày ':'วันที่ ','Đánh giá':'การประเมิน','Quay lại':'ย้อนกลับ','Tối thiểu':'ขั้นต่ำ','Tối đa':'สูงสุด','Thời gian':'เวลา','Loại lon':'ประเภทกระป๋อง','Khoảng trống':'ช่องว่าง','Không có dữ liệu phù hợp để xuất':'ไม่มีข้อมูลที่ตรงตามตัวกรองสำหรับส่งออก','Đã xóa lần đo':'ลบการวัดแล้ว','Đã xóa toàn bộ lịch sử của ':'ลบประวัติทั้งหมดของ ','Chưa có lịch sử để xóa':'ไม่มีประวัติให้ลบ','Chưa có dữ liệu lịch sử.':'ไม่มีข้อมูลประวัติ','Đã tính kết quả cho ':'คำนวณผลสำหรับ ','Đã nạp lại số liệu từ lịch sử':'โหลดข้อมูลจากประวัติแล้ว','Đã reset toàn bộ số liệu của ':'รีเซ็ตข้อมูลทั้งหมดของ ','Dữ liệu không hợp lệ':'ข้อมูลไม่ถูกต้อง','Cần kiểm tra lại số liệu':'โปรดตรวจสอบค่าการวัดอีกครั้ง','Chưa đạt: ':'ยังไม่ผ่าน: ','Chưa có kết quả để đánh giá.':'ยังไม่มีผลลัพธ์สำหรับการประเมิน','Giá trị hiện tại nằm trong giới hạn.':'ค่าปัจจุบันอยู่ในช่วง','Giá trị hiện tại nằm ngoài giới hạn.':'ค่าปัจจุบันอยู่นอกช่วง','Độ chồng mí đang âm. Hãy kiểm tra lại BH, CH, Te và SL.':'ระยะซ้อนเป็นค่าลบ โปรดตรวจสอบ BH, CH, Te และ SL','Khoảng trống mí đang âm: ST nhỏ hơn tổng chiều dày vật liệu theo công thức (2Tb + 3Te).':'ช่องว่างเป็นค่าลบ: ST น้อยกว่าความหนาวัสดุรวม (2Tb + 3Te)','SL phải lớn hơn (2Te + Tb), nếu không không thể tính % Độ chồng mí hợp lệ.':'SL ต้องมากกว่า (2Te + Tb) มิฉะนั้นจะคำนวณเปอร์เซ็นต์การซ้อนที่ถูกต้องไม่ได้','SL phải lớn hơn 1.1 × (2Te + Tb), nếu không không thể tính % Móc thân hợp lệ.':'SL ต้องมากกว่า 1.1 × (2Te + Tb) มิฉะนั้นจะคำนวณเปอร์เซ็นต์ขอเกี่ยวตัวที่ถูกต้องไม่ได้','Không thể tính phần trăm vì mẫu số bằng 0. Hãy kiểm tra SL, Te và Tb.':'ไม่สามารถคำนวณเปอร์เซ็นต์ได้เนื่องจากตัวส่วนเป็นศูนย์ โปรดตรวจสอบ SL, Te และ Tb','% Móc thân nằm ngoài khoảng 0–200%. Hãy kiểm tra số liệu đầu vào.':'เปอร์เซ็นต์ขอเกี่ยวตัวอยู่นอกช่วง 0–200% โปรดตรวจสอบข้อมูล','% Độ chồng mí nằm ngoài khoảng 0–200%. Hãy kiểm tra số liệu đầu vào.':'เปอร์เซ็นต์การซ้อนอยู่นอกช่วง 0–200% โปรดตรวจสอบข้อมูล','Độ dày vật liệu lớn hơn 1 mm. Hãy kiểm traหน่วยและข้อมูลที่ป้อน':'ความหนาวัสดุมากกว่า 1 มม. โปรดตรวจสอบหน่วยและข้อมูล','Có kích thước lớn hơn 10 mm. Hãy kiểm tra đơn vị hoặc dữ liệu nhập.':'มีขนาดมากกว่า 10 มม. โปรดตรวจสอบหน่วยหรือข้อมูล','Không phát hiện bất thường rõ ràng theo các quy tắc kiểm tra của ứng dụng.':'ไม่พบความผิดปกติที่ชัดเจนตามกฎการตรวจสอบของแอป','Hãy tính thêm lần đo để xem xu hướng.':'คำนวณเพิ่มเพื่อดูแนวโน้ม','Cần ít nhất 2 lần đo để hiển thị biểu đồ':'ต้องมีอย่างน้อย 2 การวัดเพื่อแสดงกราฟ','Biểu đồ lịch sử đo':'กราฟประวัติการวัด','Ghi chú cho loại lon này (tùy chọn)':'หมายเหตุสำหรับประเภทกระป๋องนี้ (ไม่บังคับ)','Đổi tên loại lon':'เปลี่ยนชื่อประเภทกระป๋อง','Sửa':'แก้ไข','Nhân bản':'ทำสำเนา','Xóa':'ลบ','Loại lon tự thêm':'ประเภทกระป๋องที่เพิ่มเอง','Loại lon có sẵn':'ประเภทกระป๋องในระบบ',' lần đo đã lưu':' ครั้งที่บันทึกแล้ว','Bạn có muốn xóa lần đo này khỏi lịch sử không?':'ต้องการลบการวัดนี้ออกจากประวัติหรือไม่','Hãy nhập số liệu và tính kết quả trước khi xuất báo cáo.':'โปรดป้อนข้อมูลและคำนวณผลก่อนส่งออกรายงาน','Chưa có kết quả':'ยังไม่มีผลลัพธ์','Báo cáo kiểm tra mí lon':'รายงานตรวจสอบตะเข็บกระป๋อง','Kết quả:':'ผลลัพธ์:','NẠP LẠI SỐ LIỆU':'โหลดข้อมูลอีกครั้ง','XÓA LẦN ĐO':'ลบการวัด','6 thông số đầu vào':'พารามิเตอร์อินพุต 6 ค่า','Kiểm tra Min–Max':'ตรวจสอบ Min–Max','Ngoài giới hạn':'นอกช่วง','Nạp lại số liệu':'โหลดข้อมูลอีกครั้ง','Đã mở khóa Cài đặt':'ปลดล็อกการตั้งค่าแล้ว','Đã đặt mã PIN bảo vệ Cài đặt':'ตั้ง PIN สำหรับการตั้งค่าแล้ว','Đã khóa Cài đặt':'ล็อกการตั้งค่าแล้ว','Đã tắt khóa Cài đặt':'ปิดการล็อกการตั้งค่าแล้ว','Cài đặt đang bị khóa':'การตั้งค่าถูกล็อก','Vui lòng chọn một hình ảnh':'โปรดเลือกรูปภาพ','Ảnh quá lớn, không thể lưu trên thiết bị':'รูปภาพใหญ่เกินไป ไม่สามารถบันทึกในอุปกรณ์ได้','Đã lưu thông số Min–Max và tiêu chuẩn':'บันทึก Min–Max และมาตรฐานแล้ว','Tên loại lon này đã tồn tại':'ชื่อประเภทกระป๋องนี้มีอยู่แล้ว','Hãy nhập tên loại lon':'โปรดป้อนชื่อประเภทกระป๋อง','Đã đổi tên và cập nhật ghi chú':'อัปเดตชื่อและหมายเหตุแล้ว','Đã khôi phục giao diện mặc định':'คืนค่ารูปแบบเริ่มต้นแล้ว','Đã nạp lại số liệu từ lịch sử':'โหลดข้อมูลจากประวัติแล้ว','Kết quả được nạp lại từ lịch sử.':'โหลดผลลัพธ์จากประวัติแล้ว','Chưa thiết lập Min–Max cho lần đo này.':'ยังไม่ได้ตั้งค่า Min–Max สำหรับการวัดนี้','Hãy sửa các thông số được đánh dấu đỏ trước khi sử dụng kết quả.':'โปรดแก้ไขค่าที่ทำเครื่องหมายสีแดงก่อนใช้ผลลัพธ์','Thiết lập Min–Max hoặc ngưỡng kết quả trong Cài đặt để đánh giá.':'ตั้งค่า Min–Max หรือเกณฑ์ผลลัพธ์ในการตั้งค่าเพื่อประเมินผล','📊 Tổng quan chất lượng':'📊 ภาพรวมคุณภาพ','Tất cả lịch sử':'ประวัติทั้งหมด','Đạt':'ผ่าน','Theo dõi':'เฝ้าระวัง','Không đạt':'ไม่ผ่าน','Thông số đạt':'ค่าที่อยู่ในช่วง','Thông số ngoài giới hạn':'ค่าที่อยู่นอกช่วง','Tỷ lệ Min–Max':'อัตรา Min–Max','Tỷ lệ đạt được tính trên các lần đo có trạng thái. Tỷ lệ Min–Max tính riêng các thông số đã được thiết lập giới hạn.':'อัตราผ่านคำนวณจากรายการวัดที่มีสถานะ ส่วนอัตรา Min–Max ใช้เฉพาะค่าที่กำหนดขีดจำกัดไว้','Tất cả trạng thái':'ทุกสถานะ','ĐẠT':'ผ่าน','CẦN THEO DÕI':'เฝ้าระวัง','KHÔNG ĐẠT':'ไม่ผ่าน','Xu hướng kết quả':'แนวโน้มผลลัพธ์','Cần ít nhất 2 lần đo để hiển thị biểu đồ':'ต้องมีการวัดอย่างน้อย 2 ครั้งเพื่อแสดงกราฟ','Hãy tính thêm lần đo để xem xu hướng.':'คำนวณเพิ่มเพื่อดูแนวโน้ม','Chưa có dữ liệu lịch sử.':'ยังไม่มีข้อมูลประวัติ','Thấp nhất':'ต่ำสุด','Trung bình':'ค่าเฉลี่ย','Cao nhất':'สูงสุด','Hiển thị ':'แสดง ',' lần đo gần nhất · ':' ครั้งล่าสุด · ','Ngày ':'วันที่ ','Lưu riêng cho ':'บันทึกแยกสำหรับ ',' lần đo':' ครั้งที่วัด','Không có lần đo phù hợp với bộ lọc.':'ไม่มีรายการวัดที่ตรงกับตัวกรอง','Chưa có lịch sử đo cho ':'ยังไม่มีประวัติการวัดสำหรับ ','Nhấn “Tính kết quả” để tự động lưu một mục.':'แตะ “คำนวณผล” เพื่อบันทึกการวัดโดยอัตโนมัติ',' lần đo đã lưu':' ครั้งที่บันทึกแล้ว','Loại lon tự thêm':'ประเภทกระป๋องที่เพิ่มเอง','Loại lon có sẵn':'ประเภทกระป๋องในระบบ','Sửa':'แก้ไข','Nhân bản':'ทำสำเนา','Xóa':'ลบ','Theo bộ lọc':'ตามตัวกรอง','Không có lịch sử để xóa':'ไม่มีประวัติให้ลบ','Chưa có lịch sử để xuất':'ไม่มีประวัติให้ส่งออก','Lưu riêng cho ':'บันทึกแยกสำหรับ ','Chưa có lịch sử đo cho ':'ยังไม่มีประวัติการวัดสำหรับ ','loại lon đang chọn':'ประเภทกระป๋องที่เลือก',' · Loại lon tự thêm':' · ประเภทกระป๋องที่เพิ่มเอง',' · Loại lon có sẵn':' · ประเภทกระป๋องในระบบ'
   }
-};
+ };
+// v51: explicit translations for remaining live labels/placeholders and result states.
+Object.assign(LANG_EXTRA.en, {
+  'CHƯA THIẾT LẬP':'NOT CONFIGURED',
+  'Chưa thiết lập':'Not configured',
+  'Thiết lập Min–Max hoặc ngưỡng kết quả trong Cài đặt để đánh giá.':'Set Min–Max limits or result thresholds in Settings to assess the result.',
+  'Thiết lập ngưỡng Độ chồng mí trong Cài đặt.':'Set the Overlap threshold in Settings.',
+  'Thiết lập ngưỡng Khoảng trống trong Cài đặt.':'Set the Free Space threshold in Settings.',
+  'Chưa thiết lập Min–Max':'Min–Max not configured',
+  'Ví dụ: 45':'e.g. 45','Ví dụ: 70':'e.g. 70','Ví dụ: Lon 330 ml':'e.g. 330 ml can',
+  'Thiết lập ngưỡng trong Cài đặt để đánh giá Đạt / Không đạt.':'Set thresholds in Settings to assess Pass / Fail.',
+  'Tất cả tiêu chí đã thiết lập đều đạt.':'All configured criteria passed.',
+  'Thiết lập ngưỡng Khoảng trống trong Cài đặt.':'Set the Free Space threshold in Settings.'
+});
+Object.assign(LANG_EXTRA.zh, {
+  'CHƯA THIẾT LẬP':'未配置','Chưa thiết lập':'未设置',
+  'Thiết lập Min–Max hoặc ngưỡng kết quả trong Cài đặt để đánh giá.':'请在设置中配置 Min–Max 限值或结果阈值以进行评估。',
+  'Thiết lập ngưỡng Độ chồng mí trong Cài đặt.':'请在设置中设置搭接量阈值。',
+  'Thiết lập ngưỡng Khoảng trống trong Cài đặt.':'请在设置中设置内部间隙阈值。',
+  'Chưa thiết lập Min–Max':'尚未设置 Min–Max','Ví dụ: 45':'例如：45','Ví dụ: 70':'例如：70','Ví dụ: Lon 330 ml':'例如：330 毫升罐',
+  'Thiết lập ngưỡng trong Cài đặt để đánh giá Đạt / Không đạt.':'请在设置中配置阈值以评估合格/不合格。',
+  'Tất cả tiêu chí đã thiết lập đều đạt.':'所有已设置的标准均已通过。'
+});
+Object.assign(LANG_EXTRA.th, {
+  'CHƯA THIẾT LẬP':'ยังไม่ได้กำหนดค่า','Chưa thiết lập':'ยังไม่ได้ตั้งค่า',
+  'Thiết lập Min–Max hoặc ngưỡng kết quả trong Cài đặt để đánh giá.':'ตั้งค่าขีดจำกัด Min–Max หรือเกณฑ์ผลลัพธ์ในการตั้งค่าเพื่อประเมินผล',
+  'Thiết lập ngưỡng Độ chồng mí trong Cài đặt.':'ตั้งค่าเกณฑ์ระยะซ้อนในการตั้งค่า',
+  'Thiết lập ngưỡng Khoảng trống trong Cài đặt.':'ตั้งค่าเกณฑ์ช่องว่างในการตั้งค่า',
+  'Chưa thiết lập Min–Max':'ยังไม่ได้ตั้งค่า Min–Max','Ví dụ: 45':'เช่น 45','Ví dụ: 70':'เช่น 70','Ví dụ: Lon 330 ml':'เช่น กระป๋อง 330 มล.',
+  'Thiết lập ngưỡng trong Cài đặt để đánh giá Đạt / Không đạt.':'ตั้งค่าเกณฑ์ในการตั้งค่าเพื่อประเมินผ่าน/ไม่ผ่าน',
+  'Tất cả tiêu chí đã thiết lập đều đạt.':'ผ่านเกณฑ์ทั้งหมดที่ตั้งค่าไว้'
+});
 function getLangDict(lang){return Object.assign({},LANG_TEXT[lang]||{},LANG_EXTRA[lang]||{});}
 function tr(text,lang=getAppearance().language){
   const d=getLangDict(lang); const raw=String(text??'');
@@ -1518,6 +1549,29 @@ document.addEventListener('DOMContentLoaded',()=>{
   registerPWA();
 });
 
+
+
+// Mobile keyboard polish for iOS Safari and Android Chrome.
+(function(){
+  const ids=['BH','CH','SL','ST','Tb','Te'];
+  ids.forEach((id,i)=>{
+    const el=document.getElementById(id); if(!el) return;
+    el.addEventListener('keydown',e=>{
+      if(e.key==='Enter'){
+        e.preventDefault();
+        const next=document.getElementById(ids[i+1]);
+        if(next){ next.focus(); next.select?.(); }
+        else { document.getElementById('calcBtn')?.click(); }
+      }
+    });
+  });
+  // Keep bottom sheets above the on-screen keyboard on modern mobile browsers.
+  if(window.visualViewport){
+    const sync=()=>document.documentElement.style.setProperty('--vvh',window.visualViewport.height+'px');
+    window.visualViewport.addEventListener('resize',sync,{passive:true});
+    sync();
+  }
+})();
 
 
 // Mobile keyboard polish for iOS Safari and Android Chrome.

@@ -1,8 +1,10 @@
-const CACHE_NAME='tinh-mi-lon-mobile-v39';
+const CACHE_NAME='tinh-mi-lon-mobile-v54';
 const CORE_ASSETS = [
   './',
   './index.html',
-  './manifest.webmanifest?v=11'
+  './manifest.webmanifest?v=20',
+  './song-city.m4a',
+  './song-10k-years.m4a'
 ];
 
 self.addEventListener('install', event => {
