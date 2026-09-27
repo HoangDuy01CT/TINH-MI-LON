@@ -881,7 +881,7 @@ function translateNodeText(node,lang,dict,reverse){
 }
 
 function applyLanguage(lang){
-  lang=['en','zh','th'].includes(lang)?lang:'vi';
+  lang=lang==='en'?'en':'vi';
   localStorage.setItem('tinhMiLonLanguage',lang);
   if(typeof updateMusicButton==='function') updateMusicButton();
   const dict=getLangDict(lang);
@@ -1449,7 +1449,7 @@ function updateNetworkStatus(){
   if(navigator.onLine){
     pill.classList.remove('show');
   }else{
-    text.textContent='Bạn đang ngoại tuyến. Dữ liệu và các chức năng đã tải vẫn dùng được.';
+    text.textContent=tr('Bạn đang ngoại tuyến. Dữ liệu và các chức năng đã tải vẫn dùng được.');
     pill.classList.add('show');
   }
 }

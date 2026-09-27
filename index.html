@@ -13,7 +13,7 @@
 <meta content="default" name="apple-mobile-web-app-status-bar-style"/>
 <meta content="Mí Lon" name="apple-mobile-web-app-title"/>
 <meta content="telephone=no" name="format-detection"/>
-<link href="manifest.webmanifest?v=20" rel="manifest"/>
+<link href="manifest.webmanifest?v=23" rel="manifest"/>
 <link href="icons/favicon-32-v8.png" rel="icon" sizes="32x32"/>
 <link href="icons/apple-touch-icon-v8.png" rel="apple-touch-icon"/>
 <link href="icons/splash-1290x2796-v8.png" media="(device-width: 430px) and (device-height: 932px) and (-webkit-device-pixel-ratio: 3) and (orientation: portrait)" rel="apple-touch-startup-image"/>
@@ -208,12 +208,11 @@ input::placeholder{color:#c7c7cc}
 .sheet{
   position:fixed;left:0;right:0;bottom:0;max-width:620px;margin:auto;background:var(--bg);
   border-radius:26px 26px 0 0;padding-bottom:max(16px,env(safe-area-inset-bottom));
-  max-height:90dvh;max-height:90vh;display:flex;flex-direction:column;box-shadow:0 -10px 40px rgba(0,0,0,.2)
+  max-height:90vh;max-height:90dvh;display:flex;flex-direction:column;box-shadow:0 -10px 40px rgba(0,0,0,.2)
 }
-.sheet-handle{width:38px;height:5px;border-radius:10px;background:#c7c7cc;margin:9px auto 4px}
 .sheet-header{display:flex;align-items:center;justify-content:space-between;padding:5px 16px 10px}
 .sheet-header h3{margin:0;font-size:19px;letter-spacing:-.4px}
-.sheet-body{overflow:auto;padding:0 14px 12px}
+.sheet-body{flex:1 1 auto;min-height:0;overflow:auto;overscroll-behavior:contain;-webkit-overflow-scrolling:touch;scrollbar-gutter:stable;padding:0 14px 12px}
 .hist-item{display:flex;justify-content:space-between;gap:10px;background:var(--card);border-radius:16px;padding:12px;margin-bottom:8px}
 .hi-time{font-weight:800;font-size:13px}.hi-vals{font-size:10px;color:var(--muted);margin-top:4px}
 .hist-item .hi-right{display:flex;align-items:center;gap:8px}.hi-pct{font-size:16px;font-weight:850}.hist-del{border:0;background:transparent;color:var(--red);font-size:18px}
@@ -553,6 +552,17 @@ input[type=number]::-webkit-inner-spin-button,input[type=number]::-webkit-outer-
   .gap-card{grid-column:1/-1}
 }
 @media (prefers-reduced-motion:reduce){*,*::before,*::after{scroll-behavior:auto!important;transition:none!important;animation:none!important}}
+/* Stage 1 UX polish: clear focus, responsive touch feedback, and reliable sheet scrolling */
+html{scroll-behavior:smooth}
+button,.btn,.main-btn,.sub-btn,.icon-btn,.lock-btn,.language-option{transition:transform .14s ease,opacity .14s ease,background-color .18s ease,border-color .18s ease,box-shadow .18s ease}
+button:focus-visible,.btn:focus-visible,.main-btn:focus-visible,.sub-btn:focus-visible,.icon-btn:focus-visible,.lock-btn:focus-visible,input:focus-visible,select:focus-visible,textarea:focus-visible{outline:2px solid var(--blue);outline-offset:3px}
+.field:focus-within{background:color-mix(in srgb,var(--blue) 4%,var(--card));box-shadow:inset 0 0 0 1px color-mix(in srgb,var(--blue) 28%,transparent)}
+input,select,textarea{scroll-margin-top:100px;scroll-margin-bottom:32px}
+.sheet{overscroll-behavior:contain}
+.sheet-header{flex:0 0 auto;padding-top:max(12px,env(safe-area-inset-top))}
+.sheet-body{scroll-padding-block:16px}
+@media(hover:hover){.main-btn:hover,.sub-btn:hover,.btn:hover,.lock-btn:hover{filter:brightness(1.025)}}
+@media (prefers-reduced-motion:reduce){html{scroll-behavior:auto}button,.btn,.main-btn,.sub-btn,.icon-btn,.lock-btn,.language-option{transition:none!important}}
 
 
 .language-grid{display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-top:10px}
@@ -665,7 +675,7 @@ input[type=number]::-webkit-inner-spin-button,input[type=number]::-webkit-outer-
 <!-- History sheet -->
 <div class="sheet-overlay" id="historyOverlay" onclick="if(event.target===this)closeHistory()">
 <div class="sheet">
-<div class="sheet-handle"></div>
+
 <div class="sheet-header"><div><h3>Lịch sử đo</h3><div id="historySubtitle" style="font-size:11px;color:var(--muted);margin-top:3px">Dữ liệu lưu riêng theo từng loại lon</div></div><button class="icon-btn" onclick="closeHistory()">Xong</button></div>
 <div class="sheet-body">
 <div class="quality-dashboard" id="qualityDashboard">
@@ -711,7 +721,7 @@ input[type=number]::-webkit-inner-spin-button,input[type=number]::-webkit-outer-
 <!-- History detail sheet -->
 <div class="sheet-overlay" id="historyDetailOverlay" onclick="if(event.target===this)closeHistoryDetail()">
 <div class="sheet">
-<div class="sheet-handle"></div>
+
 <div class="sheet-header"><div><h3>Chi tiết lần đo</h3><div class="sheet-note" id="historyDetailTitle"></div></div><button class="icon-btn" onclick="closeHistoryDetail()">Xong</button></div>
 <div class="sheet-body"><div id="historyDetailBody"></div></div>
 </div>
@@ -719,7 +729,7 @@ input[type=number]::-webkit-inner-spin-button,input[type=number]::-webkit-outer-
 <!-- Settings sheet -->
 <div class="sheet-overlay" id="settingsOverlay" onclick="if(event.target===this)closeSettings()">
 <div class="sheet">
-<div class="sheet-handle"></div>
+
 <div class="sheet-header"><h3>Tiêu chuẩn &amp; Cài đặt</h3><button class="icon-btn" onclick="closeSettings()">Xong</button></div>
 <div class="sheet-body">
 <div class="set-section-title">THÔNG SỐ ĐO · MIN – MAX</div>
@@ -766,7 +776,7 @@ input[type=number]::-webkit-inner-spin-button,input[type=number]::-webkit-outer-
 </div>
 <div class="sheet-overlay" id="appearanceOverlay" onclick="if(event.target===this)closeAppearanceSettings()">
 <div class="sheet">
-<div class="sheet-handle"></div>
+
 <div class="sheet-header"><div><h3>🎨 Giao diện</h3><div class="sheet-note">Tùy chỉnh giao diện cho toàn bộ ứng dụng. Thiết lập được lưu ngay trên điện thoại.</div></div><button class="icon-btn" onclick="closeAppearanceSettings()">Xong</button></div>
 <div class="sheet-body">
 <div class="set-section-title">NGÔN NGỮ / LANGUAGE</div>
@@ -792,7 +802,7 @@ input[type=number]::-webkit-inner-spin-button,input[type=number]::-webkit-outer-
 </div>
 <div class="sheet-overlay" id="canManagerOverlay" onclick="if(event.target===this)closeCanManager()">
 <div class="sheet">
-<div class="sheet-handle"></div>
+
 <div class="sheet-header">
 <div><h3>Quản lý loại lon</h3><div class="sheet-note">Thêm, đổi tên hoặc xóa loại lon. Dữ liệu và tiêu chuẩn của từng loại được lưu riêng.</div></div>
 <button class="icon-btn" onclick="closeCanManager()">Xong</button>
@@ -807,7 +817,7 @@ input[type=number]::-webkit-inner-spin-button,input[type=number]::-webkit-outer-
 </div>
 <div class="sheet-overlay" id="addCanOverlay" onclick="if(event.target===this)closeAddCan()">
 <div class="sheet">
-<div class="sheet-handle"></div>
+
 <div class="sheet-header"><h3 id="addCanTitle">Thêm loại lon</h3><button class="icon-btn" onclick="closeAddCan()">Xong</button></div>
 <div class="sheet-body">
 <div class="add-can-form">
@@ -821,7 +831,7 @@ input[type=number]::-webkit-inner-spin-button,input[type=number]::-webkit-outer-
 </div>
 <div class="sheet-overlay" id="exportOverlay" onclick="if(event.target===this)closeExport()">
 <div class="sheet">
-<div class="sheet-handle"></div>
+
 <div class="sheet-header"><div><h3>Xuất báo cáo</h3><div class="sheet-note">Xuất dữ liệu đo của loại lon đang chọn.</div></div><button class="icon-btn" onclick="closeExport()">Xong</button></div>
 <div class="sheet-body">
 <div class="report-actions">
@@ -843,19 +853,40 @@ input[type=number]::-webkit-inner-spin-button,input[type=number]::-webkit-outer-
 <div class="pin-actions"><button class="btn clear-result" onclick="closePinPrompt()">Hủy</button><button class="btn calc" id="pinSubmitBtn" onclick="submitPinPrompt()">MỞ KHÓA</button></div>
 </div>
 </div>
-<div class="toast" id="toast"></div>
+<div class="toast" id="toast" role="status" aria-live="polite" aria-atomic="true"></div>
 <script>
+/* Resilient storage: keep the app usable if browser storage is blocked or full. */
+const safeStorage = (() => {
+  const fallback = new Map();
+  const getNative = () => { try { return window.localStorage; } catch (_) { return null; } };
+  return {
+    getItem(key) {
+      if (fallback.has(String(key))) return fallback.get(String(key));
+      try { const storage=getNative(); const value=storage&&storage.getItem(key); if(value!==null&&value!==undefined)return value; } catch (_) {}
+      return null;
+    },
+    setItem(key,value) {
+      key=String(key); value=String(value); fallback.set(key,value);
+      try { const storage=getNative(); if(storage)storage.setItem(key,value); } catch (_) {}
+    },
+    removeItem(key) {
+      key=String(key); fallback.delete(key);
+      try { const storage=getNative(); if(storage)storage.removeItem(key); } catch (_) {}
+    }
+  };
+})();
+
 let current='';
 const fields=['BH','CH','SL','ST','Tb','Te'];
 const STORE_KEY='tinhMiLonDataV3';
 const OLD_KEY='tinhMiLonDataV2';
 
 function loadStore(){
-  let raw=localStorage.getItem(STORE_KEY);
+  let raw=safeStorage.getItem(STORE_KEY);
   if(raw){try{return JSON.parse(raw)}catch(e){}}
   // migrate from old flat format if present
   const migrated={};
-  const old=localStorage.getItem(OLD_KEY);
+  const old=safeStorage.getItem(OLD_KEY);
   if(old){
     try{
       const oldData=JSON.parse(old);
@@ -869,7 +900,7 @@ function loadStore(){
   return migrated;
 }
 const canData=loadStore();
-function persist(){localStorage.setItem(STORE_KEY,JSON.stringify(canData))}
+function persist(){safeStorage.setItem(STORE_KEY,JSON.stringify(canData))}
 function ensureCan(name){
   if(!canData[name])canData[name]={inputs:{},thresholds:{},history:[]};
   const c=canData[name];
@@ -1502,11 +1533,11 @@ let musicTrackIndex=0;
 let musicGesture={active:false,moved:false,startX:0,startVolume:0,pointerId:null};
 let musicPopTimer=null;
 function getMusicText(){
-  const lang=localStorage.getItem('tinhMiLonLanguage')||'vi';
+  const lang=safeStorage.getItem('tinhMiLonLanguage')||'vi';
   return {vi:{on:'Tắt nhạc',off:'Bật nhạc'},en:{on:'Turn music off',off:'Turn music on'},zh:{on:'关闭音乐',off:'打开音乐'},th:{on:'ปิดเพลง',off:'เปิดเพลง'}}[lang]||{on:'Tắt nhạc',off:'Bật nhạc'};
 }
 function getMusicVolumeText(v){
-  const lang=localStorage.getItem('tinhMiLonLanguage')||'vi';
+  const lang=safeStorage.getItem('tinhMiLonLanguage')||'vi';
   const n=Math.round(v*100);
   return {vi:`Âm lượng ${n}%`,en:`Volume ${n}%`,zh:`音量 ${n}%`,th:`ระดับเสียง ${n}%`}[lang]||`Âm lượng ${n}%`;
 }
@@ -1530,9 +1561,9 @@ function showMusicVolume(v){
 function setMusicVolume(v){
   const a=document.getElementById('bgMusic'); if(!a)return;
   v=Math.max(0,Math.min(1,v)); a.volume=v;
-  localStorage.setItem(MUSIC_VOLUME_KEY,String(v));
-  if(v<=0.001){ a.pause(); localStorage.setItem(MUSIC_KEY,'off'); }
-  else if(!a.paused){ localStorage.setItem(MUSIC_KEY,'on'); }
+  safeStorage.setItem(MUSIC_VOLUME_KEY,String(v));
+  if(v<=0.001){ a.pause(); safeStorage.setItem(MUSIC_KEY,'off'); }
+  else if(!a.paused){ safeStorage.setItem(MUSIC_KEY,'on'); }
   updateMusicButton(); showMusicVolume(v);
 }
 async function toggleMusic(){
@@ -1540,21 +1571,21 @@ async function toggleMusic(){
   try{
     if(a.paused){
       if((Number(a.volume)||0)<=0.001){
-        const saved=Number(localStorage.getItem(MUSIC_VOLUME_KEY));
+        const saved=Number(safeStorage.getItem(MUSIC_VOLUME_KEY));
         a.volume=Number.isFinite(saved)&&saved>0?saved:0.22;
       }
-      await a.play(); localStorage.setItem(MUSIC_KEY,'on');
-    } else { a.pause(); localStorage.setItem(MUSIC_KEY,'off'); }
-  }catch(e){ localStorage.setItem(MUSIC_KEY,'off'); }
+      await a.play(); safeStorage.setItem(MUSIC_KEY,'on');
+    } else { a.pause(); safeStorage.setItem(MUSIC_KEY,'off'); }
+  }catch(e){ safeStorage.setItem(MUSIC_KEY,'off'); }
   updateMusicButton();
 }
 function initMusic(){
   const a=document.getElementById('bgMusic'), b=document.getElementById('musicToggle'); if(!a||!b)return;
-  const savedVol=Number(localStorage.getItem(MUSIC_VOLUME_KEY));
+  const savedVol=Number(safeStorage.getItem(MUSIC_VOLUME_KEY));
   a.volume=Number.isFinite(savedVol)?Math.max(0,Math.min(1,savedVol)):0.22;
   a.src=MUSIC_PLAYLIST[musicTrackIndex];
   a.addEventListener('play',updateMusicButton); a.addEventListener('pause',updateMusicButton); a.addEventListener('volumechange',updateMusicButton);
-  a.addEventListener('ended',()=>{musicTrackIndex=(musicTrackIndex+1)%MUSIC_PLAYLIST.length;a.src=MUSIC_PLAYLIST[musicTrackIndex];if(localStorage.getItem(MUSIC_KEY)!=='off'&&a.volume>0.001){a.play().then(updateMusicButton).catch(updateMusicButton)}else updateMusicButton()});
+  a.addEventListener('ended',()=>{musicTrackIndex=(musicTrackIndex+1)%MUSIC_PLAYLIST.length;a.src=MUSIC_PLAYLIST[musicTrackIndex];if(safeStorage.getItem(MUSIC_KEY)!=='off'&&a.volume>0.001){a.play().then(updateMusicButton).catch(updateMusicButton)}else updateMusicButton()});
   b.addEventListener('click',()=>{ if(!musicGesture.moved) toggleMusic(); });
   b.addEventListener('pointerdown',e=>{
     musicGesture={active:true,moved:false,startX:e.clientX,startVolume:a.volume,pointerId:e.pointerId};
@@ -1575,22 +1606,22 @@ function initMusic(){
     musicGesture.active=false; b.classList.remove('dragging');
     try{b.releasePointerCapture(e.pointerId)}catch(_){ }
     setTimeout(()=>{musicGesture.moved=false;},0);
-    if(moved && a.volume>0.001 && a.paused){ a.play().then(()=>{localStorage.setItem(MUSIC_KEY,'on');updateMusicButton()}).catch(()=>{}); }
+    if(moved && a.volume>0.001 && a.paused){ a.play().then(()=>{safeStorage.setItem(MUSIC_KEY,'on');updateMusicButton()}).catch(()=>{}); }
   };
   b.addEventListener('pointerup',endGesture); b.addEventListener('pointercancel',endGesture); b.addEventListener('lostpointercapture',()=>{ if(musicGesture.active){musicGesture.active=false;b.classList.remove('dragging');setTimeout(()=>musicGesture.moved=false,0);}});
   updateMusicButton();
 }
 
 function getAppearance(){
-  const savedLanguage=localStorage.getItem('tinhMiLonLanguage')||'vi';
-  return {theme:localStorage.getItem('tinhMiLonTheme')||'default',language:['vi','en'].includes(savedLanguage)?savedLanguage:'vi'};
+  const savedLanguage=safeStorage.getItem('tinhMiLonLanguage')||'vi';
+  return {theme:safeStorage.getItem('tinhMiLonTheme')||'default',language:['vi','en'].includes(savedLanguage)?savedLanguage:'vi'};
 }
 function applyTheme(theme){
   const allowed=['default','factory','carbon','pink','orange','neon'];
   theme=allowed.includes(theme)?theme:'default';
   document.body.classList.remove('theme-soft','theme-factory','theme-carbon','theme-pink','theme-orange','theme-neon');
   if(theme!=='default')document.body.classList.add('theme-'+theme);
-  localStorage.setItem('tinhMiLonTheme',theme);
+  safeStorage.setItem('tinhMiLonTheme',theme);
   document.querySelectorAll('[data-theme-choice]').forEach(el=>el.classList.toggle('selected',el.dataset.themeChoice===theme));
 }
 function applyThemeImage(){
@@ -1764,7 +1795,7 @@ function translateNodeText(node,lang,dict,reverse){
 
 function applyLanguage(lang){
   lang=['en'].includes(lang)?lang:'vi';
-  localStorage.setItem('tinhMiLonLanguage',lang);
+  safeStorage.setItem('tinhMiLonLanguage',lang);
   if(typeof updateMusicButton==='function') updateMusicButton();
   const dict=getLangDict(lang);
   const reverse=buildLanguageReverse(lang);
@@ -1835,10 +1866,10 @@ function openAppearanceSettings(){const overlay=document.getElementById('appeara
 window.openAppearanceSettings=openAppearanceSettings;
 document.addEventListener('DOMContentLoaded',()=>{const b=document.getElementById('openAppearanceBtn');if(b)b.addEventListener('click',openAppearanceSettings);});
 function closeAppearanceSettings(){const overlay=document.getElementById('appearanceOverlay');if(overlay){overlay.classList.remove('open');overlay.style.display='';}document.body.style.overflow=''}
-function setThemeOpacity(value){value=Math.max(0,Math.min(55,parseInt(value,10)||0));localStorage.setItem('tinhMiLonBgOpacity',String(value));applyThemeImage()}
-function setThemeZoom(value){value=Math.max(80,Math.min(140,parseInt(value,10)||100));localStorage.setItem('tinhMiLonBgZoom',String(value));applyThemeImage()}
-function setThemePosition(value){const allowed=['center','top','bottom','left','right'];value=allowed.includes(value)?value:'center';localStorage.setItem('tinhMiLonBgPosition',value);applyThemeImage()}
-function resetThemeImageView(){localStorage.setItem('tinhMiLonBgOpacity','18');localStorage.setItem('tinhMiLonBgZoom','100');localStorage.setItem('tinhMiLonBgPosition','center');applyThemeImage();showToast('Đã đặt lại cách hiển thị hình nền')}
+function setThemeOpacity(value){value=Math.max(0,Math.min(55,parseInt(value,10)||0));safeStorage.setItem('tinhMiLonBgOpacity',String(value));applyThemeImage()}
+function setThemeZoom(value){value=Math.max(80,Math.min(140,parseInt(value,10)||100));safeStorage.setItem('tinhMiLonBgZoom',String(value));applyThemeImage()}
+function setThemePosition(value){const allowed=['center','top','bottom','left','right'];value=allowed.includes(value)?value:'center';safeStorage.setItem('tinhMiLonBgPosition',value);applyThemeImage()}
+function resetThemeImageView(){safeStorage.setItem('tinhMiLonBgOpacity','18');safeStorage.setItem('tinhMiLonBgZoom','100');safeStorage.setItem('tinhMiLonBgPosition','center');applyThemeImage();showToast('Đã đặt lại cách hiển thị hình nền')}
 
 function handleThemeImage(event){
   const file=event.target.files&&event.target.files[0];if(!file)return;
@@ -1850,13 +1881,13 @@ function handleThemeImage(event){
       const max=1600,scale=Math.min(1,max/Math.max(img.naturalWidth,img.naturalHeight));
       const w=Math.max(1,Math.round(img.naturalWidth*scale)),h=Math.max(1,Math.round(img.naturalHeight*scale));
       const c=document.createElement('canvas');c.width=w;c.height=h;const ctx=c.getContext('2d');ctx.drawImage(img,0,0,w,h);
-      try{const data=c.toDataURL('image/jpeg',.78);localStorage.setItem('tinhMiLonBgImage',data);if(!localStorage.getItem('tinhMiLonBgOpacity'))localStorage.setItem('tinhMiLonBgOpacity','18');applyThemeImage();showToast('Đã đặt hình nền')}catch(e){showToast('Ảnh quá lớn, không thể lưu trên thiết bị')}
+      try{const data=c.toDataURL('image/jpeg',.78);safeStorage.setItem('tinhMiLonBgImage',data);if(!safeStorage.getItem('tinhMiLonBgOpacity'))safeStorage.setItem('tinhMiLonBgOpacity','18');applyThemeImage();showToast('Đã đặt hình nền')}catch(e){showToast('Ảnh quá lớn, không thể lưu trên thiết bị')}
     }; img.src=reader.result;
   }; reader.readAsDataURL(file);event.target.value='';
 }
-function removeThemeImage(){localStorage.removeItem('tinhMiLonBgImage');applyThemeImage();showToast('Đã xóa hình nền')}
+function removeThemeImage(){safeStorage.removeItem('tinhMiLonBgImage');applyThemeImage();showToast('Đã xóa hình nền')}
 function resetAppearance(){
-  localStorage.removeItem('tinhMiLonTheme');localStorage.removeItem('tinhMiLonLanguage');
+  safeStorage.removeItem('tinhMiLonTheme');safeStorage.removeItem('tinhMiLonLanguage');
   applyTheme('default');applyThemeImage();applyLanguage('vi');showToast('Đã khôi phục giao diện mặc định');
 }
 function initAppearance(){applyTheme(getAppearance().theme);applyThemeImage();applyLanguage(getAppearance().language);initLanguageObserver()}
@@ -1865,7 +1896,7 @@ function initAppearance(){applyTheme(getAppearance().theme);applyThemeImage();ap
 function settingsLockHash(pin){
   return crypto.subtle.digest('SHA-256',new TextEncoder().encode(String(pin))).then(buf=>Array.from(new Uint8Array(buf)).map(b=>b.toString(16).padStart(2,'0')).join(''));
 }
-function isSettingsLocked(){return !!localStorage.getItem('tinhMiLonSettingsPinHash')}
+function isSettingsLocked(){return !!safeStorage.getItem('tinhMiLonSettingsPinHash')}
 let pinMode=null;
 function openPinPrompt(mode){
   pinMode=mode;
@@ -1882,13 +1913,13 @@ async function submitPinPrompt(){
   if(!/^\d{4,6}$/.test(pin)){showToast(tr('Mã PIN phải gồm 4–6 số'));input.focus();return}
   if(pinMode==='unlock'){
     const hash=await settingsLockHash(pin);
-    if(hash!==localStorage.getItem('tinhMiLonSettingsPinHash')){showToast(tr('Mã PIN không đúng'));input.select();return}
-    localStorage.setItem('tinhMiLonSettingsUnlocked','1');closePinPrompt();fillSettingsForm();document.getElementById('settingsOverlay').classList.add('open');updateSettingsLockUI();showToast(tr('Đã mở khóa Cài đặt'));return;
+    if(hash!==safeStorage.getItem('tinhMiLonSettingsPinHash')){showToast(tr('Mã PIN không đúng'));input.select();return}
+    safeStorage.setItem('tinhMiLonSettingsUnlocked','1');closePinPrompt();fillSettingsForm();document.getElementById('settingsOverlay').classList.add('open');updateSettingsLockUI();showToast(tr('Đã mở khóa Cài đặt'));return;
   }
   if(pinMode==='set'){pendingPin=pin;openPinPrompt('confirm');return}
   if(pinMode==='confirm'){
     if(pin!==pendingPin){showToast(tr('Mã PIN xác nhận không khớp'));input.select();return}
-    localStorage.setItem('tinhMiLonSettingsPinHash',await settingsLockHash(pin));localStorage.setItem('tinhMiLonSettingsUnlocked','1');pendingPin='';closePinPrompt();updateSettingsLockUI();showToast(tr('Đã đặt mã PIN bảo vệ Cài đặt'));return;
+    safeStorage.setItem('tinhMiLonSettingsPinHash',await settingsLockHash(pin));safeStorage.setItem('tinhMiLonSettingsUnlocked','1');pendingPin='';closePinPrompt();updateSettingsLockUI();showToast(tr('Đã đặt mã PIN bảo vệ Cài đặt'));return;
   }
 }
 function fillSettingsForm(){
@@ -1903,10 +1934,10 @@ function updateSettingsLockUI(){
   setBtn.textContent=tr(locked?'Đổi mã PIN':'Đặt mã PIN');lockBtn.style.display=locked?'inline-block':'none';disable.style.display=locked?'inline-block':'none';
 }
 function setSettingsPin(){openPinPrompt(isSettingsLocked()?'set':'set')}
-function lockSettingsNow(){if(!isSettingsLocked())return;localStorage.removeItem('tinhMiLonSettingsUnlocked');closeSettings();showToast(tr('Đã khóa Cài đặt'));}
-function disableSettingsLock(){if(!isSettingsLocked())return;localStorage.removeItem('tinhMiLonSettingsPinHash');localStorage.removeItem('tinhMiLonSettingsUnlocked');updateSettingsLockUI();showToast(tr('Đã tắt khóa Cài đặt'));}
+function lockSettingsNow(){if(!isSettingsLocked())return;safeStorage.removeItem('tinhMiLonSettingsUnlocked');closeSettings();showToast(tr('Đã khóa Cài đặt'));}
+function disableSettingsLock(){if(!isSettingsLocked())return;safeStorage.removeItem('tinhMiLonSettingsPinHash');safeStorage.removeItem('tinhMiLonSettingsUnlocked');updateSettingsLockUI();showToast(tr('Đã tắt khóa Cài đặt'));}
 function openSettings(){
-  if(isSettingsLocked()&&localStorage.getItem('tinhMiLonSettingsUnlocked')!=='1'){openPinPrompt('unlock');return}
+  if(isSettingsLocked()&&safeStorage.getItem('tinhMiLonSettingsUnlocked')!=='1'){openPinPrompt('unlock');return}
   fillSettingsForm();updateSettingsLockUI();
   const c=ensureCan(current);
   document.getElementById('settingsOverlay').classList.add('open');
@@ -1919,7 +1950,7 @@ function readThreshold(id){
   return Number.isFinite(n)?n:null;
 }
 function saveSettings(){
-  if(isSettingsLocked()&&localStorage.getItem('tinhMiLonSettingsUnlocked')!=='1'){closeSettings();showToast('Cài đặt đang bị khóa');return}
+  if(isSettingsLocked()&&safeStorage.getItem('tinhMiLonSettingsUnlocked')!=='1'){closeSettings();showToast('Cài đặt đang bị khóa');return}
   const c=ensureCan(current);
   c.limits=c.limits||{};
   for(const f of fields){
@@ -1964,7 +1995,7 @@ function shareResult(){
   }
 }
 
-if('serviceWorker' in navigator){window.addEventListener('load',()=>navigator.serviceWorker.register('./sw.js').catch(()=>{}))}
+/* Service Worker is registered once by registerPWA(). */
 
 document.addEventListener('DOMContentLoaded',()=>{
   initMusic();
@@ -2016,7 +2047,7 @@ function inferCanKey(btn){
 }
 function ensureCustomCans(){
   try{
-    const raw=JSON.parse(localStorage.getItem('tinhMiLonCanTypes')||'[]');
+    const raw=JSON.parse(safeStorage.getItem('tinhMiLonCanTypes')||'[]');
     if(Array.isArray(raw)){
       raw.forEach(item=>{
         if(item&&item.key&&item.name&&!document.querySelector(`.main-btn[data-can-key="${CSS.escape(item.key)}"]`)){
@@ -2034,7 +2065,7 @@ function saveCustomCans(){
     if(!key)return;
     if(btn.dataset.custom==='1')customs.push({key,name:btn.dataset.canName||btn.textContent.trim()});
   });
-  localStorage.setItem('tinhMiLonCanTypes',JSON.stringify(customs));
+  safeStorage.setItem('tinhMiLonCanTypes',JSON.stringify(customs));
 }
 function addCanButton(key,name,custom=true){
   const menu=getCanMenu();
@@ -2332,7 +2363,7 @@ function updateNetworkStatus(){
   if(navigator.onLine){
     pill.classList.remove('show');
   }else{
-    text.textContent='Bạn đang ngoại tuyến. Dữ liệu và các chức năng đã tải vẫn dùng được.';
+    text.textContent=tr('Bạn đang ngoại tuyến. Dữ liệu và các chức năng đã tải vẫn dùng được.');
     pill.classList.add('show');
   }
 }
@@ -2403,29 +2434,6 @@ document.addEventListener('DOMContentLoaded',()=>{
 
 
 
-// Mobile keyboard polish for iOS Safari and Android Chrome.
-(function(){
-  const ids=['BH','CH','SL','ST','Tb','Te'];
-  ids.forEach((id,i)=>{
-    const el=document.getElementById(id); if(!el) return;
-    el.addEventListener('keydown',e=>{
-      if(e.key==='Enter'){
-        e.preventDefault();
-        const next=document.getElementById(ids[i+1]);
-        if(next){ next.focus(); next.select?.(); }
-        else { document.getElementById('calcBtn')?.click(); }
-      }
-    });
-  });
-  // Keep bottom sheets above the on-screen keyboard on modern mobile browsers.
-  if(window.visualViewport){
-    const sync=()=>document.documentElement.style.setProperty('--vvh',window.visualViewport.height+'px');
-    window.visualViewport.addEventListener('resize',sync,{passive:true});
-    sync();
-  }
-})();
-</script>
-<script>
 // Mobile keyboard polish for iOS Safari and Android Chrome.
 (function(){
   const ids=['BH','CH','SL','ST','Tb','Te'];
