@@ -1,20 +1,14 @@
-TINH MI LON - GIAI DOAN 4 (BAN KIEM TRA PHAT HANH)
+# Tính Mí Lon v59 — Nâng cấp âm thanh
 
-Nen tang: Tinh_Mi_Lon_Giai_Doan_3_v57.zip
+## Thay đổi
+- Bổ sung nút mở bảng điều khiển nhạc riêng; nút loa chỉ bật/tắt phát nhạc.
+- Thanh trượt âm lượng 0–100% có thể chạm/kéo trực tiếp; 0% tắt tiếng, tăng lại sẽ dùng mức vừa chọn.
+- Thêm chuyển bài trước/sau cho hai bài nhạc hiện có.
+- Ghi nhớ âm lượng và bài nhạc đã chọn.
+- Cập nhật Service Worker/cache lên v59.
 
-Pham vi giai doan 4:
-- Kiem tra tinh toan ven cua goi ZIP.
-- Kiem tra cu phap JavaScript cua all.js, sw.js va script noi trong index.html.
-- Kiem tra co mot diem dang ky Service Worker trong index.html.
-- Kiem tra co cac lua chon ngon ngu Tieng Viet va English.
+## Cập nhật
+Giải nén và thay toàn bộ tệp trên GitHub Pages. Mở ứng dụng khi có mạng để nhận Service Worker mới. Nên sao lưu dữ liệu quan trọng trước khi cập nhật.
 
-Ket qua kiem tra tu dong:
-- ZIP test: OK
-- all.js: syntax OK
-- sw.js: syntax OK
-- script noi trong index.html: syntax OK
-- So diem goi register(...) trong index.html: 1
-- Co nhan ngon ngu Tieng Viet va English: Co
-
-Gioi han:
-Chua kiem thu thao tac thuc te tren iPhone/Android, chua kiem thu GitHub Pages sau khi deploy, va chua kiem thu du lieu tren cac trinh duyet khac nhau. Hay sao luu du lieu quan trong truoc khi thay ban dang chay.
+## Phạm vi kiểm tra
+Đã kiểm tra cú pháp JavaScript inline và Service Worker, cùng cấu trúc ZIP. Chưa thực hiện kiểm thử tương tác trực tiếp trên thiết bị iOS/Android.
