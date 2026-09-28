@@ -1564,7 +1564,6 @@ function exportHistoryCsv(){exportFilteredHistoryCsv();}
 const MUSIC_KEY='tinhMiLonMusic';
 const MUSIC_VOLUME_KEY='tinhMiLonMusicVolume';
 const MUSIC_TRACK_KEY='tinhMiLonMusicTrack';
-<<<<<<< HEAD
 const MUSIC_PLAYLIST=[{src:'song-city.mp3?v=65',vi:'Đó chỉ là thành phố của anh',en:'That’s Just Your City',type:'audio/mpeg'},{src:'song-10k-years.mp3?v=65',vi:'10 ngàn năm',en:'Ten Thousand Years',type:'audio/mpeg'}];
 /* ---------- User-imported music (stored in IndexedDB on this device) ---------- */
 const MUSIC_TRACK_USER_KEY='tinhMiLonMusicTrackUser';
@@ -1645,11 +1644,6 @@ function initMusicImport(){
   pop.addEventListener('drop',e=>{if(!hasFiles(e))return;e.preventDefault();pop.classList.remove('drag');importMusicFiles(e.dataTransfer.files)});
  }
 }
-=======
-const MUSIC_PLAYLIST=[
-  {src:'song-city.m4a',vi:'Đó chỉ là thành phố của anh',en:'That’s Just Your City'},
-  {src:'song-10k-years.m4a',vi:'10 ngàn năm',en:'Ten Thousand Years'},
->>>>>>> c6d773580ef89f6f55b313fe5abd620b933b5384
 let musicTrackIndex=0;
 let musicPopTimer=null;
 let musicAudioContext=null;
