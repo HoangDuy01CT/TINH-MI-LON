@@ -95,9 +95,18 @@ h1{font-size:31px;line-height:1.08;letter-spacing:-1.1px;margin:16px 2px 4px;fon
 .music-actions{display:flex;align-items:center;justify-content:center;gap:18px;margin:15px 0}
 .music-actions button{border:1px solid var(--line);background:var(--card2);color:var(--text);border-radius:50%;width:44px;height:44px;font-size:18px;font-weight:800;cursor:pointer}
 .music-actions #musicPlayPause{width:54px;height:54px;background:var(--blue);color:#fff;border-color:transparent;font-size:22px}
-.music-volume-head{display:flex;justify-content:space-between;align-items:center;margin:12px 0 4px;font-size:13px}
-.music-volume-row{display:flex;align-items:center;gap:10px}
-.music-volume-range{width:100%;margin:0;accent-color:var(--blue);height:30px;touch-action:pan-y}
+.music-volume-head{display:flex;justify-content:space-between;align-items:center;margin:14px 0 7px;font-size:13px}
+.music-volume-head #musicVolumeValue{font-size:15px;font-weight:950;min-width:54px;text-align:right;color:var(--blue)}
+.music-volume-row{display:flex;align-items:center;gap:9px}
+.music-volume-row>span{font-size:19px;flex:0 0 auto}
+.music-volume-slider{flex:1;min-width:0}
+.music-volume-range{--vol:22%;width:100%;margin:0;accent-color:var(--blue);height:34px;touch-action:none;cursor:pointer}
+.music-volume-range::-webkit-slider-runnable-track{height:7px;border-radius:999px;background:linear-gradient(to right,var(--blue) 0%,var(--blue) var(--vol),var(--card2) var(--vol),var(--card2) 100%);border:1px solid var(--line)}
+.music-volume-range::-moz-range-track{height:7px;border-radius:999px;background:var(--card2);border:1px solid var(--line)}
+.music-volume-range::-moz-range-progress{height:7px;border-radius:999px;background:var(--blue)}
+.music-volume-range::-webkit-slider-thumb{appearance:none;width:22px;height:22px;margin-top:-8px;border:3px solid var(--card);border-radius:50%;background:var(--blue);box-shadow:0 1px 5px rgba(0,0,0,.25)}
+.music-volume-range::-moz-range-thumb{width:17px;height:17px;border:3px solid var(--card);border-radius:50%;background:var(--blue);box-shadow:0 1px 5px rgba(0,0,0,.25)}
+.music-volume-range:focus-visible{outline:3px solid color-mix(in srgb,var(--blue) 30%,transparent);outline-offset:5px}
 .music-playlist-title{font-size:13px;font-weight:900;margin:15px 0 8px}
 .music-playlist{display:flex;flex-direction:column;gap:6px}
 .music-track{display:flex;align-items:center;gap:10px;width:100%;text-align:left;padding:10px 11px;border:1px solid var(--line);border-radius:13px;background:var(--card2);color:var(--text);cursor:pointer;min-height:48px}
@@ -599,13 +608,14 @@ input,select,textarea{scroll-margin-top:100px;scroll-margin-bottom:32px}
 </style>
 </head>
 <body>
-<audio id="bgMusic" src="song-city.mp3?v=65" preload="metadata" playsinline></audio>
+<audio id="bgMusic" src="song-city.mp3?v=67" preload="metadata" playsinline></audio>
 <button id="musicToggle" class="music-toggle" type="button" aria-label="Mở bảng nhạc" title="Mở bảng nhạc" aria-expanded="false">♫</button>
 <section id="musicVolumePop" class="music-volume-pop" aria-label="Điều khiển nhạc" aria-hidden="true">
  <div class="music-head"><div class="music-head-title"><span aria-hidden="true">♫</span><span id="musicPanelTitle">Nhạc nền</span></div><button id="musicClose" class="music-close" type="button" aria-label="Đóng bảng nhạc" title="Đóng">×</button></div>
  <div id="musicTrackName" class="music-track-name">Đó chỉ là thành phố của anh</div><div id="musicTrackSub" class="music-track-sub">Bài 1 / 2</div>
  <div class="music-actions"><button id="musicPrev" type="button" aria-label="Bài trước" title="Bài trước">⏮</button><button id="musicPlayPause" type="button" aria-label="Phát nhạc" title="Phát nhạc">▶</button><button id="musicNext" type="button" aria-label="Bài tiếp theo" title="Bài tiếp theo">⏭</button></div>
- <div class="music-volume-head"><span id="musicVolumeLabel">Âm lượng</span><span id="musicVolumeValue">22%</span></div><div class="music-volume-row"><span aria-hidden="true">🔈</span><input id="musicVolumeRange" class="music-volume-range" type="range" min="0" max="100" step="1" value="22" aria-label="Âm lượng nhạc"><span aria-hidden="true">🔊</span></div>
+ <div class="music-volume-head"><span id="musicVolumeLabel">Âm lượng</span><span id="musicVolumeValue">22%</span></div><div class="music-volume-row"><span aria-hidden="true">🔈</span><div class="music-volume-slider"><input id="musicVolumeRange" class="music-volume-range" type="range" min="0" max="100" step="0.01" value="22" aria-label="Âm lượng nhạc" aria-valuemin="0" aria-valuemax="100" aria-valuenow="22">
+</div><span aria-hidden="true">🔊</span></div><div id="musicVolumeHint" class="music-volume-hint">Kéo để chỉnh từ 0% đến 100%</div>
  <div id="musicPlaylistTitle" class="music-playlist-title">Danh sách phát</div><div id="musicPlaylist" class="music-playlist"></div>
  <div class="music-add"><button id="musicAddBtn" class="music-add-btn" type="button">＋ Thêm nhạc từ thiết bị</button><input id="musicFileInput" class="music-file-input" type="file" accept="audio/*,.mp3,.m4a,.aac,.wav,.ogg,.opus,.flac" multiple tabindex="-1" aria-hidden="true"></div><div id="musicAddHint" class="music-add-hint">Nhạc thêm vào được lưu riêng trên thiết bị này.</div>
 </section>
@@ -1564,7 +1574,7 @@ function exportHistoryCsv(){exportFilteredHistoryCsv();}
 const MUSIC_KEY='tinhMiLonMusic';
 const MUSIC_VOLUME_KEY='tinhMiLonMusicVolume';
 const MUSIC_TRACK_KEY='tinhMiLonMusicTrack';
-const MUSIC_PLAYLIST=[{src:'song-city.mp3?v=65',vi:'Đó chỉ là thành phố của anh',en:'That’s Just Your City',type:'audio/mpeg'},{src:'song-10k-years.mp3?v=65',vi:'10 ngàn năm',en:'Ten Thousand Years',type:'audio/mpeg'}];
+const MUSIC_PLAYLIST=[{src:'song-city.mp3?v=67',vi:'Đó chỉ là thành phố của anh',en:'That’s Just Your City',type:'audio/mpeg'},{src:'song-10k-years.mp3?v=67',vi:'10 ngàn năm',en:'Ten Thousand Years',type:'audio/mpeg'}];
 /* ---------- User-imported music (stored in IndexedDB on this device) ---------- */
 const MUSIC_TRACK_USER_KEY='tinhMiLonMusicTrackUser';
 const MUSIC_DB_NAME='tinhMiLonMusicDB',MUSIC_DB_STORE='tracks';
@@ -1665,10 +1675,10 @@ function updateMusicButton(){
  const a=document.getElementById('bgMusic'),b=document.getElementById('musicToggle');if(!a||!b)return;
  const v=currentMusicVolume(),on=!a.paused&&v>0.001,t=getMusicText();
  b.textContent=musicIcon(v,on);b.title=on?t.on:t.off;b.setAttribute('aria-label',on?t.on:t.off);b.classList.toggle('is-on',on);
- const range=document.getElementById('musicVolumeRange'),value=document.getElementById('musicVolumeValue');if(range)range.value=String(Math.round(v*100));if(value)value.textContent=Math.round(v*100)+'%';
+ const range=document.getElementById('musicVolumeRange'),value=document.getElementById('musicVolumeValue');if(range){const pct=Math.max(0,Math.min(100,v*100));range.value=String(pct);range.style.setProperty('--vol',pct+'%');range.setAttribute('aria-valuenow',String(Math.round(pct)));}if(value)value.textContent=Math.round(v*100)+'%';
  const name=document.getElementById('musicTrackName');if(name)name.textContent=MUSIC_PLAYLIST[musicTrackIndex][musicLang()];
  const playBtn=document.getElementById('musicPlayPause');if(playBtn){const playing=!a.paused&&v>0.001;playBtn.textContent=playing?'⏸':'▶';playBtn.title=musicLabel(playing?'Tạm dừng nhạc':'Phát nhạc',playing?'Pause music':'Play music');playBtn.setAttribute('aria-label',playBtn.title);}
- const label=document.getElementById('musicVolumeLabel');if(label)label.textContent=musicLabel('Âm lượng','Volume');
+ const label=document.getElementById('musicVolumeLabel');if(label)label.textContent=musicLabel('Âm lượng','Volume');const hint=document.getElementById('musicVolumeHint');if(hint)hint.textContent=musicLabel('Kéo để chỉnh từ 0% đến 100%','Drag to adjust from 0% to 100%');
  const panel=document.getElementById('musicToggle');if(panel){const open=document.getElementById('musicVolumePop')?.classList.contains('show');panel.title=musicLabel(open?'Đóng bảng nhạc':'Mở bảng nhạc',open?'Close music panel':'Open music panel');panel.setAttribute('aria-label',panel.title);panel.setAttribute('aria-expanded',String(!!open));panel.classList.toggle('is-open',!!open)}
  const sub=document.getElementById('musicTrackSub');if(sub)sub.textContent=musicLabel('Bài ','Track ')+(musicTrackIndex+1)+' / '+MUSIC_PLAYLIST.length;
  const title=document.getElementById('musicPanelTitle');if(title)title.textContent=musicLabel('Nhạc nền','Music');const addBtn=document.getElementById('musicAddBtn');if(addBtn)addBtn.textContent=musicLabel('＋ Thêm nhạc từ thiết bị','＋ Add music from this device');const addHint=document.getElementById('musicAddHint');if(addHint)addHint.textContent=musicLabel('Nhạc thêm vào được lưu riêng trên thiết bị này.','Added music is stored on this device only.');const list=document.getElementById('musicPlaylist');if(list&&!list.dataset.ready)renderMusicPlaylist();
@@ -1679,19 +1689,55 @@ async function selectMusicTrack(index){const a=document.getElementById('bgMusic'
 function setMusicVolume(v){const a=document.getElementById('bgMusic');if(!a)return;v=Math.max(0,Math.min(1,Number(v)||0));applyMusicVolume(v);safeStorage.setItem(MUSIC_VOLUME_KEY,String(v));if(v<=0.001){a.pause();safeStorage.setItem(MUSIC_KEY,'off')}updateMusicButton()}
 async function toggleMusic(){const a=document.getElementById('bgMusic');if(!a)return;try{const saved=Number(safeStorage.getItem(MUSIC_VOLUME_KEY));const vol=Number.isFinite(saved)&&saved>0?saved:0.22;if(a.paused){if(musicGainNode){applyMusicVolume(vol);a.volume=1}else if(a.volume<=0.001){a.volume=vol}await a.play();safeStorage.setItem(MUSIC_KEY,'on')}else{a.pause();safeStorage.setItem(MUSIC_KEY,'off')}}catch(_){safeStorage.setItem(MUSIC_KEY,'off')}updateMusicButton()}
 async function changeMusicTrack(step){await selectMusicTrack((musicTrackIndex+step+MUSIC_PLAYLIST.length)%MUSIC_PLAYLIST.length)}
+async function playNextMusicTrack(){
+ const a=document.getElementById('bgMusic');
+ if(!a||!MUSIC_PLAYLIST.length)return;
+ const next=(musicTrackIndex+1)%MUSIC_PLAYLIST.length;
+ musicTrackIndex=next;
+ const t=MUSIC_PLAYLIST[next];
+ safeStorage.setItem(MUSIC_TRACK_KEY,String(t.user?0:next));
+ safeStorage.setItem(MUSIC_TRACK_USER_KEY,t.user&&t.userId?String(t.userId):'');
+ a.src=t.src;a.load();renderMusicPlaylist();updateMusicButton();
+ try{await a.play();safeStorage.setItem(MUSIC_KEY,'on')}catch(_){safeStorage.setItem(MUSIC_KEY,'off')}
+ updateMusicButton();updateMediaSession();
+}
+function updateMediaSession(){
+ const a=document.getElementById('bgMusic');
+ if(!a||!('mediaSession' in navigator))return;
+ const t=MUSIC_PLAYLIST[musicTrackIndex];
+ try{
+   navigator.mediaSession.metadata=new MediaMetadata({title:t?.vi||'Nhạc nền',artist:'TÍNH MÍ LON',album:'TÍNH MÍ LON'});
+   navigator.mediaSession.playbackState=a.paused?'paused':'playing';
+ }catch(_){}
+}
+function setupMediaSession(){
+ if(!('mediaSession' in navigator))return;
+ const actions={
+   play:()=>toggleMusic(),
+   pause:()=>{const a=document.getElementById('bgMusic');if(a&&!a.paused){a.pause();safeStorage.setItem(MUSIC_KEY,'off');updateMusicButton()}},
+   nexttrack:()=>changeMusicTrack(1),
+   previoustrack:()=>changeMusicTrack(-1)
+ };
+ Object.entries(actions).forEach(([name,handler])=>{try{navigator.mediaSession.setActionHandler(name,handler)}catch(_){} });
+ updateMediaSession();
+}
 function initMusic(){
  const a=document.getElementById('bgMusic'),b=document.getElementById('musicToggle');if(!a||!b)return;
- const savedVol=Number(safeStorage.getItem(MUSIC_VOLUME_KEY));const initialVol=Number.isFinite(savedVol)?Math.max(0,Math.min(1,savedVol)):0.22;a.volume=initialVol;
+ const savedVol=Number(safeStorage.getItem(MUSIC_VOLUME_KEY));const initialVol=Number.isFinite(savedVol)?Math.max(0,Math.min(1,savedVol)):0.22;a.volume=initialVol;const initialRange=document.getElementById('musicVolumeRange');if(initialRange)initialRange.style.setProperty('--vol',Math.round(initialVol*100)+'%');
  const savedTrack=Number(safeStorage.getItem(MUSIC_TRACK_KEY));musicTrackIndex=Number.isInteger(savedTrack)&&savedTrack>=0&&savedTrack<MUSIC_PLAYLIST.length?savedTrack:0;a.src=MUSIC_PLAYLIST[musicTrackIndex].src;
- a.addEventListener('play',updateMusicButton);a.addEventListener('pause',updateMusicButton);a.addEventListener('volumechange',updateMusicButton);a.addEventListener('ended',()=>changeMusicTrack(1));
+ a.addEventListener('play',()=>{updateMusicButton();updateMediaSession()});
+ a.addEventListener('pause',()=>{updateMusicButton();updateMediaSession()});
+ a.addEventListener('volumechange',updateMusicButton);
+ a.addEventListener('ended',playNextMusicTrack);
  b.addEventListener('click',()=>showMusicPanel(!document.getElementById('musicVolumePop')?.classList.contains('show')));
  const close=document.getElementById('musicClose');if(close)close.addEventListener('click',()=>showMusicPanel(false));
- const range=document.getElementById('musicVolumeRange');if(range){range.addEventListener('input',e=>{const v=Number(e.target.value)/100;setMusicVolume(v);showMusicPanel(true)});range.addEventListener('change',async()=>{if(Number(range.value)>0&&a.paused){try{await a.play();safeStorage.setItem(MUSIC_KEY,'on')}catch(_){safeStorage.setItem(MUSIC_KEY,'off')}updateMusicButton()}})}
+ const range=document.getElementById('musicVolumeRange');if(range){range.addEventListener('input',e=>{const v=Number(e.target.value)/100;range.style.setProperty('--vol',Math.max(0,Math.min(100,Number(e.target.value)))+'%');range.setAttribute('aria-valuenow',String(Math.round(Number(e.target.value))));setMusicVolume(v);showMusicPanel(true)});range.addEventListener('change',async()=>{if(Number(range.value)>0&&a.paused){try{await a.play();safeStorage.setItem(MUSIC_KEY,'on')}catch(_){safeStorage.setItem(MUSIC_KEY,'off')}updateMusicButton()}})}
  const prev=document.getElementById('musicPrev'),next=document.getElementById('musicNext'),playPause=document.getElementById('musicPlayPause');if(prev)prev.addEventListener('click',()=>changeMusicTrack(-1));if(next)next.addEventListener('click',()=>changeMusicTrack(1));if(playPause)playPause.addEventListener('click',toggleMusic);
  document.addEventListener('pointerdown',e=>{const pop=document.getElementById('musicVolumePop');if(pop&&pop.classList.contains('show')&&!pop.contains(e.target)&&e.target!==b)showMusicPanel(false)});
  a.addEventListener('error',()=>{const t=MUSIC_PLAYLIST[musicTrackIndex];if(t){showToast(musicLabel('Không thể phát bài nhạc này. Hãy cập nhật ứng dụng rồi thử lại.','Could not play this track. Update the app and try again.'));}});
  initMusicImport();
  updateMusicButton();
+ setupMediaSession();
  loadUserMusic();
 }
 
