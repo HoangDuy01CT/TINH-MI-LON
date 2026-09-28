@@ -1,8 +1,8 @@
-const CACHE_NAME='tinh-mi-lon-mobile-v59';
+const CACHE_NAME='tinh-mi-lon-mobile-v62';
 const CORE_ASSETS = [
   './',
   './index.html',
-  './manifest.webmanifest?v=24',
+  './manifest.webmanifest?v=27',
   './song-city.m4a',
   './song-10k-years.m4a',
   './icons/icon-192-v8.png',
