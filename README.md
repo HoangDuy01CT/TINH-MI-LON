@@ -1,10 +1,21 @@
-# Tính Mí Lon v62 — Music panel & playlist
+# Tính Mí Lon v63 — Nhập nhạc từ thiết bị
 
-- Một nút ♫ duy nhất mở/đóng bảng nhạc.
-- Đóng bảng không dừng nhạc.
-- Bảng có phát/tạm dừng, bài trước/bài tiếp, thanh âm lượng và danh sách phát.
-- Danh sách hiện có 2 bài M4A. Có thể thêm MP3 bằng cách đặt file trong thư mục gốc và thêm mục tương ứng vào `MUSIC_PLAYLIST` trong `index.html`, đồng thời thêm đường dẫn file vào `CORE_ASSETS` trong `sw.js` để hỗ trợ offline.
-- Không có chức năng tải MP3 từ điện thoại trực tiếp trong giao diện hiện tại; cần thêm file vào source/repository để được đóng gói và triển khai.
+## Thay đổi
+- Bảng nhạc ♫ có nút **＋ Thêm nhạc từ thiết bị**: chọn một hoặc nhiều file âm thanh (MP3, M4A, AAC, WAV, OGG, OPUS, FLAC) từ điện thoại hoặc laptop.
+- Trên laptop có thể **kéo thả file** vào bảng nhạc.
+- Bài nhập được lưu trong IndexedDB của trình duyệt, nên vẫn còn sau khi tắt/mở lại app và chạy được khi offline. Không cần sửa source hay deploy lại.
+- Bài nhập có nút 🗑 để xóa. Hai bài gốc của app không xóa được.
+- Ghi nhớ bài đang chọn, kể cả bài nhập. Tự bỏ qua file trùng, file không phải âm thanh và file lớn hơn 80MB.
+- Service Worker/cache nâng lên v63.
+
+## Lưu ý
+- Nhạc nhập chỉ nằm trên **thiết bị đã nhập**. Điện thoại và laptop có danh sách riêng.
+- Nhạc nhập không nằm trong phần sao lưu dữ liệu của app. Xóa dữ liệu trình duyệt hoặc gỡ app sẽ mất các bài này.
+- Trên iPhone, nên dùng app đã "Thêm vào Màn hình chính" để iOS ít xóa dữ liệu hơn.
+- Một số định dạng (ví dụ FLAC trên iOS cũ) có thể không phát được; app sẽ báo khi gặp.
 
 ## Cập nhật
-Thay các tệp trong gói vào đúng thư mục nguồn GitHub Pages. Chờ workflow build và deploy đều thành công.
+Thay các tệp trong gói vào đúng thư mục nguồn GitHub Pages. Chờ workflow build và deploy thành công, rồi mở app khi có mạng để nhận Service Worker mới.
+
+## Phạm vi kiểm tra
+Đã kiểm tra cú pháp JavaScript và Service Worker, cùng logic thêm/xóa/khôi phục bài bằng môi trường giả lập (jsdom + IndexedDB giả). Chưa thử trực tiếp trên iOS/Android thật.

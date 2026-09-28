@@ -1,10 +1,10 @@
-const CACHE_NAME='tinh-mi-lon-mobile-v62';
+const CACHE_NAME='tinh-mi-lon-mobile-v65';
 const CORE_ASSETS = [
   './',
   './index.html',
   './manifest.webmanifest?v=27',
-  './song-city.m4a',
-  './song-10k-years.m4a',
+  './song-city.mp3',
+  './song-10k-years.mp3',
   './icons/icon-192-v8.png',
   './icons/icon-512-v8.png',
   './icons/apple-touch-icon-v8.png',
@@ -19,6 +19,28 @@ async function cacheResponse(request, response) {
     await cache.put(request, response.clone());
   } catch (_) {}
   return response;
+}
+
+async function responseForRange(request, cached) {
+  const range = request.headers.get('range');
+  if (!range || !cached) return cached;
+  const match = /^bytes=(\d+)-(\d*)$/i.exec(range.trim());
+  if (!match) return cached;
+  const total = Number(cached.headers.get('content-length')) || (await cached.clone().arrayBuffer()).byteLength;
+  let start = Number(match[1]);
+  let end = match[2] ? Number(match[2]) : total - 1;
+  if (!Number.isFinite(start) || !Number.isFinite(end) || start < 0 || start >= total) {
+    return new Response(null, {status: 416, headers: {'Content-Range': 'bytes */' + total}});
+  }
+  end = Math.min(end, total - 1);
+  const body = await cached.clone().arrayBuffer();
+  const slice = body.slice(start, end + 1);
+  const headers = new Headers(cached.headers);
+  headers.set('Accept-Ranges', 'bytes');
+  headers.set('Content-Range', 'bytes ' + start + '-' + end + '/' + total);
+  headers.set('Content-Length', String(slice.byteLength));
+  headers.set('Content-Type', cached.headers.get('Content-Type') || 'audio/mpeg');
+  return new Response(slice, {status: 206, statusText: 'Partial Content', headers});
 }
 
 self.addEventListener('install', event => {
@@ -43,7 +65,6 @@ self.addEventListener('fetch', event => {
   const url = new URL(request.url);
   if (url.origin !== self.location.origin) return;
 
-  // HTML: network-first, so online users receive the latest app; cache is the offline fallback.
   if (request.mode === 'navigate' || (request.headers.get('accept') || '').includes('text/html')) {
     event.respondWith((async () => {
       try {
@@ -57,7 +78,14 @@ self.addEventListener('fetch', event => {
     return;
   }
 
-  // Versioned local assets: cache-first avoids repeated background requests after the first load.
+  // Let the browser handle audio requests and HTTP Range headers natively.
+  // Custom cached 206 responses can break HTML5 audio in some browsers/PWAs.
+  const isAudio = /\.(mp3|m4a|aac|wav|ogg|oga|opus|flac|weba|webm)(\?|$)/i.test(url.pathname);
+  if (isAudio) {
+    event.respondWith(fetch(request).catch(() => Response.error()));
+    return;
+  }
+
   event.respondWith((async () => {
     const cached = await caches.match(request);
     if (cached) return cached;
