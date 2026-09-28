@@ -99,9 +99,17 @@ h1{font-size:31px;line-height:1.08;letter-spacing:-1.1px;margin:16px 2px 4px;fon
 .music-volume-head #musicVolumeValue{font-size:15px;font-weight:950;min-width:54px;text-align:right;color:var(--blue)}
 .music-volume-row{display:flex;align-items:center;gap:9px}
 .music-volume-row>span{font-size:19px;flex:0 0 auto}
-.music-volume-slider{flex:1;min-width:0}
-.music-volume-range{--vol:22%;position:relative;width:100%;height:44px;margin:0;touch-action:none;-webkit-user-select:none;user-select:none;-webkit-tap-highlight-color:transparent;cursor:pointer;box-sizing:border-box;display:block;padding:18px 0}.music-volume-range::before{content:"";position:absolute;left:0;right:0;top:18px;height:7px;border-radius:999px;background:var(--card2);border:1px solid var(--line);box-sizing:border-box}.music-volume-fill{position:absolute;left:0;top:18px;width:var(--vol);height:7px;border-radius:999px;background:var(--blue);pointer-events:none}.music-volume-thumb{position:absolute;left:var(--vol);top:9px;width:22px;height:22px;transform:translateX(-50%);border:3px solid var(--card);border-radius:50%;background:var(--blue);box-shadow:0 1px 5px rgba(0,0,0,.25);pointer-events:none;box-sizing:border-box}.music-volume-range:focus-visible{outline:3px solid color-mix(in srgb,var(--blue) 30%,transparent);outline-offset:5px;border-radius:8px}
-
+.music-volume-slider{flex:1;min-width:0;position:relative;height:44px}
+.music-volume-range{--vol:22%;position:relative;width:100%;height:44px;margin:0;padding:0;display:block;box-sizing:border-box;touch-action:pan-x;-webkit-user-select:none;user-select:none;-webkit-tap-highlight-color:transparent;cursor:pointer}
+.music-volume-range::before{content:"";position:absolute;left:0;right:0;top:18px;height:7px;border-radius:999px;background:var(--card2);border:1px solid var(--line);box-sizing:border-box;pointer-events:none}
+.music-volume-fill{position:absolute;left:0;top:18px;width:var(--vol);height:7px;border-radius:999px;background:var(--blue);pointer-events:none}
+.music-volume-thumb{position:absolute;left:var(--vol);top:9px;width:22px;height:22px;transform:translateX(-50%);border:3px solid var(--card);border-radius:50%;background:var(--blue);box-shadow:0 1px 5px rgba(0,0,0,.25);pointer-events:none;box-sizing:border-box}
+.music-volume-input{position:absolute;inset:0;width:100%;height:44px;margin:0;padding:0;opacity:0;z-index:5;cursor:pointer;touch-action:pan-x;-webkit-appearance:none;appearance:none}
+.music-volume-input::-webkit-slider-thumb{-webkit-appearance:none;appearance:none;width:44px;height:44px;background:transparent;border:0}
+.music-volume-input::-webkit-slider-runnable-track{-webkit-appearance:none;height:44px;background:transparent;border:0}
+.music-volume-input::-moz-range-thumb{width:44px;height:44px;background:transparent;border:0}
+.music-volume-input::-moz-range-track{height:44px;background:transparent;border:0}
+.music-volume-range:focus-within{outline:3px solid color-mix(in srgb,var(--blue) 30%,transparent);outline-offset:5px;border-radius:8px}
 .music-modes{display:flex;gap:8px;margin:10px 0 2px}.music-mode-btn{flex:1;min-height:40px;border:1px solid var(--line);border-radius:12px;background:var(--card2);color:var(--text);font-size:12px;font-weight:800;cursor:pointer;touch-action:manipulation}.music-mode-btn[aria-pressed="true"]{background:color-mix(in srgb,var(--blue) 14%,var(--card));border-color:var(--blue);color:var(--blue)}.music-mode-btn span{margin-left:3px}@media(max-width:420px){.music-mode-btn span{font-size:11px}}
 .music-playlist-title{font-size:13px;font-weight:900;margin:15px 0 8px}
 .music-playlist{display:flex;flex-direction:column;gap:6px}
@@ -610,7 +618,7 @@ input,select,textarea{scroll-margin-top:100px;scroll-margin-bottom:32px}
  <div class="music-head"><div class="music-head-title"><span aria-hidden="true">♫</span><span id="musicPanelTitle">Nhạc nền</span></div><button id="musicClose" class="music-close" type="button" aria-label="Đóng bảng nhạc" title="Đóng">×</button></div>
  <div id="musicTrackName" class="music-track-name">Đó chỉ là thành phố của anh</div><div id="musicTrackSub" class="music-track-sub">Bài 1 / 2</div>
  <div class="music-actions"><button id="musicPrev" type="button" aria-label="Bài trước" title="Bài trước">⏮</button><button id="musicPlayPause" type="button" aria-label="Phát nhạc" title="Phát nhạc">▶</button><button id="musicNext" type="button" aria-label="Bài tiếp theo" title="Bài tiếp theo">⏭</button></div><div class="music-modes"><button id="musicShuffle" class="music-mode-btn" type="button" aria-pressed="false" title="Phát tuần tự">🔀 <span>Ngẫu nhiên</span></button><button id="musicRepeat" class="music-mode-btn" type="button" aria-pressed="false" title="Lặp playlist">🔂 <span>Lặp playlist</span></button></div>
- <div class="music-volume-head"><span id="musicVolumeLabel">Âm lượng</span><span id="musicVolumeValue">22%</span></div><div class="music-volume-row"><span aria-hidden="true">🔈</span><div class="music-volume-slider"><div id="musicVolumeRange" class="music-volume-range" role="slider" tabindex="0" aria-label="Âm lượng nhạc" aria-valuemin="0" aria-valuemax="100" aria-valuenow="22"><div class="music-volume-fill"></div><div class="music-volume-thumb"></div></div></div><span aria-hidden="true">🔊</span></div>
+ <div class="music-volume-head"><span id="musicVolumeLabel">Âm lượng</span><span id="musicVolumeValue">22%</span></div><div class="music-volume-row"><span aria-hidden="true">🔈</span><div class="music-volume-slider"><div id="musicVolumeRange" class="music-volume-range"><div class="music-volume-fill"></div><div class="music-volume-thumb"></div><input id="musicVolumeInput" class="music-volume-input" type="range" min="0" max="100" step="1" value="22" aria-label="Âm lượng nhạc"></div></div><span aria-hidden="true">🔊</span></div>
  <div id="musicPlaylistTitle" class="music-playlist-title">Danh sách phát</div><div id="musicPlaylist" class="music-playlist"></div>
  <div class="music-add"><button id="musicAddBtn" class="music-add-btn" type="button">＋ Thêm nhạc từ thiết bị</button><input id="musicFileInput" class="music-file-input" type="file" accept="audio/*,.mp3,.m4a,.aac,.wav,.ogg,.opus,.flac" multiple tabindex="-1" aria-hidden="true"></div><div id="musicAddHint" class="music-add-hint">Nhạc thêm vào được lưu riêng trên thiết bị này.</div>
 </section>
@@ -1693,7 +1701,7 @@ function updateMusicButton(){
  const v=currentMusicVolume(),on=!a.paused&&v>0.001,t=getMusicText();
  b.textContent=musicIcon(v,on);b.title=on?t.on:t.off;b.setAttribute('aria-label',on?t.on:t.off);b.classList.toggle('is-on',on);
  const range=document.getElementById('musicVolumeRange'),value=document.getElementById('musicVolumeValue');
- if(range&&!musicUserInteracting){const pct=Math.max(0,Math.min(100,v*100));range.style.setProperty('--vol',pct+'%');range.setAttribute('aria-valuenow',String(Math.round(pct)));}
+ if(range&&!musicUserInteracting){const pct=Math.max(0,Math.min(100,Math.round(v*100)));range.style.setProperty('--vol',pct+'%');const input=document.getElementById('musicVolumeInput');if(input)input.value=String(pct);}
  if(value)value.textContent=Math.round(v*100)+'%';
  const name=document.getElementById('musicTrackName');if(name&&MUSIC_PLAYLIST[musicTrackIndex])name.textContent=MUSIC_PLAYLIST[musicTrackIndex][musicLang()];
  const playBtn=document.getElementById('musicPlayPause');if(playBtn){const playing=!a.paused&&v>0.001;playBtn.textContent=playing?'⏸':'▶';playBtn.title=musicLabel(playing?'Tạm dừng nhạc':'Phát nhạc',playing?'Pause music':'Play music');playBtn.setAttribute('aria-label',playBtn.title);}
@@ -1742,43 +1750,23 @@ function initMusic(){
  b.addEventListener('click',()=>showMusicPanel(!document.getElementById('musicVolumePop')?.classList.contains('show')));
  const close=document.getElementById('musicClose');if(close)close.addEventListener('click',()=>showMusicPanel(false));
  const range=document.getElementById('musicVolumeRange');
- if(range){
-   let dragging=false;
+ const volumeInput=document.getElementById('musicVolumeInput');
+ if(range&&volumeInput){
    const valueEl=document.getElementById('musicVolumeValue');
-   const setFromClientX=(clientX)=>{
-     const r=range.getBoundingClientRect();
-     if(!r.width)return;
-     const ratio=Math.max(0,Math.min(1,(clientX-r.left)/r.width));
-     const pct=Math.round(ratio*100);
-     range.style.setProperty('--vol',pct+'%');
-     range.setAttribute('aria-valuenow',String(pct));
-     if(valueEl)valueEl.textContent=pct+'%';
-     setMusicVolume(pct/100);
+   const syncVolumeUI=(pct)=>{
+     const n=Math.max(0,Math.min(100,Math.round(Number(pct)||0)));
+     range.style.setProperty('--vol',n+'%');
+     volumeInput.value=String(n);
+     if(valueEl)valueEl.textContent=n+'%';
    };
-   const start=(clientX)=>{dragging=true;musicUserInteracting=true;setFromClientX(clientX)};
-   const move=(clientX)=>{if(dragging)setFromClientX(clientX)};
-   const finish=()=>{dragging=false;musicUserInteracting=false;updateMusicButton()};
-   range.addEventListener('pointerdown',e=>{e.preventDefault();start(e.clientX);try{range.setPointerCapture(e.pointerId)}catch(_){}},{passive:false});
-   range.addEventListener('pointermove',e=>{if(dragging){e.preventDefault();move(e.clientX)}},{passive:false});
-   range.addEventListener('pointerup',e=>{e.preventDefault();finish()},{passive:false});
-   range.addEventListener('pointercancel',finish);
-   range.addEventListener('lostpointercapture',finish);
-   range.addEventListener('touchstart',e=>{if(e.touches[0]){e.preventDefault();start(e.touches[0].clientX)}},{passive:false});
-   range.addEventListener('touchmove',e=>{if(dragging&&e.touches[0]){e.preventDefault();move(e.touches[0].clientX)}},{passive:false});
-   range.addEventListener('touchend',finish,{passive:true});
-   range.addEventListener('touchcancel',finish,{passive:true});
-   range.addEventListener('keydown',e=>{
-     let v=currentMusicVolume()*100;
-     if(e.key==='ArrowLeft'||e.key==='ArrowDown')v-=1;
-     else if(e.key==='ArrowRight'||e.key==='ArrowUp')v+=1;
-     else if(e.key==='Home')v=0;
-     else if(e.key==='End')v=100;
-     else return;
-     e.preventDefault();
-     range.style.setProperty('--vol',Math.round(v)+'%');
-     range.setAttribute('aria-valuenow',String(Math.round(v)));
-     if(valueEl)valueEl.textContent=Math.round(v)+'%';
-     setMusicVolume(v/100);
+   syncVolumeUI(Math.round(a.volume*100));
+   volumeInput.addEventListener('input',()=>{
+     setMusicVolume(Number(volumeInput.value)/100);
+     syncVolumeUI(volumeInput.value);
+   });
+   volumeInput.addEventListener('change',()=>{
+     setMusicVolume(Number(volumeInput.value)/100);
+     syncVolumeUI(volumeInput.value);
    });
  }
  const shuffle=document.getElementById('musicShuffle');if(shuffle)shuffle.addEventListener('click',()=>{musicShuffle=!musicShuffle;safeStorage.setItem(MUSIC_SHUFFLE_KEY,musicShuffle?'1':'0');updateMusicButton()});
