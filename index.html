@@ -1554,7 +1554,11 @@ function exportHistoryCsv(){exportFilteredHistoryCsv();}
 const MUSIC_KEY='tinhMiLonMusic';
 const MUSIC_VOLUME_KEY='tinhMiLonMusicVolume';
 const MUSIC_TRACK_KEY='tinhMiLonMusicTrack';
-const MUSIC_PLAYLIST=[{src:'song-city.m4a',vi:'Đó chỉ là thành phố của anh',en:'That’s Just Your City'},{src:'song-10k-years.m4a',vi:'10 ngàn năm',en:'Ten Thousand Years'}];
+const MUSIC_PLAYLIST=[
+  {src:'song-city.m4a',vi:'Đó chỉ là thành phố của anh',en:'That’s Just Your City'},
+  {src:'song-10k-years.m4a',vi:'10 ngàn năm',en:'Ten Thousand Years'},
+  {src:'https://ikrjxdpmnxtyafrdpygh.supabase.co/storage/v1/object/public/MUSIC/Struct%20x%20Legends.m4a',vi:'Struct x Legends',en:'Struct x Legends'}
+];
 let musicTrackIndex=0;
 let musicPopTimer=null;
 let musicAudioContext=null;
