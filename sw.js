@@ -1,4 +1,4 @@
-const CACHE_NAME='tinh-mi-lon-mobile-v74-focusfix';
+const CACHE_NAME='tinh-mi-lon-mobile-v74-zalo-footer';
 const CORE_ASSETS = [
   './',
   './index.html',

@@ -36,9 +36,9 @@
 *{box-sizing:border-box;-webkit-tap-highlight-color:transparent}
 html{height:100%;background:var(--bg);overscroll-behavior:none}
 body{
-  margin:0; min-height:100%; background:var(--bg); color:var(--text);
+  margin:0; min-height:100%; min-height:100dvh; display:flex; flex-direction:column; background:var(--bg); color:var(--text);
   font-family:-apple-system,BlinkMacSystemFont,"SF Pro Display","SF Pro Text",system-ui,sans-serif;
-  padding-bottom:max(24px,env(safe-area-inset-bottom)); overscroll-behavior:none;
+  padding-bottom:env(safe-area-inset-bottom); overscroll-behavior:none;
 }
 body::before{content:"";position:fixed;inset:0;z-index:-1;background-image:var(--app-bg-image);background-size:var(--app-bg-size);background-position:var(--app-bg-position);background-repeat:no-repeat;opacity:var(--app-bg-opacity);filter:var(--app-bg-filter);pointer-events:none}
 body.theme-pink{--bg:#fff1f7;--card:#ffffff;--card2:#fff7fa;--text:#3b1025;--muted:#8a6073;--line:#f3c9da;--blue:#e83e8c;--blue2:#d62f7b;--green:#159957;--orange:#e58b16;--red:#d92d50;--shadow:0 8px 28px rgba(232,62,140,.13);--overlay:rgba(59,16,37,.32)}
@@ -61,7 +61,7 @@ body.theme-carbon{--bg:#111315;--card:#1b1e21;--card2:#24282b;--text:#f3f5f6;--m
 .theme-actions{display:grid;grid-template-columns:1fr 1fr;gap:9px}
 
 button,input{font:inherit} button{touch-action:manipulation}
-.container{width:100%;max-width:520px;margin:0 auto;padding:max(12px,env(safe-area-inset-top)) 14px 28px}
+.container{width:100%;max-width:520px;flex:1 0 auto;margin:0 auto;padding:max(12px,env(safe-area-inset-top)) 14px 28px}
 h1{font-size:31px;line-height:1.08;letter-spacing:-1.1px;margin:16px 2px 4px;font-weight:800}
 .subtitle{margin:0 2px 18px;color:var(--muted);font-size:14px;line-height:1.45}
 .menu{display:grid;grid-template-columns:1fr 1fr;gap:11px}
@@ -624,7 +624,12 @@ input,select,textarea{scroll-margin-top:100px;scroll-margin-bottom:32px}
 </section>
 <div class="container">
 <div id="menu">
-<h1>Tính Mí Lon</h1>
+<div class="app-brand-row">
+  <div class="app-brand-copy"><h1>Tính Mí Lon</h1><div class="app-brand-subtitle">Công cụ tính toán thông số mí ghép lon</div></div>
+  <button class="contact-qr-trigger" type="button" onclick="openContactQR()" aria-label="Mở mã QR liên hệ" title="Liên hệ">
+    <span class="contact-qr-mini"><img src="data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAQgAAAEIAQAAAACLjVdSAAABTUlEQVR4nO2Yyw7CMAwEdxD//8vLwU7aIiFOuEYJF9JoDivLj3Wwvvwe34BNbGITixJPSSLOzoNPN32UFsZDls5R8fmmi9JSApCEj9yIm2od7QjEKJtbdfQgsGTsz0SNjvuI6B8aEcAg5OOmjdLKeIwCMZIxOpVMF6WF8Tjqw2//ZTq6EFgSRpq+w8r0cKGOdoRlhGxHTPLQUOlPiVO9ILKBRA8JY9ZGaWk/tUa5TGNqeWV/KochhREZVqyXhySFA7PDsWNsOcx7M6VVBGbkQzQSoZX3uciPuboYyUvO2/TraUFyqGQn8YL1gi8fjNyIJaZORxeC6UbnqLUwscWs6j8yEjjmSyTIkvmR/YO5thgTfowV++k7AWOXGwO4q9LfEM/LV5ZIPJMt6dcv72NZImg20zIdXYjL+1g+hmRiLPm+fvEfN+rYxCY28X/EC6UQdijtI1k+AAAAAElFTkSuQmCC" alt="Mã QR liên hệ"></span><span class="contact-qr-label">Liên hệ</span>
+  </button>
+</div>
 <div class="network-pill" id="networkPill"><span class="network-dot"></span><span id="networkText">Bạn đang ngoại tuyến. Dữ liệu vẫn hoạt động trên thiết bị.</span></div>
 <div class="update-card" id="updateCard">
 <div class="update-copy"><b>Có phiên bản mới</b><span>Bản cập nhật đã sẵn sàng để sử dụng.</span></div>
@@ -2708,4 +2713,53 @@ function runFormulaSelfTest(){
 }
 
 </script>
+
+<style id="contact-qr-style">
+.app-brand-row{display:flex;align-items:center;justify-content:space-between;gap:12px;margin:0 0 14px;padding:0 2px 14px;border-bottom:1px solid var(--line)}
+.app-brand-copy{min-width:0;flex:1}
+.app-brand-row h1{margin:0 0 6px;font-size:29px;line-height:1.15;letter-spacing:-.7px;font-weight:800}
+.app-brand-subtitle{font-size:13px;line-height:1.4;color:var(--muted)}
+.contact-qr-trigger{flex:0 0 60px;width:60px;min-height:60px;padding:6px 5px;border:1px solid var(--line);border-radius:12px;background:var(--card);color:var(--muted);display:flex;flex-direction:column;align-items:center;justify-content:center;gap:3px;cursor:pointer;box-shadow:none}
+.contact-qr-mini{width:27px;height:27px;display:block}
+.contact-qr-mini img{display:block;width:100%;height:100%;object-fit:contain}
+.contact-qr-label{font-size:10px;line-height:1.1}
+.contact-qr-modal{position:fixed;inset:0;z-index:10060;background:#0008;display:none;align-items:center;justify-content:center;padding:20px}
+.contact-qr-modal.open{display:flex}
+.contact-qr-card{width:min(100%,370px);max-height:90dvh;overflow:auto;background:var(--card);color:var(--text);border:1px solid var(--line);border-radius:22px;padding:22px;box-shadow:0 18px 60px #0003;text-align:center}
+.contact-qr-card-head{display:flex;align-items:center;justify-content:space-between;gap:10px;text-align:left}
+.contact-qr-card-head h2{font-size:20px;margin:0}
+.contact-qr-close{width:36px;height:36px;border:0;border-radius:50%;background:var(--bg);color:var(--text);font-size:22px;cursor:pointer}
+.contact-qr-large{display:block;width:min(100%,270px);height:auto;aspect-ratio:1;object-fit:contain;margin:18px auto 10px;background:#fff;border-radius:8px}
+.contact-qr-help{font-size:13px;color:var(--muted);margin:0 0 14px}
+.contact-qr-details{text-align:left;border-top:1px solid var(--line);padding-top:12px;font-size:13px;line-height:1.8;overflow-wrap:anywhere}
+.contact-qr-details a{color:var(--blue);text-decoration:none}
+@media(max-width:380px){.app-brand-row h1{font-size:26px}.app-brand-subtitle{font-size:12px}}
+</style>
+<section class="contact-qr-modal" id="contactQRModal" role="dialog" aria-modal="true" aria-labelledby="contactQRTitle" onclick="if(event.target===this)closeContactQR()">
+  <div class="contact-qr-card">
+    <div class="contact-qr-card-head"><h2 id="contactQRTitle">Danh thiếp điện tử</h2><button class="contact-qr-close" type="button" onclick="closeContactQR()" aria-label="Đóng">×</button></div>
+    <img class="contact-qr-large" src="data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAQgAAAEIAQAAAACLjVdSAAABTUlEQVR4nO2Yyw7CMAwEdxD//8vLwU7aIiFOuEYJF9JoDivLj3Wwvvwe34BNbGITixJPSSLOzoNPN32UFsZDls5R8fmmi9JSApCEj9yIm2od7QjEKJtbdfQgsGTsz0SNjvuI6B8aEcAg5OOmjdLKeIwCMZIxOpVMF6WF8Tjqw2//ZTq6EFgSRpq+w8r0cKGOdoRlhGxHTPLQUOlPiVO9ILKBRA8JY9ZGaWk/tUa5TGNqeWV/KochhREZVqyXhySFA7PDsWNsOcx7M6VVBGbkQzQSoZX3uciPuboYyUvO2/TraUFyqGQn8YL1gi8fjNyIJaZORxeC6UbnqLUwscWs6j8yEjjmSyTIkvmR/YO5thgTfowV++k7AWOXGwO4q9LfEM/LV5ZIPJMt6dcv72NZImg20zIdXYjL+1g+hmRiLPm+fvEfN+rYxCY28X/EC6UQdijtI1k+AAAAAElFTkSuQmCC" alt="Mã QR danh thiếp Bùi Võ Hoàng Duy">
+    <p class="contact-qr-help">Quét mã QR để mở danh thiếp Zalo của tôi</p>
+    <div class="contact-qr-details">
+      <strong>Bùi Võ Hoàng Duy</strong><br>
+      Điện thoại: <a href="tel:0972538502">0972538502</a><br>
+      Zalo: <a href="https://zalo.me/0972538502" target="_blank" rel="noopener">Mở danh thiếp Zalo</a><br>
+      Email: <a href="mailto:buivohoangduy01@gmail.com">buivohoangduy01@gmail.com</a><br>
+      Facebook: <a href="https://www.facebook.com/hoang.duy.731505" target="_blank" rel="noopener">Trang cá nhân</a><br>
+      LinkedIn: <a href="https://www.linkedin.com/in/ho%C3%A0ng-duy-b%C3%B9i-v%C3%B5-071655436/" target="_blank" rel="noopener">Hồ sơ LinkedIn</a>
+    </div>
+  </div>
+</section>
+<script>
+function openContactQR(){const e=document.getElementById('contactQRModal');if(e)e.classList.add('open')}
+function closeContactQR(){const e=document.getElementById('contactQRModal');if(e)e.classList.remove('open')}
+</script>
+<style id="author-credit-style">
+.author-credit{flex:0 0 auto;margin:22px 4px 10px;text-align:center;padding-bottom:max(8px,env(safe-area-inset-bottom));color:var(--muted);font-size:11px;line-height:1.6}.author-credit button{border:0;background:transparent;color:var(--blue);font:inherit;font-weight:800;padding:6px 8px;cursor:pointer}.author-modal{position:fixed;inset:0;z-index:10050;background:#0008;display:none;align-items:center;justify-content:center;padding:20px}.author-modal.open{display:flex}.author-card{width:min(100%,390px);background:var(--card);color:var(--text);border:1px solid var(--line);border-radius:24px;padding:22px;box-shadow:0 18px 60px #0003}.author-card h2{margin:0 0 5px;font-size:21px}.author-card p{font-size:14px;line-height:1.65;color:var(--muted);margin:10px 0}.author-card .author-name{font-size:17px;font-weight:800;color:var(--text)}.author-card button{border:0;border-radius:12px;background:var(--blue);color:white;padding:11px 18px;font-weight:800;width:100%;margin-top:8px}
+</style>
+<div class="author-credit">TÍNH MÍ LON · Phát triển bởi <button type="button" onclick="openAuthorInfo()">Bùi Võ Hoàng Duy</button></div>
+<section class="author-modal" id="authorInfoModal" role="dialog" aria-modal="true" aria-labelledby="authorInfoTitle" onclick="if(event.target===this)closeAuthorInfo()">
+ <div class="author-card"><h2 id="authorInfoTitle">TÍNH MÍ LON</h2><div style="color:var(--muted);font-size:12px">Ứng dụng tính toán và kiểm tra mí ghép lon</div><p class="author-name">Tác giả &amp; phát triển: Bùi Võ Hoàng Duy</p><p>Ứng dụng được nghiên cứu và phát triển nhằm hỗ trợ tính toán, kiểm tra các thông số mí ghép lon trong công việc kỹ thuật.</p><p style="font-size:11px">© 2026 Bùi Võ Hoàng Duy</p><button type="button" onclick="closeAuthorInfo()">Đóng</button></div>
+</section>
+<script>function openAuthorInfo(){const e=document.getElementById('authorInfoModal');if(e)e.classList.add('open')}function closeAuthorInfo(){const e=document.getElementById('authorInfoModal');if(e)e.classList.remove('open')}document.addEventListener('keydown',function(e){if(e.key==='Escape')closeAuthorInfo()});</script>
 </body></html>
