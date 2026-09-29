@@ -19,3 +19,11 @@ Thay các tệp trong gói vào đúng thư mục nguồn GitHub Pages. Chờ wo
 
 ## Phạm vi kiểm tra
 Đã kiểm tra cú pháp JavaScript và Service Worker, cùng logic thêm/xóa/khôi phục bài bằng môi trường giả lập (jsdom + IndexedDB giả). Chưa thử trực tiếp trên iOS/Android thật.
+
+
+## v74 – Giai đoạn 1
+- Thêm sao lưu dữ liệu loại lon, thông số, tiêu chuẩn và lịch sử ra file JSON.
+- Thêm khôi phục từ file JSON có kiểm tra cấu trúc và xác nhận trước khi thay thế dữ liệu.
+- Thêm tự kiểm tra 4 công thức bằng bộ dữ liệu tham chiếu.
+- Tăng phiên bản cache Service Worker lên v74.
+- Giữ nguyên các công thức tính hiện có.

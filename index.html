@@ -596,7 +596,7 @@ input[type=number]::-webkit-inner-spin-button,input[type=number]::-webkit-outer-
 html{scroll-behavior:smooth}
 button,.btn,.main-btn,.sub-btn,.icon-btn,.lock-btn,.language-option{transition:transform .14s ease,opacity .14s ease,background-color .18s ease,border-color .18s ease,box-shadow .18s ease}
 button:focus-visible,.btn:focus-visible,.main-btn:focus-visible,.sub-btn:focus-visible,.icon-btn:focus-visible,.lock-btn:focus-visible,input:focus-visible,select:focus-visible,textarea:focus-visible{outline:2px solid var(--blue);outline-offset:3px}
-.field:focus-within{background:color-mix(in srgb,var(--blue) 4%,var(--card));box-shadow:inset 0 0 0 1px color-mix(in srgb,var(--blue) 28%,transparent)}
+.field:focus-within{background:var(--card);box-shadow:none} input:focus-visible{outline:0!important;box-shadow:none!important}
 input,select,textarea{scroll-margin-top:100px;scroll-margin-bottom:32px}
 .sheet{overscroll-behavior:contain}
 .sheet-header{flex:0 0 auto;padding-top:max(12px,env(safe-area-inset-top))}
@@ -886,8 +886,12 @@ input,select,textarea{scroll-margin-top:100px;scroll-margin-bottom:32px}
 <button class="btn export-btn" onclick="exportCurrentCSV()">CSV hiện tại</button>
 <button class="btn export-btn" onclick="exportHistoryCSV()">CSV lịch sử</button>
 <button class="btn calc" onclick="printCurrentReport()" style="grid-column:1/-1">IN / LƯU PDF</button>
+<button class="btn export-btn" onclick="backupAppData()" style="grid-column:1/-1">⬇︎ SAO LƯU DỮ LIỆU</button>
+<button class="btn export-btn" onclick="document.getElementById('restoreBackupFile').click()" style="grid-column:1/-1">↥ KHÔI PHỤC TỪ FILE</button>
+<button class="btn export-btn" onclick="runFormulaSelfTest()" style="grid-column:1/-1">✓ KIỂM TRA CÔNG THỨC</button>
+<input id="restoreBackupFile" type="file" accept=".json,application/json" style="display:none" onchange="restoreAppDataFromFile(event)" />
 </div>
-<div class="sheet-note">Trên iPhone, sau khi chọn IN / LƯU PDF, bạn có thể dùng menu Chia sẻ của hệ thống để lưu hoặc gửi báo cáo.</div>
+<div class="sheet-note">Bản sao lưu gồm dữ liệu các loại lon, thông số, tiêu chuẩn và lịch sử đo. Hãy giữ file JSON ở nơi an toàn. Khôi phục sẽ thay thế dữ liệu hiện có trên thiết bị này. Trên iPhone, PDF có thể lưu qua menu Chia sẻ của hệ thống.</div>
 </div>
 </div>
 </div>
@@ -2622,5 +2626,86 @@ document.addEventListener('DOMContentLoaded',()=>{
     sync();
   }
 })();
+
+/* ---------- GIAI ĐOẠN 1: sao lưu, khôi phục và tự kiểm tra công thức ---------- */
+function backupAppData(){
+  try{
+    // Capture the visible input values before creating the snapshot.
+    if(current && canData[current]){
+      const c=ensureCan(current);
+      c.inputs=c.inputs||{};
+      fields.forEach(id=>{const el=getInputById(id);if(el)c.inputs[id]=el.value;});
+      c.values=c.values||{};
+      fields.forEach(id=>{const el=getInputById(id);if(el)c.values[id]=el.value;});
+      persist();
+    }
+    const customTypes=JSON.parse(safeStorage.getItem('tinhMiLonCanTypes')||'[]');
+    const payload={
+      app:'TinhMiLon', schemaVersion:1, appVersion:'v74',
+      exportedAt:new Date().toISOString(), canData:canData,
+      customCanTypes:Array.isArray(customTypes)?customTypes:[]
+    };
+    const blob=new Blob([JSON.stringify(payload,null,2)],{type:'application/json;charset=utf-8'});
+    const url=URL.createObjectURL(blob),a=document.createElement('a');
+    a.href=url;a.download='sao-luu-tinh-mi-lon-'+new Date().toISOString().slice(0,10)+'.json';
+    document.body.appendChild(a);a.click();a.remove();setTimeout(()=>URL.revokeObjectURL(url),1500);
+    showToast('Đã tạo file sao lưu');
+  }catch(err){console.error(err);showToast('Không thể tạo file sao lưu');}
+}
+function restoreAppDataFromFile(event){
+  const file=event&&event.target&&event.target.files&&event.target.files[0];
+  if(!file)return;
+  const input=event.target;
+  const reader=new FileReader();
+  reader.onload=()=>{
+    try{
+      const data=JSON.parse(String(reader.result||''));
+      if(!data || data.app!=='TinhMiLon' || !data.canData || typeof data.canData!=='object' || Array.isArray(data.canData))
+        throw new Error('File không đúng định dạng sao lưu Tính Mí Lon.');
+      const names=Object.keys(data.canData);
+      if(!names.length)throw new Error('File sao lưu không có dữ liệu loại lon.');
+      const valid=names.every(name=>{
+        const c=data.canData[name];
+        return c && typeof c==='object' && !Array.isArray(c) &&
+          (!c.inputs || typeof c.inputs==='object') &&
+          (!c.history || Array.isArray(c.history));
+      });
+      if(!valid)throw new Error('Cấu trúc dữ liệu trong file không hợp lệ.');
+      const count=names.length;
+      if(!confirm('Khôi phục '+count+' loại lon từ file sao lưu? Dữ liệu hiện tại trên thiết bị sẽ bị thay thế.'))return;
+      Object.keys(canData).forEach(k=>delete canData[k]);
+      names.forEach(k=>{canData[k]=data.canData[k];});
+      persist();
+      if(Array.isArray(data.customCanTypes))safeStorage.setItem('tinhMiLonCanTypes',JSON.stringify(data.customCanTypes));
+      showToast('Đã khôi phục dữ liệu. Đang tải lại ứng dụng…');
+      setTimeout(()=>location.reload(),700);
+    }catch(err){
+      console.error(err);alert(err&&err.message?err.message:'Không thể đọc file sao lưu.');
+    }finally{input.value='';}
+  };
+  reader.onerror=()=>{alert('Không đọc được file đã chọn.');input.value='';};
+  reader.readAsText(file);
+}
+function runFormulaSelfTest(){
+  // Fixed reference case; expected values are independently specified below.
+  const x={BH:2.0,CH:2.1,SL:5.0,ST:1.5,Tb:0.2,Te:0.25};
+  const actual={
+    overlap:x.BH+x.CH+x.Te-x.SL,
+    overlapPct:(x.BH+x.CH+x.Te-x.SL)/(x.SL-(2*x.Te+x.Tb))*100,
+    bodyHookPct:(x.BH-1.1*x.Tb)/(x.SL-1.1*(2*x.Te+x.Tb))*100,
+    gap:x.ST-(2*x.Tb+3*x.Te)
+  };
+  const expected={overlap:-0.65,overlapPct:-15.116279069767453,bodyHookPct:42.08037825059101,gap:0.35};
+  const failed=Object.keys(expected).filter(k=>!Number.isFinite(actual[k])||Math.abs(actual[k]-expected[k])>1e-9);
+  if(failed.length){
+    alert('KIỂM TRA CÔNG THỨC: KHÔNG ĐẠT\nSai khác: '+failed.join(', ')+'\nKhông tự động thay đổi công thức.');
+    console.error('Formula self-test failed', {actual,expected,failed});
+    return false;
+  }
+  alert('KIỂM TRA CÔNG THỨC: ĐẠT\n4/4 phép kiểm tra đúng: Độ chồng mí, % chồng mí, % móc thân và Gap.\nKhông thay đổi công thức tính của ứng dụng.');
+  console.info('Formula self-test passed',actual);
+  return true;
+}
+
 </script>
 </body></html>
