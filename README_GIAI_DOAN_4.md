@@ -12,3 +12,10 @@ Giải nén và thay toàn bộ tệp trên GitHub Pages. Mở ứng dụng khi 
 
 ## Phạm vi kiểm tra
 Đã kiểm tra cú pháp JavaScript inline và Service Worker, cùng cấu trúc ZIP. Chưa thực hiện kiểm thử tương tác trực tiếp trên thiết bị iOS/Android.
+
+
+## V81 – Bước 4 Match/Cascade
+- Burst/shockwave khi gem được match.
+- Floating score và COMBO banner.
+- Cascade/fall trail nhẹ khi đá rơi và đá mới xuất hiện.
+- Giới hạn particle và animation để ưu tiên iPhone 14.

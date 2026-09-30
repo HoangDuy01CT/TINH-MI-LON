@@ -1,15 +1,30 @@
-const CACHE_NAME='tinh-mi-lon-mobile-v74-zalo-footer';
+const CACHE_NAME='tinh-mi-lon-mobile-v89-menu-fix';
 const CORE_ASSETS = [
   './',
   './index.html',
-  './manifest.webmanifest?v=27',
+  './manifest.webmanifest?v=89',
   './song-city.mp3',
   './song-10k-years.mp3',
   './icons/icon-192-v8.png',
   './icons/icon-512-v8.png',
   './icons/apple-touch-icon-v8.png',
   './icons/favicon-32-v8.png',
-  './icons/splash-1290x2796-v8.png'
+  './icons/splash-1290x2796-v8.png',
+  './game.js',
+  './game/images/background_crystal_v79.png',
+  './game/images/gem_0_red.png',
+  './game/images/gem_1_orange.png',
+  './game/images/gem_2_yellow.png',
+  './game/images/gem_3_green.png',
+  './game/images/gem_4_blue.png',
+  './game/images/gem_5_purple.png',
+  './game/images/gem_6_pearl.png',
+  './game/images/select.wav',
+  './game/images/swap.wav',
+  './game/images/match.wav',
+  './game/images/combo.wav',
+  './game/images/special.wav',
+  './game/images/error.wav'
 ];
 
 async function cacheResponse(request, response) {

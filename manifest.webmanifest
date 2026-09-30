@@ -3,9 +3,9 @@
   "short_name": "Mí Lon",
   "description": "Ứng dụng tính thông số mí lon và tự đánh giá Đạt / Không đạt theo tiêu chuẩn riêng của từng loại lon",
   "lang": "vi",
-  "start_url": "./",
+  "start_url": "./?v=75",
   "scope": "./",
-  "id": "./",
+  "id": "./?v=75",
   "display": "standalone",
   "display_override": [
     "window-controls-overlay",
