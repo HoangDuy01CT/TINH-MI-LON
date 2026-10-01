@@ -40,12 +40,10 @@ let audioUnlocked=false;
 function unlockAudio(){
   if(audioUnlocked)return;
   audioUnlocked=true;
-  for(const a of Object.values(sounds)){
-    try{const v=a.volume;a.volume=0;a.currentTime=0;const p=a.play();if(p&&p.catch)p.catch(()=>{});a.pause();a.currentTime=0;a.volume=v;}catch(_){}
-  }
-  for(const pool of Object.values(soundPools)) for(const a of pool){
-    try{a.volume=0;a.currentTime=0;const p=a.play();if(p&&p.catch)p.catch(()=>{});a.pause();a.currentTime=0;}catch(_){}
-  }
+  // Unlock only one short audio element. The old version touched every pooled
+  // audio object on the first tap, which could cause a visible hitch.
+  const a=sounds.select;if(!a)return;
+  try{const v=a.volume;a.volume=0;a.currentTime=0;const p=a.play();if(p&&p.catch)p.catch(()=>{});a.pause();a.currentTime=0;a.volume=v;}catch(_){}
 }
 let board=[],selected=null,state='menu',score=0,moves=START_MOVES,level=1,progress=0,combo=0,banner='',bannerT=0,hint=null,hintT=0,particles=[],last=0,swapInfo=null,phase=0,reverting=false,soundOn=(GAME_STORAGE.getItem('tinh-mi-lon-game-sound')!=='off'),hapticOn=(GAME_STORAGE.getItem('tinh-mi-lon-game-haptic')!=='off'),warningT=0;
 let hintCooldown=0;
@@ -137,14 +135,9 @@ function updatePerformance(dt){
   }
 }
 function perfCanRender(){
-  if(!running)return false;
-  const p=performanceProfile();
-  if(qualityMode!=='performance' && p.adaptive<.72)return true;
-  if(p.adaptive<.35)return true;
-  // Under sustained frame pressure, performance mode may skip one expensive draw
-  // while keeping simulation/input responsive.
-  perfSkip=(perfSkip+1)%2;
-  return perfSkip===0;
+  // Continuous rendering feels smoother than dropping alternate frames.
+  // Adaptive quality lowers GPU work instead of making cascades look frozen.
+  return running;
 }
 
 let specialActivations=0;
@@ -480,14 +473,14 @@ let saveFlashText='';
 
 // ===== STEP 24: FIRST-RUN TUTORIAL =====
 const TUTORIAL_KEY='tinh-mi-lon-tutorial-v124';
-const TUTORIAL_VERSION=1;
+const TUTORIAL_VERSION=2;
 const TUTORIAL_STEPS=[
-  {title:'CHÀO MỪNG ĐẾN BEJEWELED',icon:'💎',body:'Ghép 3 viên ngọc cùng màu để ghi điểm và hoàn thành mục tiêu của từng Level.',hint:'Bạn có thể bỏ qua hướng dẫn và xem lại bất cứ lúc nào trong Settings.'},
-  {title:'1 • ĐỔI 2 VIÊN NGỌC',icon:'🔄',body:'Chạm/kéo một viên ngọc sang ô bên cạnh để đổi vị trí. Chỉ nước đi hợp lệ mới được tính Move.',hint:'Trên máy tính: click + kéo. Trên điện thoại: chạm + vuốt.'},
-  {title:'2 • TẠO MATCH',icon:'✨',body:'Tạo hàng hoặc cột có từ 3 viên cùng loại. Các viên được ghép sẽ biến mất và ngọc mới rơi xuống.',hint:'Chuỗi match liên tiếp trong một lượt sẽ tạo Combo Chain.'},
-  {title:'3 • SPECIAL GEM',icon:'⚡',body:'Ghép 4 hoặc 5 viên để tạo Special Gem. Ghép hình L/T có thể tạo Bomb và các Special có thể Fusion với nhau.',hint:'Special + Special tạo ra những vụ nổ mạnh hơn rất nhiều.'},
-  {title:'4 • COMBO & MỤC TIÊU',icon:'🔥',body:'Cascade liên tiếp làm Combo tăng từ x2 đến x5. Mỗi Level có mục tiêu, số Move và độ khó riêng.',hint:'Theo dõi Score, Moves, Objective và Difficulty trên HUD.'},
-  {title:'5 • BOOSTER & TRỢ GIÚP',icon:'🛠️',body:'Hammer phá một ô, Shuffle sắp xếp lại bàn và +5 Moves tăng lượt chơi. Smart Hint/AI có thể gợi ý nước đi.',hint:'Booster không thay thế chiến thuật — hãy dùng đúng thời điểm.'}
+  {title:'CHÀO MỪNG ĐẾN BEJEWELED',icon:'💎',body:'Ghép 3 viên ngọc cùng màu để ghi điểm và hoàn thành mục tiêu của từng Level.',hint:'Bắt đầu từ 3 viên cùng màu — sau đó khám phá các cơ chế nâng cao.',board:[4,4,4,1,2,3,5,6,0],highlight:[0,1,2]},
+  {title:'1 • ĐỔI 2 VIÊN NGỌC',icon:'🔄',body:'Chạm/kéo một viên ngọc sang ô bên cạnh để đổi vị trí. Chỉ nước đi hợp lệ mới được tính Move.',hint:'Máy tính: kéo chuột. Điện thoại: chạm rồi vuốt.',board:[4,1,2,3,4,5,6,0,1],highlight:[1,2]},
+  {title:'2 • TẠO MATCH',icon:'✨',body:'Tạo hàng hoặc cột có từ 3 viên cùng loại. Các viên được ghép sẽ biến mất và ngọc mới rơi xuống.',hint:'Cascade liên tiếp trong cùng một lượt sẽ tăng Combo Chain.',board:[4,4,4,1,2,3,5,6,0],highlight:[0,1,2]},
+  {title:'3 • SPECIAL GEM',icon:'⚡',body:'Ghép 4 hoặc 5 viên để tạo Special Gem. Ghép hình L/T có thể tạo Bomb và các Special có thể Fusion với nhau.',hint:'4/5 viên hoặc L/T có thể tạo Special; Special + Special tạo Fusion.',board:[4,4,4,4,1,2,3,5,6],highlight:[0,1,2,3]},
+  {title:'4 • COMBO & MỤC TIÊU',icon:'🔥',body:'Cascade liên tiếp làm Combo tăng từ x2 đến x5. Mỗi Level có mục tiêu, số Move và độ khó riêng.',hint:'Ưu tiên Objective của Level và tận dụng Combo để tăng điểm.',board:[4,4,4,1,2,3,5,6,0],highlight:[0,1,2,3,4,5]},
+  {title:'5 • BOOSTER & TRỢ GIÚP',icon:'🛠️',body:'Hammer phá một ô, Shuffle sắp xếp lại bàn và +5 Moves tăng lượt chơi. Smart Hint/AI có thể gợi ý nước đi.',hint:'Booster mở từ nút BOOST; hãy dùng đúng thời điểm để tiết kiệm lượt.',board:[4,1,2,3,4,5,6,0,1],highlight:[6,7,8]}
 ];
 let tutorialStep=0;
 function tutorialSeen(){try{const d=JSON.parse(GAME_STORAGE.getItem(TUTORIAL_KEY)||'{}');return d.version===TUTORIAL_VERSION&&d.seen===true}catch(_){return false}}
@@ -1419,11 +1412,7 @@ function drawBackground(w,h){
   veil.addColorStop(1,'rgba(5,5,20,.58)');
   ctx.fillStyle=veil;ctx.fillRect(0,0,w,h);
   // Subtle theme tint, deliberately low-cost and static.
-  const tint=ctx.createRadialGradient(w*.5,h*.36,0,w*.5,h*.36,w*.58);
-  tint.addColorStop(0,'rgba(130,170,255,.10)');
-  tint.addColorStop(.55,'rgba(100,110,220,.035)');
-  tint.addColorStop(1,'rgba(0,0,0,.10)');
-  ctx.fillStyle=tint;ctx.fillRect(0,0,w,h);
+  ctx.fillStyle='rgba(90,115,220,.045)';ctx.fillRect(0,h*.10,w,h*.58);
   // Calm star points: no moving particles here, keeping the new background stable.
   const pp=performanceProfile();
   if(pp.motif){
@@ -1439,6 +1428,7 @@ function drawBackground(w,h){
   }
 }
 function draw(){
+  const drawPerf=performanceProfile();
   const w=parseFloat(canvas.style.width)||DESIGN_W,h=parseFloat(canvas.style.height)||DESIGN_H;
   const u=cell.s/74; // draw-scope UI scale
   ctx.clearRect(0,0,w,h); drawBackground(w,h);
@@ -1475,16 +1465,16 @@ function draw(){
   if(selected) {outline(selected.r,selected.c,'rgba(255,235,150,.98)',3); pulseSelected(selected.r,selected.c);}
   if(hint&&hintT>0){const a=.55+.45*Math.sin(performance.now()/100);outline(hint[0].r,hint[0].c,'rgba(255,255,255,'+a+')',3);outline(hint[1].r,hint[1].c,'rgba(255,255,255,'+a+')',3)}
   // Localized impact ring: only the match area reacts; the rest of the board remains stable.
-  for(const li of localImpacts){const p=1-li.life/li.max;const a=(1-p)*.34*li.strength;const rr=li.radius*(.35+p*1.18);ctx.save();ctx.globalAlpha=a;ctx.strokeStyle='rgba(255,235,170,.96)';ctx.lineWidth=Math.max(1.5,cell.s*.022);ctx.shadowColor='#ffd66d';ctx.shadowBlur=8;ctx.beginPath();ctx.arc(li.x,li.y,rr,0,Math.PI*2);ctx.stroke();ctx.shadowBlur=0;ctx.restore();}
+  for(const li of localImpacts){const p=1-li.life/li.max;const a=(1-p)*.34*li.strength;const rr=li.radius*(.35+p*1.18);ctx.save();ctx.globalAlpha=a;ctx.strokeStyle='rgba(255,235,170,.96)';ctx.lineWidth=Math.max(1.5,cell.s*.022);if(drawPerf.shadow>.35){ctx.shadowColor='#ffd66d';ctx.shadowBlur=8;}ctx.beginPath();ctx.arc(li.x,li.y,rr,0,Math.PI*2);ctx.stroke();ctx.shadowBlur=0;ctx.restore();}
   for(const e of effects){
-    if(performanceProfile().effectScale<.62 && (e.type==='fusion'||e.type==='rainbow'||e.type==='banner')) continue;
+    if(drawPerf.effectScale<.62 && (e.type==='fusion'||e.type==='rainbow'||e.type==='banner')) continue;
     const p=1-e.life/e.max, a=Math.max(0,1-p)*motionScale();
     ctx.save();ctx.globalAlpha=a;
     if(e.type==='nearMiss'){
       const p=1-e.life/e.max,pulse=.72+.28*Math.sin(performance.now()/95);
       for(const q of e.pair){
         ctx.strokeStyle='rgba(255,226,117,'+(0.55+0.35*pulse)+')';ctx.lineWidth=Math.max(2.5,cell.s*.045);
-        ctx.shadowColor='#ffd86b';ctx.shadowBlur=12;ctx.beginPath();ctx.arc(cellX(q.c),cellY(q.r),cell.s*(.34+.10*Math.sin(p*8)),0,Math.PI*2);ctx.stroke();
+        if(drawPerf.shadow>.35){ctx.shadowColor='#ffd86b';ctx.shadowBlur=12;}ctx.beginPath();ctx.arc(cellX(q.c),cellY(q.r),cell.s*(.34+.10*Math.sin(p*8)),0,Math.PI*2);ctx.stroke();
       }
       ctx.shadowBlur=0;
       const a=e.move[0],b=e.move[1];
@@ -1590,16 +1580,13 @@ function drawCrystalBoard(){
   ctx.strokeStyle='rgba(108,183,238,.40)';ctx.lineWidth=Math.max(1,cell.s*.012);ctx.stroke();
 
   const gap=Math.max(2.6,cell.s*.046),radius=Math.max(5.5,cell.s*.085);
+  // One shared fill/stroke instead of 64 gradients every frame.
+  ctx.fillStyle='rgba(49,79,135,.34)';
+  ctx.strokeStyle='rgba(190,225,255,.14)';
+  ctx.lineWidth=Math.max(.65,cell.s*.008);
   for(let rr=0;rr<N;rr++)for(let cc=0;cc<N;cc++){
     const x=cell.x+cc*cell.s+gap*.5,y=cell.y+rr*cell.s+gap*.5,cw=cell.s-gap,ch=cell.s-gap;
-    const g=ctx.createLinearGradient(x,y,x,y+ch);
-    g.addColorStop(0,'rgba(103,143,196,.40)');
-    g.addColorStop(.12,'rgba(80,124,184,.34)');
-    g.addColorStop(.55,'rgba(43,65,121,.35)');
-    g.addColorStop(1,'rgba(15,26,63,.58)');
-    ctx.fillStyle=g;round(x,y,cw,ch,radius);
-    ctx.strokeStyle='rgba(190,225,255,.14)';ctx.lineWidth=Math.max(.65,cell.s*.008);ctx.stroke();
-    ctx.strokeStyle='rgba(4,12,35,.28)';ctx.lineWidth=Math.max(.8,cell.s*.010);ctx.beginPath();ctx.moveTo(x+radius*.9,y+ch-1);ctx.lineTo(x+cw-radius*.9,y+ch-1);ctx.stroke();
+    round(x,y,cw,ch,radius);ctx.stroke();
   }
   const shine=ctx.createLinearGradient(bx,by,bx+bw,by);
   shine.addColorStop(0,'rgba(255,255,255,0)');
@@ -1786,30 +1773,44 @@ function dailyCompleteDraw(w,h){
   button(w*.22,h*.70,w*.56,44,'BACK TO MENU',true);
 }
 
-function tutorialDraw(w,h){
-  ctx.fillStyle='rgba(5,4,20,.90)';ctx.fillRect(0,0,w,h);
-  const boxX=w*.08,boxY=h*.09,boxW=w*.84,boxH=h*.80;
-  ctx.fillStyle='rgba(30,16,48,.98)';round(boxX,boxY,boxW,boxH,26);
-  ctx.strokeStyle='rgba(255,226,154,.24)';ctx.lineWidth=1.5;ctx.stroke();
-  const st=TUTORIAL_STEPS[tutorialStep];
-  ctx.textAlign='center';
-  ctx.fillStyle='#ffe299';ctx.font='900 13px system-ui';ctx.fillText('HƯỚNG DẪN '+(tutorialStep+1)+'/'+TUTORIAL_STEPS.length,w/2,boxY+h*.055);
-  ctx.font='900 42px system-ui';ctx.fillText(st.icon,w/2,boxY+h*.145);
-  ctx.fillStyle='#fff2c7';ctx.font='900 '+Math.max(19,w*.034)+'px system-ui';ctx.fillText(st.title,w/2,boxY+h*.205);
-  // Mini crystal demonstration on every page keeps the tutorial visually grounded.
-  const cy=boxY+h*.29, cs=Math.min(42,w*.09), gap=cs*.24;
-  const colors=['#75dfff','#ff8fc7','#ffe26f'];
-  for(let i=0;i<3;i++){const cx=w/2+(i-1)*(cs+gap);ctx.save();ctx.translate(cx,cy);ctx.rotate(Math.PI/4);ctx.fillStyle=colors[i];round(-cs*.36,-cs*.36,cs*.72,cs*.72,cs*.13);ctx.fill();ctx.restore()}
-  ctx.fillStyle='rgba(255,255,255,.84)';ctx.font='700 '+Math.max(13,w*.022)+'px system-ui';
-  wrapText(st.body,w/2,boxY+h*.39,w*.68,Math.max(13,w*.022),1.55);
-  ctx.fillStyle='rgba(255,226,154,.68)';ctx.font='700 '+Math.max(10,w*.017)+'px system-ui';
-  wrapText(st.hint,w/2,boxY+h*.55,w*.66,Math.max(10,w*.017),1.45);
-  // Progress dots
-  for(let i=0;i<TUTORIAL_STEPS.length;i++){ctx.beginPath();ctx.fillStyle=i===tutorialStep?'#ffe299':'rgba(255,255,255,.22)';ctx.arc(w/2+(i-(TUTORIAL_STEPS.length-1)/2)*17,boxY+h*.65,i===tutorialStep?4.5:3,0,Math.PI*2);ctx.fill()}
-  button(w*.18,boxY+h*.69,w*.28,43,tutorialStep===0?'BỎ QUA':'QUAY LẠI',false);
-  button(w*.54,boxY+h*.69,w*.28,43,tutorialStep===TUTORIAL_STEPS.length-1?'BẮT ĐẦU':'TIẾP THEO',true);
-  ctx.fillStyle='rgba(255,255,255,.40)';ctx.font='600 '+Math.max(9,w*.015)+'px system-ui';ctx.fillText('Bạn có thể xem lại hướng dẫn trong Settings.',w/2,boxY+h*.77);
+function tutorialLayout(w,h){
+  const frame=modalFrame(w,h,{kind:'tutorial'});
+  const pad=frame.boxW*.075;
+  const visualY=frame.boxY+frame.boxH*.30;
+  const visualS=Math.min(52,frame.boxW*.12);
+  const navY=frame.boxY+frame.boxH-72;
+  return {frame,pad,visualY,visualS,navY};
 }
+function drawTutorialMiniBoard(L,st,w,h){
+  const cx=w/2,cy=L.visualY,s=L.visualS,gap=s*.13,total=s*3+gap*2,left=cx-total/2;
+  const kinds=st.board||[4,4,4,1,1,1,2,3,5];
+  ctx.save();ctx.fillStyle='rgba(12,27,58,.88)';round(left-13,cy-total/2-13,total+26,total+26,18);
+  ctx.strokeStyle='rgba(190,226,255,.24)';ctx.lineWidth=1;ctx.stroke();
+  for(let r=0;r<3;r++)for(let c=0;c<3;c++){
+    const x=left+c*(s+gap),y=cy-total/2+r*(s+gap);
+    ctx.fillStyle='rgba(72,106,161,.30)';round(x,y,s,s,9);ctx.strokeStyle='rgba(188,222,255,.12)';ctx.stroke();
+    const g={kind:kinds[r*3+c]??4,special:'',obstacle:'',alpha:1,scale:1,x:x+s/2,y:y+s/2};
+    if(st.highlight?.includes(r*3+c)){ctx.save();ctx.strokeStyle='#ffe29a';ctx.lineWidth=2.4;ctx.shadowColor='#ffd56b';ctx.shadowBlur=performanceProfile().shadow>.35?7:0;ctx.strokeRect(x+3,y+3,s-6,s-6);ctx.restore();}
+    drawGem(g,r,c);
+  }
+  ctx.restore();
+}
+function tutorialDraw(w,h){
+  const L=tutorialLayout(w,h),st=TUTORIAL_STEPS[tutorialStep];
+  modalHeader(L.frame,'HƯỚNG DẪN '+(tutorialStep+1)+' / '+TUTORIAL_STEPS.length,'BEJEWELED  •  NHỮNG ĐIỀU CẦN BIẾT','gold');
+  const {boxX,boxY,boxW,boxH}=L.frame;ctx.textAlign='center';
+  ctx.fillStyle='#fff0c2';ctx.font='950 '+Math.max(18,boxW*.052)+'px system-ui';ctx.fillText(st.title,w/2,boxY+88);
+  drawTutorialMiniBoard(L,st,w,h);
+  ctx.fillStyle='rgba(226,239,255,.88)';ctx.font='750 '+Math.max(11,boxW*.028)+'px system-ui';
+  wrapText(st.body,w/2,boxY+boxH*.47,boxW*.76,Math.max(11,boxW*.028),1.42);
+  ctx.fillStyle='rgba(255,224,154,.62)';ctx.font='700 '+Math.max(9,boxW*.022)+'px system-ui';
+  wrapText(st.hint,w/2,boxY+boxH*.59,boxW*.72,Math.max(9,boxW*.022),1.35);
+  for(let i=0;i<TUTORIAL_STEPS.length;i++){ctx.beginPath();ctx.fillStyle=i===tutorialStep?'#ffe29a':'rgba(185,215,245,.24)';ctx.arc(w/2+(i-(TUTORIAL_STEPS.length-1)/2)*15,boxY+boxH*.68,i===tutorialStep?4:2.7,0,Math.PI*2);ctx.fill();}
+  modalAction(boxX+L.pad,L.navY,(boxW-L.pad*2)*.42,46,tutorialStep===0?'BỎ QUA':'QUAY LẠI',false,'‹');
+  modalAction(boxX+L.pad+(boxW-L.pad*2)*.48,L.navY,(boxW-L.pad*2)*.52,46,tutorialStep===TUTORIAL_STEPS.length-1?'BẮT ĐẦU':'TIẾP THEO',true,tutorialStep===TUTORIAL_STEPS.length-1?'▶':'›');
+  ctx.fillStyle='rgba(202,225,250,.34)';ctx.font='700 '+Math.max(8,boxW*.018)+'px system-ui';ctx.fillText('Có thể xem lại bất cứ lúc nào trong Cài đặt.',w/2,boxY+boxH-14);
+}
+
 function wrapText(text,x,y,maxW,fontSize,lineH){
   ctx.font='700 '+fontSize+'px system-ui';ctx.textAlign='center';
   const words=String(text).split(' ');let line='',lines=[];
@@ -2087,7 +2088,6 @@ function drawGem(x,r,c){
   ctx.save();
   ctx.globalAlpha=alpha;
   ctx.imageSmoothingEnabled=true;
-  ctx.imageSmoothingQuality='high';
   let drawn=false;
   try{
     // Prefer the single supplied sprite sheet: one asset, deterministic mapping.
@@ -2195,10 +2195,9 @@ function pointer(e){
   const swipe=Math.hypot(dx,dy)>=Math.max(16,cell.s*.24);
 
   if(state==='tutorial'){
-    const w=parseFloat(canvas.style.width)||DESIGN_W,h=parseFloat(canvas.style.height)||DESIGN_H;
-    const by=h*.09;
-    if(hit({x:w*.18,y:by+h*.69,w:w*.28,h:48},x,y)){if(tutorialStep===0)tutorialSkip();else{tutorialStep--;haptic('tap');startLoop()}return;}
-    if(hit({x:w*.54,y:by+h*.69,w:w*.28,h:48},x,y)){tutorialNext();return;}
+    const w=parseFloat(canvas.style.width)||DESIGN_W,h=parseFloat(canvas.style.height)||DESIGN_H,L=tutorialLayout(w,h),bw=L.boxW-L.pad*2;
+    if(hit({x:L.boxX+L.pad,y:L.navY,w:bw*.42,h:50},x,y)){if(tutorialStep===0)tutorialSkip();else{tutorialStep--;haptic('tap');startLoop()}return;}
+    if(hit({x:L.boxX+L.pad+bw*.48,y:L.navY,w:bw*.52,h:50},x,y)){tutorialNext();return;}
     return;
   }
   if(state==='menu'){

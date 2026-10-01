@@ -1,4 +1,4 @@
-const CACHE_NAME='tinh-mi-lon-mobile-v142-premium-chrome';
+const CACHE_NAME='tinh-mi-lon-mobile-v143-premium-chrome';
 const CORE_ASSETS = [
   './',
   './index.html',
