@@ -91,57 +91,6 @@ let localImpacts=[];
 let juiceShake=0,juiceShakeT=0,juiceHitStop=0,juiceBoardPunch=0,juiceBoardPunchT=0,juiceLastEvent=0;
 // STEP 25: Final Game Feel polish — pacing, effect budgets, idle breathing and input-safe feedback.
 let polishBeat=0, polishIdle=0, polishLastState='menu', polishEffectBudget=0;
-// V155: Balance & Stability — final runtime guardrails.
-// Keeps transient FX bounded, prevents stale frame jumps after tab/app resume,
-// and validates the playable board without changing the existing game rules.
-let v155LastUpdate=0,v155LastSanitize=0,v155ResumeGrace=0,v155Health=0,v155Recoveries=0;
-function v155ClampNumber(v,fallback=0,min=-1e6,max=1e6){
-  const n=Number(v);return Number.isFinite(n)?Math.max(min,Math.min(max,n)):fallback;
-}
-function v155SanitizeRuntime(){
-  let repaired=0;
-  if(!Array.isArray(board)||board.length!==N||board.some(row=>!Array.isArray(row)||row.length!==N)){
-    if(state==='playing'||state==='swapping'||state==='clearing'||state==='falling'){fillFast();repaired++;}
-  }
-  if(Array.isArray(board)) for(let r=0;r<N;r++) for(let c=0;c<N;c++){
-    const x=board[r]?.[c]; if(!x)continue;
-    if(!Number.isFinite(x.x)||!Number.isFinite(x.y)||!Number.isFinite(x.tx)||!Number.isFinite(x.ty)){
-      x.x=x.tx=cellX(c);x.y=x.ty=cellY(r);repaired++;
-    }
-    x.alpha=v155ClampNumber(x.alpha,1,0,1);x.scale=v155ClampNumber(x.scale,1,.35,3.5);
-    x.kind=v155ClampNumber(x.kind,0,0,TYPES-1);
-  }
-  const caps=performanceProfile();
-  const particleCap=Math.max(24,Math.round(caps.particleCap*.92));
-  const effectCap=Math.max(24,Math.round(52*caps.effectScale));
-  if(particles.length>particleCap){particles.splice(0,particles.length-particleCap);repaired++;}
-  if(effects.length>effectCap){effects.splice(0,effects.length-effectCap);repaired++;}
-  if(toastScore.length>20){toastScore.splice(0,toastScore.length-20);repaired++;}
-  if(cascadeDrops.length>64){cascadeDrops.splice(0,cascadeDrops.length-64);repaired++;}
-  if(localImpacts.length>24)localImpacts.splice(0,localImpacts.length-24);
-  if(!Number.isFinite(score)||score<0)score=0,repaired++;
-  if(!Number.isFinite(moves))moves=0,repaired++;
-  if(!Number.isFinite(combo)||combo<0)combo=0,repaired++;
-  if(repaired)v155Recoveries++;
-  return repaired;
-}
-function v155StabilityTick(dt){
-  const now=performance.now();
-  if(v155LastUpdate&&now-v155LastUpdate>650){
-    // App/tab resume: do not replay a huge elapsed animation step.
-    v155ResumeGrace=.18;
-    juiceShake=0;juiceHitStop=0;juiceBoardPunch=0;
-  }
-  v155LastUpdate=now;
-  v155ResumeGrace=Math.max(0,v155ResumeGrace-dt);
-  v155Health=.94*v155Health+.06*(frameEMA<=24?1:Math.max(0,.25-(frameEMA-24)/24));
-  if(v155Health<.15){
-    // Soft degradation before the adaptive profile has enough samples.
-    polishEffectBudget=Math.max(polishEffectBudget,.08);
-  }
-  return v155ResumeGrace;
-}
-
 // V154: final visual/game-feel layer — subtle breathing, sheen, trails and
 // impact accents. It is deliberately draw-only and bounded for mobile devices.
 let v154Time=0;
@@ -223,7 +172,6 @@ let fps=60,fpsTimer=0,fpsFrames=0,toastScore=[],effects=[],cascadeDrops=[];
 // STEP 22: Performance Engine — centralized runtime load control. V125.
 let frameEMA=16.7, perfPressure=0, perfSampleT=0, perfLastDraw=0, perfSkip=0, perfPausedByVisibility=false;
 function finalPolishTick(dt){
-  v155StabilityTick(dt);
   polishBeat=Math.max(0,polishBeat-dt*2.4);
   polishIdle=state==='playing' && !selected && !hint && !effects.length ? polishIdle+dt : 0;
   polishEffectBudget=Math.max(0,polishEffectBudget-dt);
@@ -237,8 +185,6 @@ function finalPolishTick(dt){
   if(particles.length>cap)particles.splice(0,particles.length-cap);
   if(effects.length>70)effects.splice(0,effects.length-70);
   if(toastScore.length>24)toastScore.splice(0,toastScore.length-24);
-  const now=performance.now();
-  if(now-v155LastSanitize>1800){v155LastSanitize=now;v155SanitizeRuntime();}
 }
 function finalPolishIntensity(base=1){
   const p=performanceProfile();
@@ -2574,12 +2520,10 @@ function update(dt){
   for(let i=cascadeDrops.length-1;i>=0;i--){cascadeDrops[i].life-=dt;if(cascadeDrops[i].life<=0)cascadeDrops.splice(i,1)}if(state==='swapping'){phase-=dt;if(phase<=0){if(matches().count===0){doSwap(swapInfo.a,swapInfo.b);moves++;sound('error');haptic('error');flashFeedback(.16);juice('error',1);state='playing';swapInfo=null;clearUndo(false);saveProgress('invalid-swap')}else resolve(true)}}else if(state==='clearing'){phase-=dt;if(phase<=0)collapse()}else if(state==='falling'){let settled=true;for(let r=0;r<N;r++)for(let c=0;c<N;c++)if(Math.abs(board[r][c].x-board[r][c].tx)>1||Math.abs(board[r][c].y-board[r][c].ty)>1)settled=false;if(settled)resolve(false)}else if(state==='playing'){if(moves<=5&&moves>0&&warningT<=0){warningT=.9;sound('error');}if(moves<=0){finishComboChain();if(dailyMode){failDaily();}else{clearSavedGame();state='gameover';saveFlashT=.8;saveFlashText='SAVE CLEARED';}}}}
 function loop(t){
   if(!running)return;
-  const raw=(t-last)/1000;
-  const dt=Math.max(0,Math.min(.033,Number.isFinite(raw)?raw:0));
+  const dt=Math.min(.033,(t-last)/1000||0);
   last=t;
   update(dt);
-  if(perfCanRender() && v155ResumeGrace<=0) draw();
-  else if(perfCanRender()) draw();
+  if(perfCanRender()) draw();
   rafId=requestAnimationFrame(loop);
 }
 function startLoop(){
@@ -2894,7 +2838,7 @@ window.openBejeweled=function(){
   startLoop();
 };
 window.closeBejeweled=close;
-window.__tinhMiLonGameDebug={getState:()=>state,getBoardSize:()=>board.length,useBooster,hasSavedGame,menuLayout,boostersLayout,getStability:()=>({health:v155Health,recoveries:v155Recoveries,frameEMA,particleCount:particles.length,effectCount:effects.length})};
+window.__tinhMiLonGameDebug={getState:()=>state,getBoardSize:()=>board.length,useBooster,hasSavedGame,menuLayout,boostersLayout};
 canvas.addEventListener('wheel',function(e){
   if(state!=='levelmap')return;
   e.preventDefault();

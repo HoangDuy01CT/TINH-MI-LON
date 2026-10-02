@@ -13,7 +13,7 @@
 <meta content="default" name="apple-mobile-web-app-status-bar-style"/>
 <meta content="Mí Lon" name="apple-mobile-web-app-title"/>
 <meta content="telephone=no" name="format-detection"/>
-<link href="manifest.webmanifest?v=156" rel="manifest"/>
+<link href="manifest.webmanifest?v=146" rel="manifest"/>
 <link href="icons/favicon-32-v8.png" rel="icon" sizes="32x32"/>
 <link href="icons/apple-touch-icon-v8.png" rel="apple-touch-icon"/>
 <link href="icons/splash-1290x2796-v8.png" media="(device-width: 430px) and (device-height: 932px) and (-webkit-device-pixel-ratio: 3) and (orientation: portrait)" rel="apple-touch-startup-image"/>
@@ -704,54 +704,6 @@ body.game-open{overflow:hidden;overscroll-behavior:none;-webkit-tap-highlight-co
 .tm-set-test,.tm-settings-actions button{width:100%;min-height:43px;margin-top:8px;border:1px solid rgba(175,217,255,.18);border-radius:13px;background:linear-gradient(180deg,rgba(42,71,110,.94),rgba(19,39,70,.98));color:#f1f8ff;font-weight:900;font-size:10px;cursor:pointer}.tm-set-test{border-color:rgba(255,224,148,.3);color:#ffe6a5}.tm-settings-actions{display:grid;grid-template-columns:1fr 1fr;gap:8px}.tm-settings-actions .danger{grid-column:1/-1;color:#ffcfcc;border-color:rgba(255,130,120,.18);background:rgba(85,30,39,.42)}
 .tm-settings-footer{display:flex;align-items:center;justify-content:space-between;gap:10px;padding:10px 18px 15px;flex:0 0 auto;border-top:1px solid rgba(181,216,255,.10)}.tm-settings-footer span{font-size:8px;color:rgba(220,235,255,.42)}.tm-settings-footer button{min-width:90px;min-height:38px;border:1px solid rgba(255,224,148,.3);border-radius:12px;background:linear-gradient(180deg,rgba(55,83,126,.95),rgba(22,43,75,.98));color:#ffe8aa;font-weight:950;font-size:10px;cursor:pointer}
 @media(max-width:420px){.tm-settings-card{height:94%;border-radius:22px}.tm-settings-header{padding-top:24px}.tm-settings-quality{gap:5px}.tm-quality{min-height:54px}.tm-settings-scroll{padding-left:13px;padding-right:13px}.tm-settings-footer{padding-left:13px;padding-right:13px}}
-
-/* V156 — Settings UI unified with the main app */
-.settings-sheet{background:var(--bg);border:1px solid var(--line);box-shadow:var(--shadow);}
-.settings-sheet .sheet-header{padding:14px 16px 12px;background:var(--card);border-bottom:1px solid var(--line);}
-.settings-sheet .sheet-header h3{font-size:20px;font-weight:900;letter-spacing:-.5px;}
-.settings-title-wrap{display:flex;align-items:center;gap:11px;min-width:0}
-.settings-title-icon{width:40px;height:40px;border-radius:13px;display:grid;place-items:center;background:color-mix(in srgb,var(--blue) 12%,var(--card));color:var(--blue);font-size:21px;box-shadow:inset 0 0 0 1px color-mix(in srgb,var(--blue) 18%,var(--line));flex:0 0 auto}
-.settings-kicker{font-size:10px;font-weight:900;letter-spacing:.8px;color:var(--blue);text-transform:uppercase;margin-bottom:2px}
-.settings-sheet .sheet-body{padding:14px 14px max(22px,env(safe-area-inset-bottom));}
-.settings-section{background:var(--card);border:1px solid var(--line);border-radius:18px;padding:14px;margin-bottom:11px;box-shadow:var(--shadow);}
-.settings-section-head{display:flex;align-items:flex-start;gap:10px;margin-bottom:11px}
-.settings-section-icon{width:34px;height:34px;border-radius:11px;display:grid;place-items:center;background:var(--card2);color:var(--blue);font-size:17px;flex:0 0 auto}
-.settings-section-title{font-size:13px;font-weight:900;letter-spacing:.25px;color:var(--text);margin:0;text-transform:none}
-.settings-section-note{font-size:11px;color:var(--muted);line-height:1.45;margin-top:3px}
-.settings-divider{height:1px;background:var(--line);margin:12px 0}
-.settings-sheet .set-section-title{display:none}
-.settings-sheet .set-note-top{margin:0}
-.settings-sheet .range-grid{gap:8px}
-.settings-sheet .range-field{margin:0;padding:11px 0;border-bottom:1px solid var(--line)}
-.settings-sheet .range-field:last-child{border-bottom:0;padding-bottom:0}
-.settings-sheet .set-field label{font-size:12px;font-weight:850;color:var(--text)}
-.settings-sheet .range-pair input,.settings-sheet .set-field .set-row{background:var(--card2);border:1px solid var(--line);}
-.settings-sheet .range-pair input{padding:10px 11px;border-radius:12px;font-size:17px;font-weight:850;color:var(--text)}
-.settings-sheet .range-pair{gap:7px}
-.settings-sheet .lock-status{margin:0;padding:12px;background:var(--card2);border:1px solid var(--line);border-radius:14px}
-.settings-sheet .lock-actions{display:grid;grid-template-columns:1fr 1fr 1fr;gap:8px;margin-top:9px}
-.settings-sheet .lock-btn{min-height:42px;border-radius:12px;font-size:11px;font-weight:850;border:1px solid var(--line);background:var(--card2);color:var(--text)}
-.settings-sheet .lock-btn.primary{background:color-mix(in srgb,var(--blue) 11%,var(--card));color:var(--blue);border-color:color-mix(in srgb,var(--blue) 30%,var(--line))}
-.settings-sheet .lock-badge{padding:6px 9px;font-size:10px;border-radius:999px;background:var(--line);color:var(--muted);font-weight:900;white-space:nowrap}
-.settings-sheet .lock-badge.on{background:var(--badge-ok-bg);color:var(--green)}
-.settings-result-grid{display:grid;gap:8px}
-.settings-result-item{background:var(--card2);border:1px solid var(--line);border-radius:14px;padding:11px 12px}
-.settings-result-item label{font-size:12px;font-weight:850;display:block;margin-bottom:7px}
-.settings-sheet .set-row{padding:7px 10px;border-radius:12px}
-.settings-sheet .set-row input{font-size:18px;font-weight:850}
-.settings-footer{position:sticky;bottom:0;padding-top:9px;background:linear-gradient(180deg,transparent,var(--bg) 28%);}
-.settings-save{width:100%;min-height:52px;border-radius:16px!important;font-size:14px!important;font-weight:900!important;box-shadow:0 8px 20px color-mix(in srgb,var(--blue) 20%,transparent)!important}
-.settings-sheet .set-note:last-of-type{margin:9px 2px 0}
-@media(max-width:420px){
- .settings-sheet .sheet-header{padding-left:13px;padding-right:13px}
- .settings-sheet .sheet-body{padding-left:11px;padding-right:11px}
- .settings-section{padding:12px;border-radius:16px}
- .settings-section-icon{width:32px;height:32px}
- .settings-sheet .lock-actions{grid-template-columns:1fr 1fr}
- .settings-sheet #disableLockBtn{grid-column:1/-1}
- .settings-sheet .range-pair{grid-template-columns:minmax(0,1fr) 10px minmax(0,1fr) 22px}
-}
-
 </style>
 </head>
 <body>
@@ -782,7 +734,7 @@ body.game-open{overflow:hidden;overscroll-behavior:none;-webkit-tap-highlight-co
     <canvas id="bejeweledCanvas" class="bejeweled-canvas" aria-label="Bàn game kim cương 8 x 8"></canvas>
   </div>
 </section>
-<script src="game.js?v=155.0"></script>
+<script src="game.js?v=153.0"></script>
 <script src="app.js?v=146.0"></script>
 
 
@@ -943,56 +895,51 @@ body.game-open{overflow:hidden;overscroll-behavior:none;-webkit-tap-highlight-co
 <div class="sheet-body"><div id="historyDetailBody"></div></div>
 </div>
 </div>
-<!-- Settings sheet — V156 unified UI -->
+<!-- Settings sheet -->
 <div class="sheet-overlay" id="settingsOverlay" onclick="if(event.target===this)closeSettings()">
-<div class="sheet settings-sheet">
-<div class="sheet-header">
-  <div class="settings-title-wrap">
-    <div class="settings-title-icon" aria-hidden="true">⚙️</div>
-    <div><div class="settings-kicker">TIÊU CHUẨN & CÀI ĐẶT</div><h3>Thiết lập kiểm tra</h3></div>
-  </div>
-  <button class="icon-btn" onclick="closeSettings()">Xong</button>
-</div>
+<div class="sheet">
+
+<div class="sheet-header"><h3>Tiêu chuẩn &amp; Cài đặt</h3><button class="icon-btn" onclick="closeSettings()">Xong</button></div>
 <div class="sheet-body">
-  <section class="settings-section">
-    <div class="settings-section-head">
-      <div class="settings-section-icon">📏</div>
-      <div><div class="settings-section-title">Thông số đo · Min – Max</div><div class="settings-section-note">Đặt khoảng tiêu chuẩn riêng cho loại lon đang chọn. Có thể bỏ trống Min hoặc Max.</div></div>
-    </div>
-    <div class="range-grid">
-      <div class="set-field range-field"><label>BH · Móc thân</label><div class="range-pair"><input id="limBHMin" inputmode="decimal" placeholder="Min" step="0.01" type="number"/><span>–</span><input id="limBHMax" inputmode="decimal" placeholder="Max" step="0.01" type="number"/><b>mm</b></div></div>
-      <div class="set-field range-field"><label>CH / EH · Móc nắp</label><div class="range-pair"><input id="limCHMin" inputmode="decimal" placeholder="Min" step="0.01" type="number"/><span>–</span><input id="limCHMax" inputmode="decimal" placeholder="Max" step="0.01" type="number"/><b>mm</b></div></div>
-      <div class="set-field range-field"><label>SL · Rộng mí</label><div class="range-pair"><input id="limSLMin" inputmode="decimal" placeholder="Min" step="0.01" type="number"/><span>–</span><input id="limSLMax" inputmode="decimal" placeholder="Max" step="0.01" type="number"/><b>mm</b></div></div>
-      <div class="set-field range-field"><label>ST · Độ dày mí</label><div class="range-pair"><input id="limSTMin" inputmode="decimal" placeholder="Min" step="0.001" type="number"/><span>–</span><input id="limSTMax" inputmode="decimal" placeholder="Max" step="0.001" type="number"/><b>mm</b></div></div>
-      <div class="set-field range-field"><label>Tb · Độ dày thân</label><div class="range-pair"><input id="limTbMin" inputmode="decimal" placeholder="Min" step="0.001" type="number"/><span>–</span><input id="limTbMax" inputmode="decimal" placeholder="Max" step="0.001" type="number"/><b>mm</b></div></div>
-      <div class="set-field range-field"><label>Te · Độ dày nắp</label><div class="range-pair"><input id="limTeMin" inputmode="decimal" placeholder="Min" step="0.001" type="number"/><span>–</span><input id="limTeMax" inputmode="decimal" placeholder="Max" step="0.001" type="number"/><b>mm</b></div></div>
-    </div>
-  </section>
-
-  <section class="settings-section">
-    <div class="settings-section-head">
-      <div class="settings-section-icon">🔐</div>
-      <div><div class="settings-section-title">Bảo vệ cài đặt</div><div class="settings-section-note">Khóa thay đổi tiêu chuẩn bằng mã PIN 4–6 số.</div></div>
-    </div>
-    <div class="lock-status"><div><b>Khóa tiêu chuẩn & Min–Max</b><div class="set-note" style="margin:4px 0 0">Bảo vệ các giới hạn và tiêu chí đánh giá.</div></div><span class="lock-badge" id="settingsLockBadge">Đang mở</span></div>
-    <div class="lock-actions"><button class="lock-btn primary" id="setPinBtn" onclick="setSettingsPin()">Đặt mã PIN</button><button class="lock-btn" id="lockNowBtn" onclick="lockSettingsNow()">Khóa ngay</button><button class="lock-btn" id="disableLockBtn" onclick="disableSettingsLock()" style="display:none">Tắt khóa</button></div>
-  </section>
-
-  <section class="settings-section">
-    <div class="settings-section-head">
-      <div class="settings-section-icon">✅</div>
-      <div><div class="settings-section-title">Tiêu chí kết quả</div><div class="settings-section-note">Dùng để đánh giá Đạt / Không đạt sau khi tính mí.</div></div>
-    </div>
-    <div class="settings-result-grid">
-      <div class="settings-result-item"><label>Độ chồng mí · Overlap (mm)</label><div class="set-row"><input id="thOverlapMin" inputmode="decimal" placeholder="Tối thiểu" step="0.001" type="number"/><span class="set-unit">mm</span></div><div style="height:7px"></div><div class="set-row"><input id="thOverlapMax" inputmode="decimal" placeholder="Tối đa" step="0.001" type="number"/><span class="set-unit">mm</span></div></div>
-      <div class="settings-result-item"><label for="thOverlap">% Độ chồng mí tối thiểu</label><div class="set-row"><input id="thOverlap" inputmode="decimal" placeholder="Ví dụ: 45" step="0.1" type="number"/><span class="set-unit">%</span></div></div>
-      <div class="settings-result-item"><label for="thBodyHook">% Độ móc thân tối thiểu</label><div class="set-row"><input id="thBodyHook" inputmode="decimal" placeholder="Ví dụ: 70" step="0.1" type="number"/><span class="set-unit">%</span></div></div>
-      <div class="settings-result-item"><label for="thGapMax">Khoảng trống tối đa</label><div class="set-row"><input id="thGapMax" inputmode="decimal" placeholder="Tối đa" step="0.001" type="number"/><span class="set-unit">mm</span></div></div>
-    </div>
-    <div class="set-note">Các ngưỡng được lưu riêng cho từng loại lon. Để trống ngưỡng nếu không muốn dùng tiêu chí đó. Ứng dụng chỉ kết luận <b>ĐẠT</b> khi tất cả tiêu chí đã thiết lập đều đạt.</div>
-  </section>
-
-  <div class="settings-footer"><button class="btn calc settings-save" onclick="saveSettings()">✓ LƯU TIÊU CHUẨN CHO LOẠI LON NÀY</button></div>
+<div class="set-section-title">THÔNG SỐ ĐO · MIN – MAX</div>
+<div class="set-note set-note-top">Đặt khoảng tiêu chuẩn cho 6 thông số đầu vào của riêng loại lon này. Để trống một phía nếu không muốn giới hạn phía đó.</div>
+<div class="set-section-title">BẢO VỆ CÀI ĐẶT</div>
+<div class="lock-status"><div><b>Khóa tiêu chuẩn &amp; Min–Max</b><div class="set-note" style="margin:4px 0 0">Khóa thao tác thay đổi tiêu chuẩn bằng mã PIN 4–6 số.</div></div><span class="lock-badge" id="settingsLockBadge">Đang mở</span></div>
+<div class="lock-actions"><button class="lock-btn primary" id="setPinBtn" onclick="setSettingsPin()">Đặt mã PIN</button><button class="lock-btn" id="lockNowBtn" onclick="lockSettingsNow()">Khóa ngay</button><button class="lock-btn" id="disableLockBtn" onclick="disableSettingsLock()" style="display:none">Tắt khóa</button></div>
+<div class="set-divider"></div>
+<div class="range-grid">
+<div class="set-field range-field"><label>BH · Móc thân</label><div class="range-pair"><input id="limBHMin" inputmode="decimal" placeholder="Min" step="0.01" type="number"/><span>–</span><input id="limBHMax" inputmode="decimal" placeholder="Max" step="0.01" type="number"/><b>mm</b></div></div>
+<div class="set-field range-field"><label>CH / EH · Móc nắp</label><div class="range-pair"><input id="limCHMin" inputmode="decimal" placeholder="Min" step="0.01" type="number"/><span>–</span><input id="limCHMax" inputmode="decimal" placeholder="Max" step="0.01" type="number"/><b>mm</b></div></div>
+<div class="set-field range-field"><label>SL · Rộng mí</label><div class="range-pair"><input id="limSLMin" inputmode="decimal" placeholder="Min" step="0.01" type="number"/><span>–</span><input id="limSLMax" inputmode="decimal" placeholder="Max" step="0.01" type="number"/><b>mm</b></div></div>
+<div class="set-field range-field"><label>ST · Độ dày mí</label><div class="range-pair"><input id="limSTMin" inputmode="decimal" placeholder="Min" step="0.001" type="number"/><span>–</span><input id="limSTMax" inputmode="decimal" placeholder="Max" step="0.001" type="number"/><b>mm</b></div></div>
+<div class="set-field range-field"><label>Tb · Độ dày thân</label><div class="range-pair"><input id="limTbMin" inputmode="decimal" placeholder="Min" step="0.001" type="number"/><span>–</span><input id="limTbMax" inputmode="decimal" placeholder="Max" step="0.001" type="number"/><b>mm</b></div></div>
+<div class="set-field range-field"><label>Te · Độ dày nắp</label><div class="range-pair"><input id="limTeMin" inputmode="decimal" placeholder="Min" step="0.001" type="number"/><span>–</span><input id="limTeMax" inputmode="decimal" placeholder="Max" step="0.001" type="number"/><b>mm</b></div></div>
+</div>
+<div class="set-divider"></div>
+<div class="set-section-title">TIÊU CHÍ KẾT QUẢ</div>
+<div class="set-note set-note-top">Các ngưỡng bên dưới tiếp tục dùng cho đánh giá Đạt / Không đạt của kết quả tính.</div>
+<div class="set-field">
+<label>Độ chồng mí · Overlap (mm)</label>
+<div class="set-row"><input id="thOverlapMin" inputmode="decimal" placeholder="Tối thiểu" step="0.001" type="number"/><span class="set-unit">mm</span></div>
+<div style="height:8px"></div>
+<div class="set-row"><input id="thOverlapMax" inputmode="decimal" placeholder="Tối đa" step="0.001" type="number"/><span class="set-unit">mm</span></div>
+</div>
+<div class="set-field">
+<label for="thOverlap">% Độ chồng mí tối thiểu</label>
+<div class="set-row"><input id="thOverlap" inputmode="decimal" placeholder="Ví dụ: 45" step="0.1" type="number"/><span class="set-unit">%</span></div>
+</div>
+<div class="set-field">
+<label for="thBodyHook">% Độ móc thân tối thiểu</label>
+<div class="set-row"><input id="thBodyHook" inputmode="decimal" placeholder="Ví dụ: 70" step="0.1" type="number"/><span class="set-unit">%</span></div>
+</div>
+<div class="set-field">
+<label for="thGapMax">Khoảng trống tối đa</label>
+<div class="set-row"><input id="thGapMax" inputmode="decimal" placeholder="Tối đa" step="0.001" type="number"/><span class="set-unit">mm</span></div>
+</div>
+<div class="set-note">Các ngưỡng được lưu riêng cho từng loại lon. Để trống một ngưỡng nếu bạn không muốn dùng tiêu chí đó. Ứng dụng chỉ kết luận <b>ĐẠT</b> khi tất cả tiêu chí đã thiết lập đều đạt.</div>
+<div class="sheet-actions">
+<button class="btn calc" onclick="saveSettings()">Lưu tiêu chuẩn cho loại lon này</button>
+</div>
 </div>
 </div>
 </div>

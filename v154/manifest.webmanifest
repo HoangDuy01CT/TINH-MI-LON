@@ -1,12 +1,12 @@
 {
-  "version": "156.0",
+  "version": "152.0",
   "name": "Tính Mí Lon",
   "short_name": "Mí Lon",
   "description": "Ứng dụng tính thông số mí lon và tự đánh giá Đạt / Không đạt theo tiêu chuẩn riêng của từng loại lon",
   "lang": "vi",
-  "start_url": "./index.html?v=155",
+  "start_url": "./index.html?v=153",
   "scope": "./",
-  "id": "/tinh-mi-lon-v156",
+  "id": "/tinh-mi-lon-v154",
   "display": "standalone",
   "display_override": [
     "window-controls-overlay",

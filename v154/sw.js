@@ -1,8 +1,8 @@
-const CACHE_NAME='tinh-mi-lon-mobile-v156-settings';
+const CACHE_NAME='tinh-mi-lon-mobile-v154-gamefeel';
 const CORE_ASSETS = [
   './',
   './index.html',
-  './manifest.webmanifest?v=155',
+  './manifest.webmanifest?v=153',
   './song-city.mp3',
   './song-10k-years.mp3',
   './icons/icon-192-v8.png',
@@ -10,7 +10,7 @@ const CORE_ASSETS = [
   './icons/apple-touch-icon-v8.png',
   './icons/favicon-32-v8.png',
   './icons/splash-1290x2796-v8.png',
-  './game.js?v=155',
+  './game.js?v=153',
   './app.js?v=146',
   './game/images/background_bejeweled_v135.png',
   './game/images/gems_spritesheet.png',
