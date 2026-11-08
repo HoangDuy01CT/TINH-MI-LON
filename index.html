@@ -13,7 +13,7 @@
 <meta content="default" name="apple-mobile-web-app-status-bar-style"/>
 <meta content="Mí Lon" name="apple-mobile-web-app-title"/>
 <meta content="telephone=no" name="format-detection"/>
-<link href="manifest.webmanifest?v=156" rel="manifest"/>
+<link href="manifest.webmanifest?v=175" rel="manifest"/>
 <link href="icons/favicon-32-v8.png" rel="icon" sizes="32x32"/>
 <link href="icons/apple-touch-icon-v8.png" rel="apple-touch-icon"/>
 <link href="icons/splash-1290x2796-v8.png" media="(device-width: 430px) and (device-height: 932px) and (-webkit-device-pixel-ratio: 3) and (orientation: portrait)" rel="apple-touch-startup-image"/>
@@ -258,6 +258,24 @@ input::placeholder{color:#c7c7cc}
 .hist-item .hi-right{display:flex;align-items:center;gap:8px}.hi-pct{font-size:16px;font-weight:850}.hist-del{border:0;background:transparent;color:var(--red);font-size:18px}
 .empty-state{color:var(--muted);font-size:13px;text-align:center;padding:28px 10px}
 .set-field{margin-bottom:13px}.set-field label{display:block;font-size:12px;font-weight:800;margin-bottom:6px}.set-field .set-row{display:flex;align-items:center;gap:10px;background:var(--card);border-radius:15px;padding:8px 12px}.set-field input{font-size:20px;flex:1;min-width:0}.set-unit{color:var(--muted);font-size:12px;font-weight:700}.set-note{font-size:11px;color:var(--muted);line-height:1.5;margin:3px 2px 15px}.set-note-top{margin-top:-4px}.set-section-title{font-size:10px;font-weight:900;letter-spacing:.8px;color:var(--blue);margin:3px 2px 5px}.set-divider{height:1px;background:var(--line);margin:4px 0 14px}.range-grid{display:grid;grid-template-columns:1fr;gap:1px}.range-field{margin-bottom:10px}.range-pair{display:grid;grid-template-columns:minmax(0,1fr) 14px minmax(0,1fr) 25px;align-items:center;gap:6px}.range-pair input{background:var(--card);border-radius:13px;padding:10px 10px;font-size:16px;width:100%;box-sizing:border-box}.range-pair span{color:var(--muted);text-align:center;font-weight:800}.range-pair b{font-size:10px;color:var(--muted)}.sheet-actions{display:grid;gap:9px;margin-top:4px}
+.spec-entry-card{width:100%;display:flex;align-items:center;gap:12px;margin:0 0 14px;padding:13px 15px;border:1px solid var(--line);border-radius:17px;background:var(--card);color:var(--text);text-align:left;box-shadow:var(--shadow);cursor:pointer}
+.spec-entry-icon{width:42px;height:42px;flex:0 0 42px;border-radius:13px;display:grid;place-items:center;background:color-mix(in srgb,var(--blue) 10%,var(--card));font-size:22px}
+.spec-entry-copy{display:flex;flex-direction:column;gap:4px;min-width:0;flex:1}.spec-entry-copy b{font-size:13px;letter-spacing:.25px}.spec-entry-copy small{font-size:10px;line-height:1.35;color:var(--muted)}.spec-entry-arrow{font-size:25px;color:var(--blue);font-weight:700}
+.spec-sheet{max-height:94vh;max-height:94dvh}
+.spec-intro{font-size:12px;line-height:1.55;color:var(--muted);background:var(--card);border:1px solid var(--line);border-radius:14px;padding:12px;margin:0 0 12px}
+.spec-group{background:var(--card);border:1px solid var(--line);border-radius:17px;padding:12px;margin:0 0 11px}
+.spec-group-head{display:flex;align-items:center;gap:8px;margin-bottom:10px}.spec-group-head input{font-size:15px;font-weight:850;min-width:0;flex:1;background:var(--card2);border:1px solid var(--line);border-radius:10px;padding:10px}
+.spec-item{border:1px solid var(--line);border-radius:13px;padding:10px;margin:9px 0;background:var(--card2)}
+.spec-item-grid{display:grid;grid-template-columns:1fr 1fr;gap:8px}.spec-control{min-width:0}.spec-control label{display:block;font-size:10px;font-weight:800;color:var(--muted);margin:0 0 5px}.spec-control input,.spec-control select{width:100%;min-width:0;background:var(--card);border:1px solid var(--line);border-radius:10px;padding:10px;font-size:13px;color:var(--text)}.spec-control.full{grid-column:1/-1}
+.spec-small-btn{border:0;border-radius:10px;padding:8px 10px;background:var(--card2);color:var(--text);font-size:11px;font-weight:800;cursor:pointer}.spec-small-btn.danger{color:var(--red)}
+.spec-add-row{display:flex;gap:8px;flex-wrap:wrap;margin-top:9px}.spec-add-row button{flex:1}
+.spec-compare{background:var(--card);border:1px solid var(--line);border-radius:17px;padding:13px;margin:12px 0}.spec-compare h4{font-size:14px;margin:0 0 5px}.spec-compare-note{font-size:11px;line-height:1.5;color:var(--muted);margin-bottom:10px}
+.spec-compare-row{display:grid;grid-template-columns:minmax(0,1fr) auto;gap:8px;padding:10px 0;border-top:1px solid var(--line);align-items:center}.spec-compare-name{font-size:12px;font-weight:800}.spec-compare-values{font-size:10px;color:var(--muted);line-height:1.5;margin-top:3px}.spec-total{display:flex;align-items:center;justify-content:space-between;gap:8px;border-top:1px solid var(--line);padding-top:12px;margin-top:8px;font-weight:900;font-size:13px}
+.spec-compare-group{border:1px solid var(--line);border-radius:12px;margin:9px 0;overflow:hidden;background:var(--card2)}.spec-compare-group summary{cursor:pointer;list-style:none;padding:12px;font-size:13px;font-weight:900;display:flex;align-items:center;justify-content:space-between;gap:8px}.spec-compare-group summary::-webkit-details-marker{display:none}.spec-compare-group summary:after{content:"＋";font-size:18px;color:var(--muted)}.spec-compare-group[open] summary:after{content:"−"}.spec-compare-table{width:100%;border-collapse:collapse;font-size:11px}.spec-compare-table th,.spec-compare-table td{padding:9px 6px;text-align:left;border-top:1px solid var(--line);vertical-align:middle}.spec-compare-table th{color:var(--muted);font-size:10px}.spec-compare-table td:last-child{text-align:center;font-weight:900}.spec-live-title{font-size:14px;font-weight:950;margin:0 0 8px}
+
+.spec-empty{font-size:12px;color:var(--muted);text-align:center;padding:16px 8px}
+@media(max-width:380px){.spec-item-grid{grid-template-columns:1fr}.spec-control.full{grid-column:auto}}
+
 /* Step 4 · Bảo vệ cài đặt */
 .lock-status{display:flex;align-items:center;justify-content:space-between;gap:10px;padding:12px 14px;border:1px solid var(--line);border-radius:14px;background:var(--card);margin-bottom:10px}
 .lock-badge{font-size:11px;font-weight:800;padding:6px 9px;border-radius:999px;background:#eef2f7;color:#59636f}
@@ -705,7 +723,7 @@ body.game-open{overflow:hidden;overscroll-behavior:none;-webkit-tap-highlight-co
 .tm-settings-footer{display:flex;align-items:center;justify-content:space-between;gap:10px;padding:10px 18px 15px;flex:0 0 auto;border-top:1px solid rgba(181,216,255,.10)}.tm-settings-footer span{font-size:8px;color:rgba(220,235,255,.42)}.tm-settings-footer button{min-width:90px;min-height:38px;border:1px solid rgba(255,224,148,.3);border-radius:12px;background:linear-gradient(180deg,rgba(55,83,126,.95),rgba(22,43,75,.98));color:#ffe8aa;font-weight:950;font-size:10px;cursor:pointer}
 @media(max-width:420px){.tm-settings-card{height:94%;border-radius:22px}.tm-settings-header{padding-top:24px}.tm-settings-quality{gap:5px}.tm-quality{min-height:54px}.tm-settings-scroll{padding-left:13px;padding-right:13px}.tm-settings-footer{padding-left:13px;padding-right:13px}}
 
-/* V156 — Settings UI unified with the main app */
+/* V169 — Settings UI unified with the main app */
 .settings-sheet{background:var(--bg);border:1px solid var(--line);box-shadow:var(--shadow);}
 .settings-sheet .sheet-header{padding:14px 16px 12px;background:var(--card);border-bottom:1px solid var(--line);}
 .settings-sheet .sheet-header h3{font-size:20px;font-weight:900;letter-spacing:-.5px;}
@@ -782,8 +800,8 @@ body.game-open{overflow:hidden;overscroll-behavior:none;-webkit-tap-highlight-co
     <canvas id="bejeweledCanvas" class="bejeweled-canvas" aria-label="Bàn game kim cương 8 x 8"></canvas>
   </div>
 </section>
-<script src="game.js?v=155.0"></script>
-<script src="app.js?v=146.0"></script>
+<script src="game.js?v=175"></script>
+<script src="app.js?v=175-qc2"></script>
 
 
 <div class="container">
@@ -820,6 +838,7 @@ body.game-open{overflow:hidden;overscroll-behavior:none;-webkit-tap-highlight-co
 <button aria-label="Xuất báo cáo" class="icon-btn" onclick="openExport()">⇧</button>
 <button aria-label="Cài đặt ngưỡng" class="icon-btn" onclick="openSettings()">⚙️</button>
 </div>
+<button class="spec-entry-card" type="button" onclick="openCanSpecification()"><span class="spec-entry-icon">📋</span><span class="spec-entry-copy"><b>QUY CÁCH LON</b><small>Xem và nhập tiêu chuẩn kỹ thuật · Đối chiếu sau khi tính</small></span><span class="spec-entry-arrow">›</span></button>
 <div class="section-title">Thông số mí ghép</div>
 <div class="form-card">
 <div class="field"><label for="BH">Móc thân <span>BH · Body Hook</span></label><input enterkeyhint="next" id="BH" inputmode="decimal" min="0" placeholder="0.00" step="0.01" type="number"/></div>
@@ -887,7 +906,20 @@ body.game-open{overflow:hidden;overscroll-behavior:none;-webkit-tap-highlight-co
 </div>
 </div>
 </div>
-<div class="formula-note" id="message">Kết quả được tính riêng và lưu trên thiết bị cho từng loại lon.</div></div>
+<div class="formula-note" id="message">Kết quả được tính riêng và lưu trên thiết bị cho từng loại lon.</div><div class="spec-compare" id="specLiveComparison" hidden></div></div>
+</div>
+<!-- Quy cách lon: independent technical specification and optional result comparison -->
+<div class="sheet-overlay" id="canSpecificationOverlay" onclick="if(event.target===this)closeCanSpecification()">
+ <div class="sheet spec-sheet">
+  <div class="sheet-header"><div><h3>Quy cách lon</h3><div class="sheet-note" id="specCanTitle">Tiêu chuẩn riêng của loại lon đang chọn</div></div><button class="icon-btn" onclick="closeCanSpecification()">Đóng</button></div>
+  <div class="sheet-body">
+   <div class="spec-intro">Nhập thông số kỹ thuật theo tài liệu của bạn. Quy cách chỉ dùng để xem và đối chiếu kết quả sau khi tính mí; không thay đổi công thức hoặc kết quả tính mặc định.</div>
+   <div id="specEditorGroups"></div>
+   <div class="sheet-actions"><button class="btn clear-result" onclick="addSpecificationGroup()">＋ THÊM NHÓM THÔNG SỐ</button></div>
+   <div class="spec-compare" id="specComparisonPanel"></div>
+   <div class="sheet-actions"><button class="btn calc" onclick="saveCanSpecification(true)">✓ LƯU QUY CÁCH</button></div>
+  </div>
+ </div>
 </div>
 <!-- History sheet -->
 <div class="sheet-overlay" id="historyOverlay" onclick="if(event.target===this)closeHistory()">
@@ -943,7 +975,7 @@ body.game-open{overflow:hidden;overscroll-behavior:none;-webkit-tap-highlight-co
 <div class="sheet-body"><div id="historyDetailBody"></div></div>
 </div>
 </div>
-<!-- Settings sheet — V156 unified UI -->
+<!-- Settings sheet — V166 unified UI -->
 <div class="sheet-overlay" id="settingsOverlay" onclick="if(event.target===this)closeSettings()">
 <div class="sheet settings-sheet">
 <div class="sheet-header">

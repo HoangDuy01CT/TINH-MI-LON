@@ -55,6 +55,8 @@ function ensureCan(name){
   c.note=c.note||'';
   c.limits=c.limits||{};
   c.history=c.history||[];
+  c.specification=c.specification||{groups:[]};
+  c.specification.groups=Array.isArray(c.specification.groups)?c.specification.groups:[];
   return c;
 }
 
@@ -306,6 +308,7 @@ function openCalc(name){
   document.getElementById('calculator').style.display='block';
   // restore last computed display if present
   if(c.lastResult){setResults(c.lastResult)}else{setResults({})}
+  renderLiveSpecificationComparison(name);
   updateHistoryCount();
   window.scrollTo({top:0,behavior:'smooth'});
 }
@@ -319,7 +322,10 @@ function saveInputsOnly(){
 
 function resetCurrent(){
   if(!current)return;
+  // Reset measurement data as before, but keep the separate technical specification.
+  const savedSpecification=canData[current]&&canData[current].specification;
   delete canData[current];
+  if(savedSpecification)canData[current]={inputs:{},thresholds:{},history:[],specification:savedSpecification};
   persist();
   fields.forEach(id=>document.getElementById(id).value='');
   setResults({message:'Đã reset toàn bộ số liệu của '+current+'.'});
@@ -434,6 +440,7 @@ function calculateOriginal(){
     gapNum:gap,
     overlapPctNum:overlapPct,
     bodyHookPctNum:bodyHookPct,
+    sourceValues:{BH,CH,SL,ST,Tb,Te},
     message:'Đã tính kết quả cho '+current+'.'
   };
 
@@ -456,6 +463,7 @@ function calculateOriginal(){
   if(c.history.length>50)c.history.length=50;
   persist();
   updateHistoryCount();
+  renderLiveSpecificationComparison(current);
 }
 
 
@@ -622,6 +630,7 @@ function loadHistoryEntry(i,fromDetail=false){
     overlap:fmt(h.overlap,'mm',3), overlapPct:fmt(h.overlapPct,'%',2),
     bodyHookPct:fmt(h.bodyHookPct,'%',2), gap:fmt(h.gap,'mm',3),
     overlapNum:h.overlap, overlapPctNum:h.overlapPct, bodyHookPctNum:h.bodyHookPct, gapNum:h.gap,
+    sourceValues:{BH:Number(h.BH),CH:Number(h.CH),SL:Number(h.SL),ST:Number(h.ST),Tb:Number(h.Tb),Te:Number(h.Te)},
     qualityStatus:h.qualityStatus||historyLabel(historyState(h)),
     qualityState:historyState(h), qualityDetail:'Kết quả được nạp lại từ lịch sử.'
   };
@@ -1271,6 +1280,114 @@ document.addEventListener('DOMContentLoaded',()=>{
 });
 
 
+// ===== QUY CÁCH LON — nhập tiêu chuẩn độc lập và đối chiếu kết quả đã tính =====
+let specificationCanKey=null;
+function specificationCan(){return ensureCan(specificationCanKey||current)}
+const SPEC_SOURCES=[
+  ['','Không đối chiếu tự động'],['BH','BH · Móc thân (mm)'],['CH','CH · Móc nắp (mm)'],['SL','SL · Rộng mí (mm)'],['ST','ST · Độ dày mí (mm)'],['Tb','Tb · Dày thân (mm)'],['Te','Te · Dày nắp (mm)'],
+  ['overlapNum','Độ chồng mí (mm)'],['overlapPctNum','% Độ chồng mí'],['bodyHookPctNum','% Độ móc thân'],['gapNum','Khoảng trống (mm)']
+];
+function specEscape(v){return String(v??'').replace(/[&<>"']/g,ch=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[ch]))}
+function specId(){return 'sp-'+Date.now().toString(36)+'-'+Math.random().toString(36).slice(2,7)}
+function defaultSpecificationGroups(){
+  const make=(name,source)=>({id:specId(),name,value:'',tolerance:'',unit:'mm',source});
+  return [
+    {id:specId(),title:'MÓC GHÉP',items:[make('Móc thân','BH'),make('Móc nắp','CH')]},
+    {id:specId(),title:'KÍCH THƯỚC MÍ GHÉP',items:[make('Rộng mí ghép','SL'),make('Độ dày mí ghép','ST'),make('Độ chồng mí','overlapNum')]},
+    {id:specId(),title:'TỶ LỆ & KHOẢNG TRỐNG',items:[make('% Độ chồng mí','overlapPctNum'),make('% Độ móc thân','bodyHookPctNum'),make('Khoảng trống mí','gapNum')]}
+  ];
+}
+function openCanSpecification(){
+  if(!current){showToast('Hãy chọn loại lon trước');return}
+  specificationCanKey=current;
+  const c=specificationCan();
+  if(!c.specification.groups.length)c.specification.groups=defaultSpecificationGroups();
+  persist();
+  document.getElementById('specCanTitle').textContent='Quy cách riêng · '+((document.getElementById('title')||{}).textContent||current);
+  renderSpecificationEditor();
+  document.getElementById('canSpecificationOverlay').classList.add('open');
+  document.body.style.overflow='hidden';
+}
+function closeCanSpecification(){
+  const el=document.getElementById('canSpecificationOverlay');if(el)el.classList.remove('open');
+  document.body.style.overflow='';
+  specificationCanKey=null;
+}
+function saveCanSpecification(showMessage=false){
+  const key=specificationCanKey||current;if(!key)return;
+  const c=ensureCan(key);c.specification=c.specification||{groups:[]};persist();
+  if(showMessage)showToast('Đã lưu quy cách cho '+key);
+  renderSpecificationComparison();
+  renderLiveSpecificationComparison(key);
+}
+function renderSpecificationEditor(){
+  const host=document.getElementById('specEditorGroups');if(!host)return;
+  const groups=specificationCan().specification.groups;
+  if(!groups.length){host.innerHTML='<div class="spec-empty">Chưa có nhóm thông số. Bạn có thể tạo nhóm theo tài liệu kỹ thuật, ví dụ: Thông tin chung, Vật liệu, Kích thước thân lon, Mí ghép, Nắp EOE.</div>';}
+  else host.innerHTML=groups.map((g,gi)=>`<section class="spec-group" data-spec-group="${specEscape(g.id)}">
+    <div class="spec-group-head"><input aria-label="Tên nhóm thông số" value="${specEscape(g.title)}" placeholder="Tên nhóm thông số" onchange="updateSpecificationGroup('${specEscape(g.id)}','title',this.value)"><button class="spec-small-btn danger" onclick="deleteSpecificationGroup('${specEscape(g.id)}')">Xóa nhóm</button></div>
+    ${(g.items||[]).map(it=>`<div class="spec-item" data-spec-item="${specEscape(it.id)}">
+      <div class="spec-item-grid">
+       <div class="spec-control full"><label>TÊN THÔNG SỐ</label><input value="${specEscape(it.name)}" placeholder="Ví dụ: Chiều cao thân lon" onchange="updateSpecificationItem('${specEscape(g.id)}','${specEscape(it.id)}','name',this.value)"></div>
+       <div class="spec-control"><label>GIÁ TRỊ TIÊU CHUẨN</label><input type="number" inputmode="decimal" step="any" value="${specEscape(it.value)}" placeholder="Ví dụ: 78.10" onchange="updateSpecificationItem('${specEscape(g.id)}','${specEscape(it.id)}','value',this.value)"></div>
+       <div class="spec-control"><label>DUNG SAI ±</label><input type="number" inputmode="decimal" min="0" step="any" value="${specEscape(it.tolerance)}" placeholder="Ví dụ: 0.30" onchange="updateSpecificationItem('${specEscape(g.id)}','${specEscape(it.id)}','tolerance',this.value)"></div>
+       <div class="spec-control"><label>ĐƠN VỊ</label><input value="${specEscape(it.unit)}" placeholder="mm, %, ml, g..." onchange="updateSpecificationItem('${specEscape(g.id)}','${specEscape(it.id)}','unit',this.value)"></div>
+       <div class="spec-control"><label>DỮ LIỆU DÙNG ĐỂ ĐỐI CHIẾU</label><select onchange="updateSpecificationItem('${specEscape(g.id)}','${specEscape(it.id)}','source',this.value)">${SPEC_SOURCES.map(([v,l])=>`<option value="${v}" ${it.source===v?'selected':''}>${l}</option>`).join('')}</select></div>
+      </div>
+      <div class="spec-add-row"><button class="spec-small-btn danger" onclick="deleteSpecificationItem('${specEscape(g.id)}','${specEscape(it.id)}')">Xóa thông số</button></div>
+    </div>`).join('')}
+    <div class="spec-add-row"><button class="spec-small-btn" onclick="addSpecificationItem('${specEscape(g.id)}')">＋ Thêm thông số vào nhóm</button></div>
+   </section>`).join('');
+  renderSpecificationComparison();
+}
+function updateSpecificationGroup(gid,key,value){const g=specificationCan().specification.groups.find(x=>x.id===gid);if(g){g[key]=value;saveCanSpecification(false)}}
+function updateSpecificationItem(gid,iid,key,value){const g=specificationCan().specification.groups.find(x=>x.id===gid);const it=g&&g.items.find(x=>x.id===iid);if(it){it[key]=value;saveCanSpecification(false)}}
+function addSpecificationGroup(){const c=specificationCan();c.specification.groups.push({id:specId(),title:'Nhóm thông số mới',items:[]});saveCanSpecification(false);renderSpecificationEditor()}
+function deleteSpecificationGroup(gid){const c=specificationCan();c.specification.groups=c.specification.groups.filter(x=>x.id!==gid);saveCanSpecification(false);renderSpecificationEditor()}
+function addSpecificationItem(gid){const g=specificationCan().specification.groups.find(x=>x.id===gid);if(!g)return;g.items=g.items||[];g.items.push({id:specId(),name:'',value:'',tolerance:'',unit:'mm',source:''});saveCanSpecification(false);renderSpecificationEditor()}
+function deleteSpecificationItem(gid,iid){const g=specificationCan().specification.groups.find(x=>x.id===gid);if(!g)return;g.items=(g.items||[]).filter(x=>x.id!==iid);saveCanSpecification(false);renderSpecificationEditor()}
+function getSpecificationResultValues(c){
+  const r=c&&c.lastResult;if(!r)return null;
+  let inputs=r.sourceValues||null;
+  if(!inputs&&Array.isArray(c.history)&&c.history.length){const h=c.history[0];if(h&&['BH','CH','SL','ST','Tb','Te'].every(k=>Number.isFinite(Number(h[k]))))inputs={BH:Number(h.BH),CH:Number(h.CH),SL:Number(h.SL),ST:Number(h.ST),Tb:Number(h.Tb),Te:Number(h.Te)}}
+  return {BH:inputs?Number(inputs.BH):NaN,CH:inputs?Number(inputs.CH):NaN,SL:inputs?Number(inputs.SL):NaN,ST:inputs?Number(inputs.ST):NaN,Tb:inputs?Number(inputs.Tb):NaN,Te:inputs?Number(inputs.Te):NaN,overlapNum:Number(r.overlapNum),overlapPctNum:Number(r.overlapPctNum),bodyHookPctNum:Number(r.bodyHookPctNum),gapNum:Number(r.gapNum)};
+}
+function buildSpecificationComparisonMarkup(c){
+  const groups=c&&c.specification&&c.specification.groups||[];
+  const values=getSpecificationResultValues(c);
+  const configured=groups.map(g=>({group:g,items:(g.items||[]).filter(it=>it.source&&it.value!=='' )})).filter(x=>x.items.length);
+  if(!configured.length)return '<div class="spec-compare-note">Chưa có tiêu chuẩn nào được nhập. Hãy mở QUY CÁCH LON để nhập giá trị tiêu chuẩn và dung sai.</div>';
+  if(!values)return '<div class="spec-compare-note">Chưa có kết quả tính mí để đối chiếu. Hãy nhập đủ thông số và nhấn TÍNH KẾT QUẢ.</div>';
+  let count=0,pass=0,fail=0,missing=0;
+  const body=configured.map(({group,items})=>{
+    const rows=items.map(it=>{
+      const val=values[it.source],target=Number(it.value),tol=it.tolerance===''||it.tolerance===null?0:Number(it.tolerance);
+      const valid=Number.isFinite(val)&&Number.isFinite(target)&&Number.isFinite(tol)&&tol>=0;
+      let label='CHƯA ĐỦ DỮ LIỆU',cls='neutral',range='Chưa đủ dữ liệu';
+      if(Number.isFinite(target)&&Number.isFinite(tol)&&tol>=0)range=fmt(target-tol,it.unit||'',3).trim()+' – '+fmt(target+tol,it.unit||'',3).trim();
+      if(valid){count++;const ok=val>=target-tol-1e-9&&val<=target+tol+1e-9;label=ok?'ĐẠT':'KHÔNG ĐẠT';cls=ok?'ok':'bad';if(ok)pass++;else fail++;}else missing++;
+      const actual=Number.isFinite(val)?fmt(val,it.unit||'',3).trim():'—';
+      return `<tr><td>${specEscape(it.name||'Chỉ tiêu')}</td><td>${specEscape(actual)}</td><td>${specEscape(range)}</td><td><span class="badge ${cls}">${label}</span></td></tr>`;
+    }).join('');
+    const groupFail=items.some(it=>{const v=values[it.source],t=Number(it.value),d=it.tolerance===''?0:Number(it.tolerance);return Number.isFinite(v)&&Number.isFinite(t)&&Number.isFinite(d)&&d>=0&&(v<t-d-1e-9||v>t+d+1e-9)});
+    return `<details class="spec-compare-group"><summary>${specEscape(group.title||'Nhóm thông số')} <span class="badge ${groupFail?'bad':'neutral'}">${groupFail?'Có chỉ tiêu không đạt':'Xem đối chiếu'}</span></summary><table class="spec-compare-table"><thead><tr><th>Chỉ tiêu</th><th>Kết quả tính</th><th>Giới hạn</th><th>Đánh giá</th></tr></thead><tbody>${rows}</tbody></table></details>`;
+  }).join('');
+  const complete=count>0&&missing===0,overall=complete?(fail===0?'ĐẠT':'KHÔNG ĐẠT'):'CHƯA ĐỦ DỮ LIỆU',cls=complete?(fail===0?'ok':'bad'):'neutral';
+  return `<div class="spec-live-title">KẾT QUẢ ĐỐI CHIẾU QUY CÁCH</div><div class="spec-compare-note">Tự động đối chiếu với tiêu chuẩn của đúng loại lon sau mỗi lần tính. Mở từng nhóm để xem chi tiết.</div>${body}<div class="spec-total"><span>KẾT LUẬN ĐỐI CHIẾU</span><span class="badge ${cls}">${overall}</span></div><div class="spec-compare-note" style="margin:8px 0 0">Đạt: ${pass} · Không đạt: ${fail} · Chưa đủ dữ liệu: ${missing}</div>`;
+}
+function renderSpecificationComparison(){
+  const host=document.getElementById('specComparisonPanel');if(!host)return;
+  host.innerHTML=buildSpecificationComparisonMarkup(specificationCan());
+}
+function renderLiveSpecificationComparison(key=current){
+  const host=document.getElementById('specLiveComparison');if(!host)return;
+  const c=key&&canData[key];
+  if(!c||!c.specification||!c.specification.groups||!c.specification.groups.some(g=>(g.items||[]).some(it=>it.source&&it.value!==''))){host.hidden=true;host.innerHTML='';return}
+  host.hidden=false;host.innerHTML=buildSpecificationComparisonMarkup(c);
+}
+
+
+
 function calculate(){
   const values={};
   ['BH','CH','SL','ST','Tb','Te'].forEach(id=>{
@@ -1449,7 +1566,7 @@ function duplicateCanType(key){
   while(listCanTypes().some(x=>normalizeCanName(x.name).toLowerCase()===name.toLowerCase())) name=base+' '+n++;
   let newKey=canKeyFromName(name), k=2, keyBase=newKey;
   while(canData[newKey]||listCanTypes().some(x=>x.key===newKey)) newKey=keyBase+'-'+k++;
-  canData[newKey]=JSON.parse(JSON.stringify({displayName:name,note:src.note||'',inputs:src.inputs||{},thresholds:src.thresholds||{},limits:src.limits||{},history:[]}));
+  canData[newKey]=JSON.parse(JSON.stringify({displayName:name,note:src.note||'',inputs:src.inputs||{},thresholds:src.thresholds||{},limits:src.limits||{},specification:src.specification||{groups:[]},history:[]}));
   canData[newKey].displayName=name;
   canData[newKey].history=[];
   addCanButton(newKey,name,true);

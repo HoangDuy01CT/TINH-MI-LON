@@ -81,9 +81,9 @@ function unlockAudio(){
   const a=sounds.select;if(!a)return;
   try{const v=a.volume;a.volume=0;a.currentTime=0;const p=a.play();if(p&&p.catch)p.catch(()=>{});a.pause();a.currentTime=0;a.volume=v;}catch(_){}
 }
-let board=[],selected=null,rainbowTarget=null,state='menu',score=0,moves=START_MOVES,level=1,progress=0,combo=0,banner='',bannerT=0,hint=null,hintT=0,particles=[],last=0,swapInfo=null,phase=0,reverting=false,soundOn=(GAME_STORAGE.getItem('tinh-mi-lon-game-sound')!=='off'),hapticOn=(GAME_STORAGE.getItem('tinh-mi-lon-game-haptic')!=='off'),warningT=0;
+let board=[],selected=null,rainbowTarget=null,state='menu',score=0,moves=START_MOVES,level=1,progress=0,combo=0,banner='',bannerT=0,hint=null,hintT=0,particles=[],last=0,swapInfo=null,phase=0,reverting=false,soundOn=(GAME_STORAGE.getItem('tinh-mi-lon-game-sound')!=='off'),hapticOn=(GAME_STORAGE.getItem('tinh-mi-lon-game-haptic')!=='off'),voiceOn=(GAME_STORAGE.getItem('tinh-mi-lon-game-voice')!=='off'),warningT=0;
 let hintCooldown=0;
-let boosterState='menu',boosterTarget=null;
+let boosterState='menu',boosterTarget=null,boosterMode=null,boosterSelected=null;
 let feedbackFlash=0,feedbackPulse=0;
 // V131: localized match impact — only the gems/cells being cleared react.
 let localImpacts=[];
@@ -489,8 +489,13 @@ function obstacleCount(l){
 }
 function themePalette(){return themeForLevel(level)}
 function themeMusicSource(){return themeForLevel(level).music}
-function applyThemeMusic(){
-  // Respect a user-imported track. Built-in tracks may follow the current world.
+let lastThemeMusicLevel=-1;
+function applyThemeMusic(force=false){
+  // Keep game restart/replay independent from the music player.
+  // Only re-evaluate the built-in theme track when the game actually enters
+  // a different level. User-imported tracks are always respected.
+  if(!force && lastThemeMusicLevel===level)return;
+  lastThemeMusicLevel=level;
   try{
     const a=document.getElementById('bgMusic');
     const idx=themeForLevel(level).music.includes('10k-years')?1:0;
@@ -501,6 +506,103 @@ function applyThemeMusic(){
 }
 function setSound(v){soundOn=!!v;try{GAME_STORAGE.setItem('tinh-mi-lon-game-sound',soundOn?'on':'off')}catch(_){}}
 function setHaptic(v){hapticOn=!!v;try{GAME_STORAGE.setItem('tinh-mi-lon-game-haptic',hapticOn?'on':'off')}catch(_){} }
+function setVoice(v){voiceOn=!!v;try{GAME_STORAGE.setItem('tinh-mi-lon-game-voice',voiceOn?'on':'off')}catch(_){} }
+
+// V159: Procedural match audio + device voice. This is intentionally independent
+// from the background music player and from the old WAV-only match cues.
+let matchAudioCtx=null;
+function matchAudioContext(){
+  if(matchAudioCtx)return matchAudioCtx;
+  try{const C=window.AudioContext||window.webkitAudioContext;if(!C)return null;matchAudioCtx=new C();return matchAudioCtx}catch(_){return null}
+}
+function playTone(ctx,dest,freq,start,duration,gain,type='sine'){
+  const o=ctx.createOscillator(),g=ctx.createGain(),f=ctx.createBiquadFilter();
+  o.type=type;o.frequency.setValueAtTime(freq,start);
+  f.type='lowpass';f.frequency.setValueAtTime(Math.min(5200,freq*3.8),start);
+  g.gain.setValueAtTime(0.0001,start);g.gain.exponentialRampToValueAtTime(gain,start+.012);g.gain.exponentialRampToValueAtTime(0.0001,start+duration);
+  o.connect(f);f.connect(g);g.connect(dest);o.start(start);o.stop(start+duration+.02);
+}
+function proceduralMatchSound(size,comboStep=1){
+  if(!soundOn)return;
+  const ctx=matchAudioContext();if(!ctx)return;
+  try{
+    if(ctx.state==='suspended')ctx.resume().catch(()=>{});
+    const now=ctx.currentTime+.006,master=ctx.createGain();
+    const qualityMul=performanceProfile().audioMul;master.gain.value=Math.min(.20,.105*qualityMul);master.connect(ctx.destination);
+    const n=Math.max(3,Math.min(8,size|0));
+    const roots={3:392,4:494,5:523,6:587,7:659,8:784};
+    const root=roots[n]||392;
+    const patterns={3:[1],4:[1,1.25,1.5],5:[1,1.25,1.5,2],6:[1,1.25,1.5,1.78,2.25],7:[1,1.25,1.5,1.78,2.25,2.67],8:[1,1.25,1.5,1.78,2.25,2.67,3.0]};
+    const pat=patterns[n];
+    pat.forEach((mul,i)=>playTone(ctx,master,root*mul,now+i*.055,.13+(n-3)*.008,.18/(i+1),n>=5?'triangle':'sine'));
+    if(n>=5){playTone(ctx,master,root*2.0,now+.09,.28,.075,'sine');playTone(ctx,master,root*2.5,now+.15,.32,.055,'sine');}
+    if(comboStep>=2){const cb=Math.min(4,comboStep);for(let i=0;i<cb;i++)playTone(ctx,master,root*(1.5+i*.18),now+.16+i*.045,.11,.035,'square');}
+  }catch(_){}
+}
+let voiceVoices=[];
+function refreshVoiceVoices(){try{voiceVoices=window.speechSynthesis?.getVoices?.()||[]}catch(_){voiceVoices=[]}}
+if(typeof window!=='undefined'&&window.speechSynthesis){try{refreshVoiceVoices();window.speechSynthesis.onvoiceschanged=refreshVoiceVoices}catch(_){} }
+function gameVoice(text,kind='reward'){
+  if(!voiceOn||typeof window==='undefined'||!window.speechSynthesis||!text)return;
+  try{
+    const voices=voiceVoices.length?voiceVoices:(window.speechSynthesis.getVoices?.()||[]);
+    // Prefer a natural English voice for the short arcade-style reward calls.
+    const preferred=voices.find(v=>/^en(-|_)?US/i.test(v.lang)&&/Samantha|Karen|Ava|Siri|Alex|Google|Microsoft/i.test(v.name))
+      ||voices.find(v=>/^en(-|_)?US/i.test(v.lang))
+      ||voices.find(v=>/^en/i.test(v.lang));
+    window.speechSynthesis.cancel();
+    const u=new SpeechSynthesisUtterance(text);
+    if(preferred){u.voice=preferred;u.lang=preferred.lang||'en-US'}else u.lang='en-US';
+    // Short, bright and playful — closer to casual mobile-game callouts.
+    u.rate=kind==='combo'?.94:1.10;
+    u.pitch=kind==='mega'?1.22:kind==='combo'?1.14:1.18;
+    u.volume=.86;
+    window.speechSynthesis.speak(u);
+  }catch(_){ }
+}
+function rewardVoice(size,comboStep){
+  if(comboStep>=5)return gameVoice('Amazing!','mega');
+  if(comboStep>=4)return gameVoice('Fantastic!','combo');
+  if(comboStep>=2)return gameVoice('Great!','combo');
+  if(size===4)return gameVoice('Sweet!','reward');
+  if(size===5)return gameVoice('Delicious!','reward');
+  if(size>=6)return gameVoice('Amazing!','reward');
+}
+// V160: Original arcade-style reward audio. No Candy Crush voice assets are copied;
+// the game uses its own short callouts + procedural chimes.
+function candyStyleMatchAudio(size,comboStep=1){
+  if(!soundOn)return;
+  const ctx=matchAudioContext();
+  if(!ctx)return;
+  try{
+    if(ctx.state==='suspended')ctx.resume().catch(()=>{});
+    const now=ctx.currentTime+.008,master=ctx.createGain();
+    const q=performanceProfile().audioMul;
+    master.gain.value=Math.min(.16,.082*q);master.connect(ctx.destination);
+    const n=Math.max(3,Math.min(8,size|0));
+    const roots={3:392,4:494,5:523,6:587,7:659,8:784};
+    const root=roots[n]||392;
+    // 3 = simple pop, 4 = ascending sparkle, 5+ = brighter reward fanfare.
+    if(n===3){
+      playTone(ctx,master,root,now,.10,.16,'sine');
+      playTone(ctx,master,root*1.5,now+.045,.12,.07,'sine');
+    }else{
+      const count=n===4?3:n===5?4:Math.min(7,n-1);
+      for(let i=0;i<count;i++){
+        const ratio=[1,1.25,1.5,2,2.5,3,3.5][Math.min(i,6)];
+        playTone(ctx,master,root*ratio,now+i*.052,.115+(n>=5?.025:0),.105/(1+i*.16),n>=5?'triangle':'sine');
+      }
+      if(n>=5){
+        playTone(ctx,master,root*2,now+.075,.30,.055,'sine');
+        playTone(ctx,master,root*3,now+.13,.34,.045,'sine');
+      }
+    }
+    if(comboStep>=2){
+      const c=Math.min(5,comboStep);
+      for(let i=0;i<c;i++)playTone(ctx,master,root*(1.5+i*.20),now+.15+i*.038,.10,.028,'square');
+    }
+  }catch(_){ }
+}
 const HAPTIC_CAPABLE=typeof navigator!=='undefined'&&typeof navigator.vibrate==='function';
 const HAPTIC_NATIVE_CAPABLE=!!(typeof window!=='undefined' && (
   window.TinhMiLonHaptics ||
@@ -687,14 +789,15 @@ function ensureTutorialDom(){
   el.addEventListener('click',stopBubble,false);
   el.addEventListener('pointerdown',stopBubble,false);
   el.addEventListener('pointerup',stopBubble,false);
+  // V175 tutorial fix: use the browser's single synthesized click activation.
+  // The previous click + pointerup + touchend handlers advanced 2-3 steps
+  // for one physical tap on touch devices and some pointer-driven browsers.
   back.addEventListener('click',e=>{e.preventDefault();e.stopPropagation();tutorialBack();},{passive:false});
   next.addEventListener('click',e=>{e.preventDefault();e.stopPropagation();tutorialNext();},{passive:false});
-  back.addEventListener('pointerup',e=>{e.preventDefault();e.stopPropagation();tutorialBack();},{passive:false});
-  next.addEventListener('pointerup',e=>{e.preventDefault();e.stopPropagation();tutorialNext();},{passive:false});
-  back.addEventListener('touchend',e=>{e.preventDefault();e.stopPropagation();tutorialBack();},{passive:false});
-  next.addEventListener('touchend',e=>{e.preventDefault();e.stopPropagation();tutorialNext();},{passive:false});
   el.addEventListener('keydown',e=>{
-    if(e.key==='ArrowRight' || e.key==='Enter'){e.preventDefault();tutorialNext();}
+    // Enter is intentionally handled by the focused button's native click,
+    // avoiding a second advance from keydown plus click.
+    if(e.key==='ArrowRight'){e.preventDefault();tutorialNext();}
     else if(e.key==='ArrowLeft'){e.preventDefault();tutorialBack();}
     else if(e.key==='Escape'){e.preventDefault();tutorialSkip();}
   });
@@ -781,41 +884,133 @@ function handleTutorialInput(){return false}
 
 // ===== STEP 8: LEVEL MAP + 3 STARS + UNLOCK =====
 const MAP_KEY='tinh-mi-lon-level-map-v98';
-let mapState={version:1,stars:{},unlocked:1};
+let mapState={version:2,stars:{},unlocked:1,levels:{}};
 let mapScroll=0;
 let selectedMapLevel=1;
 let levelCompletePending=false;
+let lastLevelReward=null;
+let levelStartMoves=START_MOVES;
+let levelStartScore=0;
+let levelRunId=0;
+let levelCompletionLocked=false;
+
+function normalizeMapState(raw){
+  const out={version:2,stars:{},unlocked:1,levels:{}};
+  if(raw&&typeof raw==='object'){
+    if(raw.version===2){
+      out.stars=(raw.stars&&typeof raw.stars==='object')?raw.stars:{};
+      out.levels=(raw.levels&&typeof raw.levels==='object')?raw.levels:{};
+      out.unlocked=Math.max(1,Math.min(MAX_LEVELS,Number(raw.unlocked)||1));
+    }else if(raw.version===1){
+      out.stars=(raw.stars&&typeof raw.stars==='object')?raw.stars:{};
+      out.unlocked=Math.max(1,Math.min(MAX_LEVELS,Number(raw.unlocked)||1));
+      for(let l=1;l<=MAX_LEVELS;l++){
+        const st=Math.max(0,Math.min(3,Number(out.stars[String(l)])||0));
+        if(st>0)out.levels[String(l)]={stars:st,bestScore:0,bestMoves:0,completions:1};
+      }
+    }
+  }
+  for(let l=1;l<=MAX_LEVELS;l++){
+    const k=String(l),st=Math.max(0,Math.min(3,Number(out.stars[k])||0));
+    if(st>0){
+      const rec=out.levels[k]&&typeof out.levels[k]==='object'?out.levels[k]:{};
+      out.levels[k]={stars:st,bestScore:Math.max(0,Number(rec.bestScore)||0),bestMoves:Math.max(0,Number(rec.bestMoves)||0),completions:Math.max(1,Number(rec.completions)||1)};
+      if(l<MAX_LEVELS)out.unlocked=Math.max(out.unlocked,l+1);
+    }
+  }
+  out.unlocked=Math.max(1,Math.min(MAX_LEVELS,out.unlocked));
+  return out;
+}
 function loadMapState(){
   try{
     const d=JSON.parse(GAME_STORAGE.getItem(MAP_KEY)||'{}');
-    if(d && d.version===1){
-      mapState={version:1,stars:(d.stars&&typeof d.stars==='object')?d.stars:{},unlocked:Math.max(1,Math.min(MAX_LEVELS,Number(d.unlocked)||1))};
-    }
-  }catch(_){}
+    mapState=normalizeMapState(d);
+    saveMapState();
+  }catch(_){mapState={version:2,stars:{},unlocked:1,levels:{}};saveMapState();}
 }
-function saveMapState(){try{GAME_STORAGE.setItem(MAP_KEY,JSON.stringify(mapState))}catch(_){}}
-function levelStars(l){return Math.max(0,Math.min(3,Number(mapState.stars[String(l)])||0))}
-function isLevelUnlocked(l){return l>=1&&l<=mapState.unlocked}
+function saveMapState(){try{GAME_STORAGE.setItem(MAP_KEY,JSON.stringify(mapState))}catch(_){} }
+function levelRecord(l){return mapState.levels[String(l)]||{stars:levelStars(l),bestScore:0,bestMoves:0,completions:0}}
+function levelStars(l){const rec=mapState.levels[String(l)];return Math.max(0,Math.min(3,Number(rec?.stars ?? mapState.stars[String(l)])||0))}
+function isLevelUnlocked(l){return l>=1&&l<=MAX_LEVELS&&l<=mapState.unlocked}
+function levelStatus(l){return !isLevelUnlocked(l)?'locked':levelStars(l)>0?'completed':'open'}
 function rateLevel(){
-  const budget=Math.max(1,Number(levelConfig(level).moves)||START_MOVES);
-  const ratio=moves/budget;
+  const budget=Math.max(1,Number(levelStartMoves||levelConfig(level).moves)||START_MOVES);
+  const remaining=Math.max(0,Number(moves)||0);
+  const ratio=remaining/budget;
+  // Stars measure efficiency at the moment the level objective is completed.
+  // They never depend on total account score or on the size of a +5 booster stack.
   if(ratio>=.50)return 3;
   if(ratio>=.20)return 2;
   return 1;
 }
+function buildLevelReward(stars,oldStars,levelNo){
+  const reward={hammer:0,shuffle:0,moves:0,line:0,color:0,free:0,bonus:'',stars};
+  if(stars>=1&&oldStars<1)reward.moves+=1;
+  if(stars>=2&&oldStars<2)reward.shuffle+=1;
+  if(stars>=3&&oldStars<3)reward.hammer+=1;
+  if(levelNo%5===0){
+    reward.bonus='MILESTONE CHEST';
+    const pool=['line','color','free','hammer','shuffle','moves'];
+    reward[pool[(levelNo/5-1)%pool.length]]+=1;
+    if(levelNo%10===0){reward[pool[(levelNo/10+1)%pool.length]]+=1;reward.bonus='MEGA MILESTONE CHEST';}
+  }
+  return reward;
+}
+function applyLevelReward(reward){
+  if(!reward)return;
+  const gained={};
+  for(const k of ['hammer','shuffle','moves','line','color','free']){
+    const n=rewardBooster(k,reward[k]||0); if(n>0)gained[k]=n;
+  }
+  reward.gained=gained;reward.claimed=true;
+}
+function rewardSummaryText(reward){
+  if(!reward)return '';
+  const parts=[];
+  if(reward.gained?.hammer)parts.push('🔨 ×'+reward.gained.hammer);
+  if(reward.gained?.shuffle)parts.push('🔀 ×'+reward.gained.shuffle);
+  if(reward.gained?.moves)parts.push('➕ ×'+reward.gained.moves);
+  if(reward.gained?.line)parts.push('🚀 ×'+reward.gained.line);
+  if(reward.gained?.color)parts.push('🌈 ×'+reward.gained.color);
+  if(reward.gained?.free)parts.push('🔄 ×'+reward.gained.free);
+  return parts.join('   ')||'HÀNH TRANG ĐÃ ĐẦY';
+}
 function completeLevel(){
+  // Idempotent completion: repeated resolve frames, pointer clicks or Safari
+  // click fallbacks cannot award/advance the same level twice.
   if(dailyMode){completeDaily();return;}
-  const stars=rateLevel(),old=levelStars(level);
-  if(stars>old)mapState.stars[String(level)]=stars;
-  if(level<MAX_LEVELS)mapState.unlocked=Math.max(mapState.unlocked,level+1);
-  // A completed level grants a small booster reward without forcing purchases.
-  if(stars>=3)rewardBooster('hammer',1);
-  if(stars>=2)rewardBooster('shuffle',1);
-  rewardBooster('moves',1);
+  if(levelCompletionLocked||state==='levelcomplete')return;
+  if(!objectiveDone())return;
+  levelCompletionLocked=true;
+  levelCompletePending=false;
+
+  const levelNo=level;
+  const stars=rateLevel();
+  const old=levelStars(levelNo);
+  const bestScore=Math.max(0,Number(levelRecord(levelNo).bestScore)||0,Number(score)||0);
+  const bestMoves=Math.max(0,Number(levelRecord(levelNo).bestMoves)||0,Math.max(0,Number(moves)||0));
+  const newStars=Math.max(old,stars);
+  const rec={stars:newStars,bestScore,bestMoves,completions:Math.max(0,Number(levelRecord(levelNo).completions)||0)+1};
+  mapState.levels[String(levelNo)]=rec;
+  mapState.stars[String(levelNo)]=newStars;
+  if(levelNo<MAX_LEVELS)mapState.unlocked=Math.max(mapState.unlocked,levelNo+1);
+  selectedMapLevel=levelNo<MAX_LEVELS?levelNo+1:levelNo;
+
+  const isFirstClear=old===0;
+  lastLevelReward=buildLevelReward(newStars,old,levelNo);
+  lastLevelReward.firstClear=isFirstClear;
+  lastLevelReward.runStars=stars;
+  lastLevelReward.bestStars=newStars;
+  if(lastLevelReward.hammer||lastLevelReward.shuffle||lastLevelReward.moves||lastLevelReward.line||lastLevelReward.color||lastLevelReward.free||lastLevelReward.bonus){
+    applyLevelReward(lastLevelReward);
+  }else{
+    lastLevelReward={...lastLevelReward,gained:{},claimed:true,bonus:'REPLAY — NO NEW BOOSTER'};
+  }
   saveMapState();
-  addMissionProgress('levels',1);
+  if(isFirstClear)addMissionProgress('levels',1);
   clearSavedGame();
-  banner='LEVEL '+level+' COMPLETE!';bannerT=1.4;
+  saveFlashT=0;saveFlashText='';
+  banner='LEVEL '+levelNo+' COMPLETE!';bannerT=1.4;
   state='levelcomplete';
 }
 loadMapState();
@@ -914,7 +1109,7 @@ function updateDailyStreak(){
   return {current:streakState.current,milestone:milestones.length?Math.max(...milestones):0,milestones,already:false};
 }
 function streakRewardFor(m){return m>=30?'hammer':m>=14?'shuffle':'moves'}
-function streakRewardText(m){const k=streakRewardFor(m);return k==='hammer'?'🔨 +1 Hammer':k==='shuffle'?'🔀 +1 Shuffle':'➕ +1 +5 Moves'}
+function streakRewardText(m){const k=streakRewardFor(m);return boosterIcon(k)+' +1 '+boosterLabel(k)}
 function applyStreakCompletion(){
   const r=updateDailyStreak();
   streakFlash=.9; streakMilestone=r.milestone;
@@ -935,8 +1130,8 @@ function dailyStart(){
 function completeDaily(){dailyState.completed=true;dailyState.bestScore=Math.max(dailyState.bestScore,score);saveDaily();rewardBooster(dailyConfig.reward,1);addMissionProgress('levels',1);dailyResult='COMPLETED';clearUndo();const streak=applyStreakCompletion();if(!streak.milestone){banner='DAILY COMPLETE! • 🔥 STREAK '+streak.current;bannerT=1.4;}clearSavedGame();dailyMode=false;state='dailycomplete';}
 function failDaily(){dailyState.bestScore=Math.max(dailyState.bestScore,score);saveDaily();dailyMode=false;clearUndo();state='gameover';banner='DAILY FAILED';bannerT=1.0}
 function missionDefForType(type){return MISSION_DEFS.find(d=>d.type===type)||MISSION_DEFS[0]}
-function missionRewardLabel(k){return k==='hammer'?'🔨 +1 Hammer':k==='shuffle'?'🔀 +1 Shuffle':'➕ +1 +5 Moves'}
-function missionRewardText(k){return k==='hammer'?'HAMMER ×1':k==='shuffle'?'SHUFFLE ×1':'+5 MOVES ×1'}
+function missionRewardLabel(k){return ' '+boosterIcon(k)+' +1 '+boosterLabel(k)}
+function missionRewardText(k){return boosterLabel(k)+' ×1'}
 function makeMission(def,index){
   const d=def||MISSION_DEFS[0];
   return {uid:'m'+index+'-'+Date.now()+'-'+Math.random().toString(36).slice(2,7),type:d.type,target:d.target,label:d.label,reward:d.reward,icon:d.icon||'◆',progress:0,claimed:false};
@@ -1004,41 +1199,95 @@ loadMissions();
 
 // ===== STEP 9: BOOSTERS =====
 const BOOSTER_KEY='tinh-mi-lon-boosters-v105';
-const BOOSTER_VERSION=2, BOOSTER_MAX=9;
-const BOOSTER_DEFAULTS={hammer:3,shuffle:2,moves:2};
+const BOOSTER_VERSION=4, BOOSTER_MAX=99;
+const BOOSTER_DEFAULTS={hammer:3,shuffle:2,moves:2,line:1,color:1,free:1};
 let boosters={...BOOSTER_DEFAULTS};
+let boosterBusy=false;
+let boosterSessionId=0;
+let movesZeroGrace=0;
 function clampBooster(n){return Math.max(0,Math.min(BOOSTER_MAX,Math.floor(Number(n)||0)))}
 function loadBoosters(){
   try{
     const raw=GAME_STORAGE.getItem(BOOSTER_KEY)||GAME_STORAGE.getItem('tinh-mi-lon-boosters-v99')||'{}';
     const d=JSON.parse(raw);
-    boosters={hammer:clampBooster(d.hammer ?? BOOSTER_DEFAULTS.hammer),shuffle:clampBooster(d.shuffle ?? BOOSTER_DEFAULTS.shuffle),moves:clampBooster(d.moves ?? BOOSTER_DEFAULTS.moves)};
+    boosters={hammer:clampBooster(d.hammer ?? BOOSTER_DEFAULTS.hammer),shuffle:clampBooster(d.shuffle ?? BOOSTER_DEFAULTS.shuffle),moves:clampBooster(d.moves ?? BOOSTER_DEFAULTS.moves),line:clampBooster(d.line ?? BOOSTER_DEFAULTS.line),color:clampBooster(d.color ?? BOOSTER_DEFAULTS.color),free:clampBooster(d.free ?? BOOSTER_DEFAULTS.free)};
     saveBoosters();
   }catch(_){boosters={...BOOSTER_DEFAULTS}}
 }
 function saveBoosters(){try{GAME_STORAGE.setItem(BOOSTER_KEY,JSON.stringify({...boosters,version:BOOSTER_VERSION}))}catch(_){}
 }
-function boosterLabel(k){return k==='hammer'?'HAMMER':k==='shuffle'?'SHUFFLE':'+5 MOVES'}
-function boosterIcon(k){return k==='hammer'?'🔨':k==='shuffle'?'🔀':'➕'}
-function boosterCanUse(k){return (state==='playing'||state==='boosters') && clampBooster(boosters[k])>0 && moves>0}
-function boosterUsedBanner(k){return k==='hammer'?'HAMMER!':k==='shuffle'?'BOARD SHUFFLED!':'+5 MOVES!'}
+const BOOSTER_INFO={
+  hammer:{name:'BÚA PHÁ Ô',short:'HAMMER',icon:'🔨',desc:'Phá 1 ô hoặc vật cản'},
+  shuffle:{name:'XÁO TRỘN',short:'SHUFFLE',icon:'🔀',desc:'Xáo trộn bàn, giữ lại nước đi'},
+  moves:{name:'+5 LƯỢT',short:'+5 MOVES',icon:'➕',desc:'Cộng thêm 5 lượt chơi'},
+  line:{name:'PHÁ HÀNG',short:'LINE BLAST',icon:'🚀',desc:'Chọn 1 ô → phá toàn bộ hàng'},
+  color:{name:'PHÁ MÀU',short:'COLOR BLAST',icon:'🌈',desc:'Chọn 1 viên → phá toàn bộ ngọc cùng màu'},
+  free:{name:'ĐỔI CHỖ TỰ DO',short:'FREE SWITCH',icon:'🔄',desc:'Đổi 2 ô bất kỳ → không cần kề nhau, không trừ lượt'}
+};
+function boosterLabel(k){return BOOSTER_INFO[k]?.short||String(k||'').toUpperCase()}
+function boosterName(k){return BOOSTER_INFO[k]?.name||boosterLabel(k)}
+function boosterDesc(k){return BOOSTER_INFO[k]?.desc||''}
+function boosterIcon(k){return BOOSTER_INFO[k]?.icon||'◆'}
+function boosterCanUse(k){
+  if(!BOOSTER_INFO[k]||clampBooster(boosters[k])<=0)return false;
+  if(boosterBusy)return false;
+  // Booster menu is always a valid place to choose a booster. During gameplay,
+  // targeted boosters are also allowed; +5 may rescue a zero-move board.
+  if(state==='boosters')return true;
+  if(state!=='playing')return false;
+  if(k==='moves')return moves>=0;
+  return true;
+}
+function boosterMessage(text,kind='tap'){
+  banner=text;bannerT=.9;haptic(kind);startLoop();
+}
+function beginBooster(k,stateName,prompt){
+  if(clampBooster(boosters[k])<=0||boosterBusy)return false;
+  boosterBusy=true;boosterSessionId++;
+  boosterMode=k;boosterTarget=null;boosterSelected=null;
+  state=stateName;
+  banner=prompt;bannerT=1.1;haptic('tap');startLoop();
+  return true;
+}
+function enterBoosterMode(k){
+  const cfg={
+    hammer:['booster-hammer','🔨 BÚA PHÁ Ô • CHỌN 1 Ô'],
+    line:['booster-line','🚀 PHÁ HÀNG • CHỌN 1 Ô TRONG HÀNG'],
+    color:['booster-color','🌈 PHÁ MÀU • CHỌN 1 VIÊN NGỌC'],
+    free:['booster-free','🔄 ĐỔI CHỖ TỰ DO • CHỌN 2 Ô']
+  }[k];
+  if(!cfg)return false;
+  return beginBooster(k,cfg[0],cfg[1]);
+}
+function activateBoosterCard(k){return useBooster(k)}
+function finishBoosterSelection(){boosterMode=null;boosterSelected=null;boosterTarget=null;boosterBusy=false}
 function useBooster(k){
   if(!boosterCanUse(k)){
-    banner=boosters[k]?'Không thể dùng lúc này':'HẾT BOOSTER';bannerT=.8;sound('error');haptic('error');return false;
+    boosterMessage(clampBooster(boosters[k])>0?'KHÔNG THỂ DÙNG LÚC NÀY':'HẾT BOOSTER','error');
+    return false;
   }
-  if(k==='hammer'){
-    boosterTarget=null;state='booster-hammer';banner='HAMMER: CHỌN 1 Ô • CHẠM NGOÀI ĐỂ HỦY';bannerT=1.2;haptic('tap');startLoop();return true;
-  }
+  if(k==='hammer')return enterBoosterMode('hammer');
+  if(k==='line')return enterBoosterMode('line');
+  if(k==='color')return enterBoosterMode('color');
+  if(k==='free')return enterBoosterMode('free');
   if(k==='moves'){
-    boosters.moves=clampBooster(boosters.moves-1);saveBoosters();addMissionProgress('booster',1);
-    moves=Math.min(99,moves+5);banner='+5 MOVES!';bannerT=.95;sound('special',2);haptic('special', Math.min(1.65, 1 + combo*0.12));flashFeedback(.22);state='playing';saveProgress();startLoop();return true;
+    // +5 is transactional: consume exactly one, then add five moves.
+    boosters.moves=clampBooster(boosters.moves-1);
+    moves=Math.min(99,moves+5);
+    movesZeroGrace=0;
+    saveBoosters();addMissionProgress('booster',1);
+    state='playing';finishBoosterSelection();
+    banner='➕ +5 LƯỢT • CÒN '+moves+' LƯỢT';bannerT=.95;sound('special',2);haptic('special',1.15);flashFeedback(.22);
+    saveProgress('booster-plus5',true);startLoop();return true;
   }
   if(k==='shuffle'){
     if(!boosterShuffle()){
-      banner='KHÔNG THỂ XÁO TRỘN';bannerT=.9;sound('error');haptic('error');return false;
+      boosterMessage('KHÔNG THỂ XÁO TRỘN BÀN','error');return false;
     }
     boosters.shuffle=clampBooster(boosters.shuffle-1);saveBoosters();addMissionProgress('booster',1);
-    banner='BOARD SHUFFLED!';bannerT=1.0;sound('special',2);haptic('special', Math.min(1.65, 1 + combo*0.12));flashFeedback(.20);state='playing';saveProgress();startLoop();return true;
+    state='playing';finishBoosterSelection();
+    banner='🔀 XÁO TRỘN!';bannerT=1.0;sound('special',2);haptic('special',1.1);flashFeedback(.20);
+    saveProgress('booster-shuffle',true);startLoop();return true;
   }
   return false;
 }
@@ -1055,47 +1304,90 @@ function boosterShuffle(){
   const cells=shufflePoolCells();
   if(cells.length<3)return false;
   const original=cells.map(x=>x.kind);
-  for(let attempt=0;attempt<180;attempt++){
+  for(let attempt=0;attempt<300;attempt++){
     const pool=original.slice();
     for(let i=pool.length-1;i>0;i--){const j=Math.floor(Math.random()*(i+1));[pool[i],pool[j]]=[pool[j],pool[i]]}
-    for(let i=0;i<cells.length;i++){cells[i].kind=pool[i];cells[i].matched=false;cells[i].alpha=1;cells[i].scale=.92}
-    if(!hasImmediateMatch() && findMove()){
-      selected=null;hint=null;combo=0;nearMiss=null;nearMissT=0;
+    for(let i=0;i<cells.length;i++)cells[i].kind=pool[i];
+    if(!hasImmediateMatch()&&findMove()){
+      for(const x of cells){x.matched=false;x.alpha=1;x.scale=.92;}
+      selected=null;hint=null;combo=0;chainActive=false;chainStep=0;chainMax=0;chainScore=0;chainCleared=0;chainSpecials=0;chainSwaps=0;chainQualified=false;
       return true;
     }
   }
-  // Deterministic fallback: try random pair swaps from the current safe board.
-  for(let i=0;i<220;i++){
-    const a=cells[Math.floor(Math.random()*cells.length)],b=cells[Math.floor(Math.random()*cells.length)];
-    if(a===b)continue;
-    [a.kind,b.kind]=[b.kind,a.kind];
-    if(!hasImmediateMatch()&&findMove()){selected=null;hint=null;combo=0;nearMiss=null;nearMissT=0;return true}
-    [a.kind,b.kind]=[b.kind,a.kind];
-  }
+  // Never leave a failed shuffle half-applied.
+  for(let i=0;i<cells.length;i++){cells[i].kind=original[i];cells[i].matched=false;cells[i].alpha=1;cells[i].scale=1;}
   return false;
 }
-function applyHammer(r,c){
-  if(!inside(r,c)||state!=='booster-hammer')return;
-  const x=board[r][c];
-  if(x.obstacle==='stone' && x.special){} // Special may coexist visually; hammer still targets the cell.
-  const wasObstacle=!!x.obstacle,obstacleType=x.obstacle||'',wasSpecial=!!x.special,kind=x.kind;
-  boosters.hammer=clampBooster(boosters.hammer-1);saveBoosters();addMissionProgress('booster',1);boosterTarget={r,c};
-  if(wasObstacle){x.obstacle='';objectiveProgress+=1}
-  if(objective.type==='collect'&&kind===objective.kind)objectiveProgress+=1;
-  if(wasSpecial&&objective.type==='special')objectiveProgress+=1;
-  x.special='';x.matched=true;x.alpha=1;
-  const hammerScore=wasObstacle?45:(wasSpecial?120:30);
-  score+=hammerScore;addMissionProgress('score',hammerScore);
-  if(!wasObstacle)addMissionProgress('match',1);
-  if(wasSpecial)addMissionProgress('special',1);
-  if(objective.type==='score')objectiveProgress=score;
+function updateDirectObjective({scoreNow,collect=0,blocks=0}){
+  if(objective.type==='score')objectiveProgress=Math.max(0,Number(scoreNow)||0);
+  else if(objective.type==='collect')objectiveProgress+=Math.max(0,Number(collect)||0);
+  else if(objective.type==='clear')objectiveProgress+=Math.max(0,Number(blocks)||0);
+  // Direct boosters do not fabricate COMBO or SPECIAL creation progress.
   progress=Math.min(1,objective.target>0?objectiveProgress/objective.target:0);
-  combo=0;chainActive=false;chainStep=0;chainMax=0;chainScore=0;chainCleared=0;chainSpecials=0;chainSwaps=0;chainQualified=false;hint=null;
-  banner=wasObstacle?(obstacleType==='ice'?'HAMMER! ICE BROKEN':obstacleType==='lock'?'HAMMER! LOCK BROKEN':obstacleType==='stone'?'HAMMER! STONE BROKEN':'HAMMER! BLOCK BROKEN'):'HAMMER!';bannerT=.8;
-  effects.push({type:'burst',x:cellX(c),y:cellY(r),life:.45,max:.45,combo:0});spawn(cellX(c),cellY(r),10);
-  sound('special',2);haptic('special', Math.min(1.65, 1 + combo*0.12));flashFeedback(.24);state='clearing';phase=.32;saveProgress();
+}
+function applyHammer(r,c){
+  if(!inside(r,c)||state!=='booster-hammer'||clampBooster(boosters.hammer)<=0)return false;
+  const x=board[r][c],wasObstacle=!!x.obstacle,wasSpecial=!!x.special,kind=x.kind;
+  boosters.hammer=clampBooster(boosters.hammer-1);saveBoosters();addMissionProgress('booster',1);
+  let collect=0,blocks=0;const wasStructural=x.obstacle==='stone'||x.obstacle==='lock';if(wasObstacle){x.obstacle='';blocks=1;}if(objective.type==='collect'&&!wasStructural&&kind===objective.kind)collect=1;
+  x.special='';x.matched=true;x.alpha=1;
+  const hammerScore=wasObstacle?45:(wasSpecial?120:30);score+=hammerScore;
+  addMissionProgress('score',hammerScore);if(wasSpecial)addMissionProgress('special',1);if(wasObstacle)addMissionProgress('blocks',1);
+  updateDirectObjective({scoreNow:score,collect,blocks});
+  combo=0;chainActive=false;selected=null;hint=null;
+  banner='🔨 BÚA PHÁ Ô!';bannerT=.8;effects.push({type:'burst',x:cellX(c),y:cellY(r),life:.45,max:.45,combo:0});spawn(cellX(c),cellY(r),10);
+  sound('special',2);haptic('special',1.15);flashFeedback(.24);finishBoosterSelection();state='clearing';phase=.32;saveProgress('booster-hammer',true);startLoop();return true;
+}
+function cancelSpecialBooster(message='BOOSTER ĐÃ HỦY'){finishBoosterSelection();state='playing';banner=message;bannerT=.65;haptic('tap');startLoop();}
+function lineBoosterTargetSelectable(r,c){return inside(r,c)&&!!board[r]?.[c];}
+function colorBoosterTargetSelectable(r,c){const x=board[r]?.[c];return !!x&&x.obstacle!=='stone'&&x.obstacle!=='lock';}
+function boosterCellSelectable(r,c){return colorBoosterTargetSelectable(r,c);}
+function applyLineBooster(r,c){
+  if(state!=='booster-line'||!lineBoosterTargetSelectable(r,c)||clampBooster(boosters.line)<=0)return false;
+  const row=r;let cleared=0,collect=0,blocks=0;
+  for(let x=0;x<N;x++){
+    const q=board[row][x],wasStructural=q.obstacle==='stone'||q.obstacle==='lock';
+    if(q.obstacle){q.obstacle='';blocks++;}
+    if(objective.type==='collect'&&!wasStructural&&q.kind===objective.kind)collect++;
+    q.special='';q.matched=true;cleared++;
+  }
+  boosters.line=clampBooster(boosters.line-1);saveBoosters();addMissionProgress('booster',1);
+  const scoreGain=cleared*55;score+=scoreGain;addMissionProgress('score',scoreGain);addMissionProgress('blocks',blocks);
+  updateDirectObjective({scoreNow:score,collect,blocks});
+  swapInfo=null;finishBoosterSelection();banner='🚀 PHÁ HÀNG!';bannerT=.9;sound('special',2.2);haptic('fusion',1.15);flashFeedback(.26);juice('special',1.35);state='clearing';phase=.32;saveProgress('booster-line',true);startLoop();return true;
+}
+function applyColorBooster(r,c){
+  if(state!=='booster-color'||!colorBoosterTargetSelectable(r,c)||clampBooster(boosters.color)<=0)return false;
+  const kind=board[r][c].kind;let cleared=0,collect=0,blocks=0;
+  for(let y=0;y<N;y++)for(let x=0;x<N;x++){
+    const q=board[y][x];
+    if(q.kind===kind&&q.obstacle!=='stone'&&q.obstacle!=='lock'){
+      if(q.obstacle){q.obstacle='';blocks++;}
+      if(objective.type==='collect'&&kind===objective.kind)collect++;
+      q.special='';q.matched=true;cleared++;
+    }
+  }
+  if(cleared===0){banner='KHÔNG CÓ NGỌC MÀU NÀY';bannerT=.65;sound('error');haptic('error');return false;}
+  boosters.color=clampBooster(boosters.color-1);saveBoosters();addMissionProgress('booster',1);
+  const scoreGain=cleared*65;score+=scoreGain;addMissionProgress('score',scoreGain);addMissionProgress('blocks',blocks);
+  updateDirectObjective({scoreNow:score,collect,blocks});
+  swapInfo=null;finishBoosterSelection();banner='🌈 PHÁ MÀU • '+gemNames[kind].toUpperCase();bannerT=.95;sound('combo',2.3);haptic('win',1.12);flashFeedback(.28);juice('fusion',1.4);state='clearing';phase=.32;saveProgress('booster-color',true);startLoop();return true;
+}
+function applyFreeSwitch(a,b){
+  if(state!=='booster-free'||!a||!b||!inside(a.r,a.c)||!inside(b.r,b.c)||clampBooster(boosters.free)<=0)return false;
+  if(a.r===b.r&&a.c===b.c){boosterSelected=null;banner='CHỌN Ô THỨ HAI';bannerT=.55;startLoop();return false;}
+  if(!boosterCellSelectable(a.r,a.c)||!boosterCellSelectable(b.r,b.c))return false;
+  // Transaction: validate both cells, exchange them, then consume exactly one booster.
+  // This is a free action: never arm normal-move undo and never enter invalid-swap rollback.
+  if(!chainActive)combo=0;
+  swapInfo={a:{...a},b:{...b},anchor:{...b},boosterFree:true};
+  doSwap(a,b);selected=null;phase=.22;
+  boosters.free=clampBooster(boosters.free-1);saveBoosters();addMissionProgress('booster',1);
+  finishBoosterSelection();state='swapping';
+  saveProgress('booster-free-switch',true);startLoop();return true;
 }
 function rewardBooster(k,n=1){const add=Math.max(0,Math.floor(n||0));const before=clampBooster(boosters[k]||0);const after=clampBooster(before+add);boosters[k]=after;saveBoosters();return after-before;}
+loadBoosters();
 function hasSavedGame(){try{return !!(GAME_STORAGE.getItem(SAVE_KEY)||GAME_STORAGE.getItem(SAVE_LEGACY_KEY))}catch(_){return false}}
 function boardChecksum(rows){
   let h=2166136261>>>0;
@@ -1109,7 +1401,7 @@ function snapshotGame(){
   const cleanBoard=board.map(row=>row.map(c=>({kind:Number(c.kind)||0,special:c.special||'',obstacle:c.obstacle||''})));
   return {
     version:SAVE_VERSION, schema:'normal-save', savedAt:Date.now(),
-    score,moves,level,progress,combo:0,objectiveProgress,
+    score,moves,level,progress,combo:0,objectiveProgress,levelStartMoves,levelStartScore,
     objective:objective?{type:objective.type,target:objective.target,label:objective.label,kind:objective.kind,world:objective.world}:null,
     board:cleanBoard,
     boardChecksum:boardChecksum(cleanBoard),
@@ -1147,11 +1439,11 @@ function loadProgress(){
     const d=JSON.parse(raw);
     if(!d || Number(d.version)<SAVE_MIN_VERSION || Number(d.version)>SAVE_VERSION || !Array.isArray(d.board) || d.board.length!==N || d.board.some(row=>!Array.isArray(row)||row.length!==N))return false;
     if(d.boardChecksum && d.boardChecksum!==boardChecksum(d.board))return false;
-    score=Number(d.score)||0; moves=Math.max(0,Number(d.moves)||0); level=Math.max(1,Number(d.level)||1);
+    score=Number(d.score)||0; moves=Math.max(0,Number(d.moves)||0); level=Math.max(1,Math.min(MAX_LEVELS,Number(d.level)||1)); levelStartMoves=Math.max(1,Number(d.levelStartMoves)||Number(levelConfig(level).moves)||START_MOVES); levelStartScore=Number(d.levelStartScore)||0; levelCompletionLocked=false; levelCompletePending=false;
     progress=Math.max(0,Math.min(.9999,Number(d.progress)||0)); combo=0; objectiveProgress=Math.max(0,Number(d.objectiveProgress)||0);
     objective=objectiveForLevel(level);
-    if(d.map && d.map.stars){mapState.stars=d.map.stars;mapState.unlocked=Math.max(mapState.unlocked,Number(d.map.unlocked)||1);saveMapState();}
-    if(d.boosters){boosters={hammer:clampBooster(d.boosters.hammer),shuffle:clampBooster(d.boosters.shuffle),moves:clampBooster(d.boosters.moves)};saveBoosters();}
+    if(d.map){mapState=normalizeMapState(d.map);mapState.unlocked=Math.max(mapState.unlocked,Math.min(MAX_LEVELS,Number(d.map.unlocked)||1));saveMapState();}
+    if(d.boosters){boosters={hammer:clampBooster(d.boosters.hammer),shuffle:clampBooster(d.boosters.shuffle),moves:clampBooster(d.boosters.moves),line:clampBooster(d.boosters.line),color:clampBooster(d.boosters.color),free:clampBooster(d.boosters.free)};saveBoosters();}
     if(d.settings){if(QUALITY_MODES.includes(d.settings.quality))qualityMode=d.settings.quality;if(typeof d.settings.showFps==='boolean')showFps=d.settings.showFps;if(typeof d.settings.reducedMotion==='boolean')reducedMotion=d.settings.reducedMotion;if(typeof d.settings.adaptivePerformance==='boolean')adaptivePerformance=d.settings.adaptivePerformance;saveSettings();}
     if(d.objective && d.objective.type===objective.type) objective={...objective,target:Number(d.objective.target)||objective.target,label:d.objective.label||objective.label,kind:d.objective.kind??objective.kind,world:d.objective.world||objective.world};
     board=d.board.map(row=>row.map(c=>{const x=makeCell(Number(c.kind)||0);x.special=c.special||'';x.obstacle=c.obstacle||'';return x;}));
@@ -1354,14 +1646,39 @@ function fillFast(){
   }
   for(let r=0;r<N;r++)for(let c=0;c<N;c++)board[r][c].obstacle='';
 }
-function reset(startLevel=1,smart=true){dailyMode=false;levelCompletePending=false;clearUndo();resetNearMiss();nearMissStreak=0;rainbowTarget=null;score=0;level=Math.max(1,Math.min(MAX_LEVELS,startLevel));moves=Math.max(20,Number(levelConfig(level).moves)||START_MOVES);combo=0;chainActive=false;chainStep=0;chainMax=0;chainScore=0;chainCleared=0;chainSpecials=0;chainSwaps=0;chainQualified=false;selected=null;hint=null;particles=[];effects=[];cascadeDrops=[];toastScore=[];localImpacts=[];polishBeat=0;polishIdle=0;polishEffectBudget=0;refreshObjective();if(smart){fill();let guard=0;while(!findMove()&&guard++<3)fill();if(!findMove())fillFast()}else{fillFast();let guard=0;while(!findMove()&&guard++<3)fillFast()}for(let r=0;r<N;r++)for(let c=0;c<N;c++){board[r][c].x=board[r][c].tx=cellX(c);board[r][c].y=board[r][c].ty=cellY(r)}state='menu';banner='';}
-function start(startLevel=1,countGame=true){reset(startLevel,true);clearSavedGame();if(countGame)recordNewGame();warningT=0;state='playing';banner=themeForLevel(level).vi.toUpperCase()+' • LEVEL '+level+' • '+levelConfig(level).label;bannerT=1.15;applyThemeMusic();saveProgress('new-game',true)}
+function reset(startLevel=1,smart=true){dailyMode=false;levelCompletePending=false;levelCompletionLocked=false;clearUndo();resetNearMiss();nearMissStreak=0;rainbowTarget=null;score=0;level=Math.max(1,Math.min(MAX_LEVELS,startLevel));moves=Math.max(20,Number(levelConfig(level).moves)||START_MOVES);combo=0;chainActive=false;chainStep=0;chainMax=0;chainScore=0;chainCleared=0;chainSpecials=0;chainSwaps=0;chainQualified=false;selected=null;hint=null;particles=[];effects=[];cascadeDrops=[];toastScore=[];localImpacts=[];polishBeat=0;polishIdle=0;polishEffectBudget=0;refreshObjective();levelStartMoves=Math.max(20,Number(levelConfig(level).moves)||START_MOVES);levelStartScore=0;levelRunId++;lastLevelReward=null;if(smart){fill();let guard=0;while(!findMove()&&guard++<3)fill();if(!findMove())fillFast()}else{fillFast();let guard=0;while(!findMove()&&guard++<3)fillFast()}for(let r=0;r<N;r++)for(let c=0;c<N;c++){board[r][c].x=board[r][c].tx=cellX(c);board[r][c].y=board[r][c].ty=cellY(r)}state='menu';banner='';}
+function start(startLevel=1,countGame=true){movesZeroGrace=0;boosterBusy=false;boosterMode=null;boosterSelected=null;boosterTarget=null;reset(startLevel,true);clearSavedGame();if(countGame)recordNewGame();warningT=0;state='playing';banner=themeForLevel(level).vi.toUpperCase()+' • LEVEL '+level+' • '+levelConfig(level).label;bannerT=1.15;applyThemeMusic();saveProgress('new-game',true)}
 function cellX(c){return cell.x+c*cell.s+cell.s/2}function cellY(r){return cell.y+r*cell.s+cell.s/2}
 function inside(r,c){return r>=0&&r<N&&c>=0&&c<N}function adj(a,b){return Math.abs(a.r-b.r)+Math.abs(a.c-b.c)===1}
-function inLine(r,c){const k=board[r][c].kind;let h=1,v=1;for(let x=c-1;x>=0&&board[r][x].kind===k;x--)h++;for(let x=c+1;x<N&&board[r][x].kind===k;x++)h++;for(let y=r-1;y>=0&&board[y][c].kind===k;y--)v++;for(let y=r+1;y<N&&board[y][c].kind===k;y++)v++;return h>=3||v>=3}
+function matchable(r,c){const x=board[r]?.[c];return !!x&&x.obstacle!=='stone'&&x.obstacle!=='lock';}
+function inLine(r,c){if(!matchable(r,c))return false;const k=board[r][c].kind;let h=1,v=1;for(let x=c-1;x>=0&&matchable(r,x)&&board[r][x].kind===k;x--)h++;for(let x=c+1;x<N&&matchable(r,x)&&board[r][x].kind===k;x++)h++;for(let y=r-1;y>=0&&matchable(y,c)&&board[y][c].kind===k;y--)v++;for(let y=r+1;y<N&&matchable(y,c)&&board[y][c].kind===k;y++)v++;return h>=3||v>=3}
 function swapValid(a,b){const A=board[a.r][a.c],B=board[b.r][b.c];if(A.obstacle==='stone'||A.obstacle==='lock'||B.obstacle==='stone'||B.obstacle==='lock')return false;if(A.special||B.special)return true;[A.kind,B.kind]=[B.kind,A.kind];const ok=inLine(a.r,a.c)||inLine(b.r,b.c);[A.kind,B.kind]=[B.kind,A.kind];return ok}
 function findMove(){for(let r=0;r<N;r++)for(let c=0;c<N;c++){if(c+1<N&&swapValid({r,c},{r,c:c+1}))return [{r,c},{r,c:c+1}];if(r+1<N&&swapValid({r,c},{r:r+1,c}))return [{r,c},{r:r+1,c}]}return null}
-function matches(){const m=Array.from({length:N},()=>Array(N).fill(false)),runs=[];for(let r=0;r<N;r++){let s=0;while(s<N){let e=s+1;while(e<N&&board[r][e].kind===board[r][s].kind)e++;if(e-s>=3){runs.push({r,c:s,len:e-s,h:true});for(let c=s;c<e;c++)m[r][c]=true}s=e}}for(let c=0;c<N;c++){let s=0;while(s<N){let e=s+1;while(e<N&&board[e][c].kind===board[s][c].kind)e++;if(e-s>=3){runs.push({r:s,c,len:e-s,h:false});for(let r=s;r<e;r++)m[r][c]=true}s=e}}let count=0;for(let r=0;r<N;r++)for(let c=0;c<N;c++)if(m[r][c])count++;return {m,runs,count}}
+function matches(){
+  const m=Array.from({length:N},()=>Array(N).fill(false)),runs=[];
+  for(let r=0;r<N;r++){
+    let c=0;
+    while(c<N){
+      if(!matchable(r,c)){c++;continue;}
+      const start=c,k=board[r][c].kind;
+      while(c<N&&matchable(r,c)&&board[r][c].kind===k)c++;
+      const len=c-start;
+      if(len>=3){runs.push({r,c:start,len,h:true});for(let x=start;x<c;x++)m[r][x]=true;}
+    }
+  }
+  for(let c=0;c<N;c++){
+    let r=0;
+    while(r<N){
+      if(!matchable(r,c)){r++;continue;}
+      const start=r,k=board[r][c].kind;
+      while(r<N&&matchable(r,c)&&board[r][c].kind===k)r++;
+      const len=r-start;
+      if(len>=3){runs.push({r:start,c,len,h:false});for(let y=start;y<r;y++)m[y][c]=true;}
+    }
+  }
+  let count=0;for(let r=0;r<N;r++)for(let c=0;c<N;c++)if(m[r][c])count++;
+  return {m,runs,count};
+}
 function planSpecials(m,anchor){
   const p=Array.from({length:N},()=>Array(N).fill(''));
   const rank=s=>({row:1,col:1,bomb:2,cross:3,lightning:4,rainbow:5,star:6}[s]||0);
@@ -1405,6 +1722,7 @@ function specialEffect(s,r,c){
 
 function resolve(fromSwap){
   const m=matches();
+  const maxMatchRun=m.runs.reduce((mx,run)=>Math.max(mx,run.len),0);
   const specialA=fromSwap&&swapInfo?board[swapInfo.a.r][swapInfo.a.c].special:'';
   const specialB=fromSwap&&swapInfo?board[swapInfo.b.r][swapInfo.b.c].special:'';
   if(!m.count&&!specialA&&!specialB){
@@ -1449,26 +1767,50 @@ function resolve(fromSwap){
       const rp=colorSpecial(specialA)?a:b,op=colorSpecial(specialA)?b:a;
       const target=board[op.r][op.c].kind;
       const os=colorSpecial(specialA)?specialB:specialA;
+      const targets=[];
+      for(let r=0;r<N;r++)for(let c=0;c<N;c++){
+        // The two swapped gems are consumed as the fusion source, not converted targets.
+        if(board[r][c].kind===target && !(r===rp.r&&c===rp.c) && !(r===op.r&&c===op.c))targets.push({r,c});
+      }
       if(os==='bomb'){
-        // Color + Bomb: every target-color gem detonates as a 3x3 bomb.
-        for(let r=0;r<N;r++)for(let c=0;c<N;c++)if(board[r][c].kind===target)addBomb(r,c,1);
+        // Rainbow + Bomb: visually turn every gem of the selected color into a bomb,
+        // then detonate each one with its own 3x3 blast.
+        for(const q of targets){
+          effects.push({type:'specialCreate',special:'bomb',x:cellX(q.c),y:cellY(q.r),life:.42,max:.42});
+          effects.push({type:'bomb',x:cellX(q.c),y:cellY(q.r),life:.62,max:.62});
+          addBomb(q.r,q.c,1);
+        }
+        specialActivations+=targets.length;
         fusionLabel='RAINBOW BOMB!'; fusionTier=4;
       }else if(os==='cross'){
-        // Color + Cross: every target-color gem fires a row + column.
-        for(let r=0;r<N;r++)for(let c=0;c<N;c++)if(board[r][c].kind===target){addRow(r);addCol(c)}
+        // Rainbow + Cross: every target-color gem fires a row and a column.
+        for(const q of targets){
+          effects.push({type:'specialCreate',special:'cross',x:cellX(q.c),y:cellY(q.r),life:.42,max:.42});
+          effects.push({type:'line',dir:'row',x:cellX(q.c),y:cellY(q.r),life:.48,max:.48});
+          effects.push({type:'line',dir:'col',x:cellX(q.c),y:cellY(q.r),life:.48,max:.48});
+          addRow(q.r);addCol(q.c);
+        }
+        specialActivations+=targets.length;
         fusionLabel='RAINBOW CROSS!'; fusionTier=5;
       }else if(os==='lightning'){
-        // Color + Lightning: target-color gems trigger a local lightning sweep.
-        for(let r=0;r<N;r++)for(let c=0;c<N;c++)if(board[r][c].kind===target){
-          for(let d=-1;d<=1;d++){addRow(r+d);addCol(c+d)}
+        // Rainbow + Lightning: each target-color gem becomes a lightning trigger.
+        for(const q of targets){
+          effects.push({type:'specialCreate',special:'lightning',x:cellX(q.c),y:cellY(q.r),life:.42,max:.42});
+          effects.push({type:'lightning',x:cellX(q.c),y:cellY(q.r),life:.62,max:.62});
+          for(let d=-1;d<=1;d++){addRow(q.r+d);addCol(q.c+d)}
         }
+        specialActivations+=targets.length;
         fusionLabel='LIGHTNING RAIN!'; fusionTier=5;
       }else if(isLine(os)){
-        // Color + Line: every target-color gem becomes the same line direction.
-        for(let r=0;r<N;r++)for(let c=0;c<N;c++)if(board[r][c].kind===target){
-          if(os==='row')addRow(r); else addCol(c);
+        // Rainbow + horizontal/vertical Line: every target-color gem visibly
+        // transforms into that same line gem, then fires its complete row/column.
+        for(const q of targets){
+          effects.push({type:'specialCreate',special:os,x:cellX(q.c),y:cellY(q.r),life:.42,max:.42});
+          effects.push({type:'line',dir:os,x:cellX(q.c),y:cellY(q.r),life:.52,max:.52});
+          if(os==='row')addRow(q.r); else addCol(q.c);
         }
-        fusionLabel='RAINBOW LINE!'; fusionTier=4;
+        specialActivations+=targets.length;
+        fusionLabel=os==='row'?'RAINBOW HORIZONTAL!':'RAINBOW VERTICAL!'; fusionTier=4;
       }
       add(rp.r,rp.c);add(op.r,op.c);
     }else if(isLine(specialA)&&isLine(specialB)){
@@ -1569,9 +1911,10 @@ function resolve(fromSwap){
     if(!cellRef.obstacle){cleared++;if(cellRef.kind===objective.kind)collected++;cellRef.matched=true;spawn(cellX(c),cellY(r),7)}
   }
   for(let r=0;r<N;r++)for(let c=0;c<N;c++)if(plan[r][c]){board[r][c].special=plan[r][c];board[r][c].matched=false;board[r][c].scale=1.35;specialCreated++;effects.push({type:'specialCreate',special:plan[r][c],x:cellX(c),y:cellY(r),life:.72,max:.72})}
-  objectiveProgress += blocksCleared;
+  if(objective.type==='clear') objectiveProgress += blocksCleared;
   if(objective.type==='collect') objectiveProgress += collected;
   if(objective.type==='special') objectiveProgress += specialCreated;
+  if(objective.type==='combo') objectiveProgress=Math.max(objectiveProgress,chainMax);
   if(objective.type==='score') objectiveProgress=score;
   const specialValue={row:150,col:150,bomb:260,cross:360,lightning:520,rainbow:700,star:1000};
   let createdValue=0;
@@ -1601,13 +1944,57 @@ function resolve(fromSwap){
   if(combo>=2 || fusion || specialCreated){
     effects.push({type:'scoreBreakdown',x:cellX(3.5),y:cellY(3.5),life:.9,max:.9,combo,total:scoreGain,tier:scoring.tier.label,multiplier:scoring.tier.multiplier});
   }
-  sound(fusion?'special':(combo>=3?'combo':'match'),Math.max(1,combo));
-  if(combo>=2){haptic('combo', Math.min(1.65, 0.85 + combo*0.18));juice('combo',Math.min(1.7,0.9+combo*.16));} else {haptic('match');juice('match',1);}
+  // V160: fully replace the old match WAV cue with an original arcade-style layer.
+  // Match audio and reward voice are independent from the background music player.
+  if(fusion){
+    sound('special',Math.max(1.35,combo*.42));
+  }else if(maxMatchRun>=3){
+    candyStyleMatchAudio(maxMatchRun,combo);
+    if(combo>=2 || maxMatchRun>=4)rewardVoice(maxMatchRun,combo);
+  }else{
+    sound('match',Math.max(1,combo));
+  }
+  if(combo>=2){
+    haptic('combo', Math.min(1.65, 0.85 + combo*0.18));juice('combo',Math.min(1.7,0.9+combo*.16));
+  } else {haptic('match');juice('match',1);}
   flashFeedback(fusion||specialCreated||specialActivations?0.24:(combo>=2?0.18:0.10));
-  if(cleared>=4||specialCreated||specialActivations||fusion){sound('special',Math.max(1,combo));haptic(fusion?'fusion':'special', Math.min(1.65, 1 + combo*0.12));juice(fusion?'fusion':'special',Math.min(1.8,1+combo*.10));}
+  if(specialCreated||specialActivations||fusion){
+    if(!fusion && maxMatchRun<5)sound('special',Math.max(1,combo));
+    haptic(fusion?'fusion':'special', Math.min(1.65, 1 + combo*0.12));
+    juice(fusion?'fusion':'special',Math.min(1.8,1+combo*.10));
+  }
   specialActivations=0;swapInfo=null;phase=.42;state='clearing'
 }
-function collapse(){cascadeDrops=[];juice('cascade',Math.min(1.4,1+Math.max(0,combo-1)*.12));for(let c=0;c<N;c++){let wr=N-1;for(let r=N-1;r>=0;r--){if(board[r][c].matched)continue;if(wr!==r){const moved=board[r][c];cascadeDrops.push({x:cellX(c),y:moved.y,ty:cellY(wr),life:.34,max:.34});board[wr][c]=moved}board[wr][c].tx=cellX(c);board[wr][c].ty=cellY(wr);wr--}for(let r=wr;r>=0;r--){const x=makeCell(Math.floor(Math.random()*TYPES));x.x=cellX(c);x.y=cellY(r)-cell.s*(wr-r+1);x.tx=cellX(c);x.ty=cellY(r);board[r][c]=x;cascadeDrops.push({x:cellX(c),y:x.y,ty:x.ty,life:.46,max:.46})}}state='falling'}
+function collapse(){
+  cascadeDrops=[];juice('cascade',Math.min(1.4,1+Math.max(0,combo-1)*.12));
+  for(let c=0;c<N;c++){
+    let top=0;
+    while(top<N){
+      while(top<N&&(board[top][c].obstacle==='stone'||board[top][c].obstacle==='lock'))top++;
+      if(top>=N)break;
+      let end=top;
+      while(end<N&&board[end][c].obstacle!=='stone'&&board[end][c].obstacle!=='lock')end++;
+      const kept=[];
+      for(let r=end-1;r>=top;r--){
+        const cellRef=board[r][c];
+        if(cellRef.matched)continue;
+        kept.push(cellRef);
+      }
+      let wr=end-1;
+      for(const moved of kept){
+        if(moved!==board[wr][c])cascadeDrops.push({x:cellX(c),y:moved.y,ty:cellY(wr),life:.34,max:.34});
+        board[wr][c]=moved;board[wr][c].tx=cellX(c);board[wr][c].ty=cellY(wr);wr--;
+      }
+      while(wr>=top){
+        const x=makeCell(Math.floor(Math.random()*TYPES));
+        x.x=cellX(c);x.y=cellY(wr)-cell.s*(wr-top+1);x.tx=cellX(c);x.ty=cellY(wr);
+        board[wr][c]=x;cascadeDrops.push({x:cellX(c),y:x.y,ty:x.ty,life:.46,max:.46});wr--;
+      }
+      top=end;
+    }
+  }
+  state='falling';
+}
 function shuffle(){finishComboChain();resetNearMiss();nearMissStreak=0;fill();while(!findMove())fill();selected=null;hint=null;combo=0;chainActive=false;chainStep=0;chainMax=0;chainScore=0;chainCleared=0;chainSpecials=0;chainSwaps=0;chainQualified=false;banner='NO MOVES • SHUFFLED';bannerT=1.2;sound('special')}
 function doSwap(a,b){[board[a.r][a.c],board[b.r][b.c]]=[board[b.r][b.c],board[a.r][a.c]];board[a.r][a.c].tx=cellX(a.c);board[a.r][a.c].ty=cellY(a.r);board[b.r][b.c].tx=cellX(b.c);board[b.r][b.c].ty=cellY(b.r);sound('swap')}
 function choose(q){if(state!=='playing')return;
@@ -1738,6 +2125,7 @@ function spawn(x,y,n){
     particles.push({x,y,vx:Math.cos(a)*s,vy:Math.sin(a)*s,life:.45+Math.random()*.18,max:.63,size:2+Math.random()*4});
   }
 }
+// V160: Match-size audio is now handled by candyStyleMatchAudio().
 function sound(n,intensity=1){
   if(!soundOn||!sounds[n])return;
   try{
@@ -1894,6 +2282,17 @@ function draw(){
     }else if(e.type==='specialCreate'){
       const rr=cell.s*(.35+p*.8);ctx.strokeStyle=e.special==='rainbow'?'#fff0a0':e.special==='bomb'?'#ffd36d':'#d9f8ff';ctx.lineWidth=Math.max(2,cell.s*.035);ctx.beginPath();ctx.arc(e.x,e.y,rr,0,Math.PI*2);ctx.stroke();
       ctx.globalAlpha*=.7;ctx.beginPath();ctx.arc(e.x,e.y,rr*.55,0,Math.PI*2);ctx.stroke();
+      // Show the temporary special-gem form before its blast: stripes for line gems,
+      // a compact burst mark for bombs, and a cross mark for cross gems.
+      ctx.globalAlpha*=.95;ctx.strokeStyle='rgba(255,255,255,.98)';ctx.lineWidth=Math.max(2.2,cell.s*.055);ctx.lineCap='round';
+      if(e.special==='row'||e.special==='col'){
+        ctx.beginPath();if(e.special==='row'){ctx.moveTo(e.x-cell.s*.22,e.y);ctx.lineTo(e.x+cell.s*.22,e.y);ctx.moveTo(e.x-cell.s*.22,e.y-cell.s*.10);ctx.lineTo(e.x+cell.s*.22,e.y-cell.s*.10);ctx.moveTo(e.x-cell.s*.22,e.y+cell.s*.10);ctx.lineTo(e.x+cell.s*.22,e.y+cell.s*.10)}else{ctx.moveTo(e.x,e.y-cell.s*.22);ctx.lineTo(e.x,e.y+cell.s*.22);ctx.moveTo(e.x-cell.s*.10,e.y-cell.s*.22);ctx.lineTo(e.x-cell.s*.10,e.y+cell.s*.22);ctx.moveTo(e.x+cell.s*.10,e.y-cell.s*.22);ctx.lineTo(e.x+cell.s*.10,e.y+cell.s*.22)}ctx.stroke();
+      }else if(e.special==='bomb'){
+        ctx.beginPath();ctx.arc(e.x,e.y,cell.s*.12,0,Math.PI*2);ctx.stroke();for(let i=0;i<8;i++){const a=i*Math.PI/4;ctx.beginPath();ctx.moveTo(e.x+Math.cos(a)*cell.s*.16,e.y+Math.sin(a)*cell.s*.16);ctx.lineTo(e.x+Math.cos(a)*cell.s*.25,e.y+Math.sin(a)*cell.s*.25);ctx.stroke();}
+      }else if(e.special==='cross'){
+        ctx.beginPath();ctx.moveTo(e.x-cell.s*.2,e.y);ctx.lineTo(e.x+cell.s*.2,e.y);ctx.moveTo(e.x,e.y-cell.s*.2);ctx.lineTo(e.x,e.y+cell.s*.2);ctx.stroke();
+      }
+      ctx.lineCap='butt';
     }else{
       ctx.strokeStyle=e.combo>1?'#ffd86b':'#ffffff';ctx.lineWidth=Math.max(2,cell.s*.025);ctx.beginPath();ctx.arc(e.x,e.y,cell.s*(.18+p*.78),0,Math.PI*2);ctx.stroke();
       if(e.combo>1){ctx.font='900 '+Math.max(18,cell.s*.42)+'px system-ui';ctx.fillStyle='#ffe38a';ctx.textAlign='center';ctx.fillText('COMBO CHAIN x'+e.combo,e.x,e.y-cell.s*(.8+p*.18));}
@@ -1925,6 +2324,14 @@ function draw(){
     const pulse=.55+.45*Math.sin(performance.now()/120);
     ctx.strokeStyle='rgba(255,217,105,'+pulse+')';ctx.lineWidth=Math.max(3,cell.s*.045);
     for(let r=0;r<N;r++)for(let c=0;c<N;c++){ctx.strokeRect(cell.x+c*cell.s+5,cell.y+r*cell.s+5,cell.s-10,cell.s-10)}
+    ctx.restore();
+  }
+  if(['booster-line','booster-color','booster-free'].includes(state)){
+    ctx.save();ctx.fillStyle='rgba(8,6,22,.30)';ctx.fillRect(0,0,w,h);ctx.fillStyle='rgba(255,232,170,.96)';ctx.font='900 '+Math.max(14,cell.s*.22)+'px system-ui';ctx.textAlign='center';
+    const msg=state==='booster-line'?'🚀 CHỌN 1 Ô • PHÁ CẢ HÀNG':state==='booster-color'?'🌈 CHỌN 1 Ô • XÓA MÀU ĐÓ': '🔄 CHỌN Ô THỨ NHẤT • Ô THỨ HAI KHÔNG CẦN KỀ NHAU';
+    ctx.fillText(msg,w/2,cell.y-18);ctx.strokeStyle='rgba(255,217,105,.42)';ctx.lineWidth=Math.max(2,cell.s*.028);
+    if(state==='booster-line'&&boosterSelected){ctx.strokeStyle='rgba(255,217,105,.9)';ctx.lineWidth=Math.max(4,cell.s*.06);ctx.strokeRect(cell.x,cell.y+boosterSelected.r*cell.s,cell.s*N,cell.s);}
+    if(state==='booster-free'&&boosterSelected){ctx.strokeStyle='rgba(125,225,255,.9)';ctx.strokeRect(cell.x+boosterSelected.c*cell.s+4,cell.y+boosterSelected.r*cell.s+4,cell.s-8,cell.s-8);}
     ctx.restore();
   }
   if(state==='paused')overlay(w,h,'PAUSED',['RESUME','RESTART','SAVE & MENU']);if(state==='gameover')overlay(w,h,'GAME OVER',['PLAY AGAIN','MENU']);if(state==='levelcomplete')levelCompleteOverlay(w,h);
@@ -2041,7 +2448,7 @@ function levelmapLayout(w,h){
   const listX=frame.boxX+frame.boxW*.07;
   const listW=frame.boxW*.86;
   const top=frame.boxY+112;
-  const bottom=frame.boxY+frame.boxH-96;
+  const bottom=frame.boxY+frame.boxH-102;
   const rowH=Math.max(52,Math.min(58,frame.boxH*.078));
   const rowGap=8;
   const backY=frame.boxY+frame.boxH-68;
@@ -2050,7 +2457,7 @@ function levelmapLayout(w,h){
 }
 function levelmapDraw(w,h){
   const L=levelmapLayout(w,h);
-  modalHeader(L.frame,'LEVEL MAP','CHỌN MÀN ĐÃ MỞ KHÓA  •  6 THẾ GIỚI  •  3 SAO / MÀN');
+  modalHeader(L.frame,'BẢN ĐỒ LEVEL','🔓 ĐÃ MỞ • ★ SAO • MÀN TIẾP THEO SẼ MỞ KHI HOÀN THÀNH');
   mapScroll=Math.max(0,Math.min(L.maxScroll,mapScroll));
   ctx.save();ctx.beginPath();ctx.rect(L.listX,L.top,L.listW,L.bottom-L.top);ctx.clip();
   let lastWorld='';
@@ -2070,6 +2477,7 @@ function levelmapDraw(w,h){
     ctx.fillStyle=unlocked?th.accent:'rgba(255,255,255,.18)';ctx.font='800 8px system-ui';ctx.fillText(th.vi,L.listX+L.listW*.45,y+20);
     ctx.textAlign='right';ctx.fillStyle=unlocked?'#ffd96a':'rgba(255,255,255,.18)';ctx.font='900 16px system-ui';ctx.fillText(done?starString(levelStars(l)):'🔒',L.listX+L.listW-12,y+21);
     ctx.textAlign='left';ctx.fillStyle='rgba(226,239,255,.60)';ctx.font='700 8px system-ui';ctx.fillText((objectiveForLevel(l).label||'').toUpperCase(),L.listX+14,y+38);
+    const rec=levelRecord(l);if(done&&rec.bestScore>0){ctx.textAlign='right';ctx.fillStyle='rgba(255,224,155,.55)';ctx.font='700 7.3px system-ui';ctx.fillText('BEST '+Number(rec.bestScore).toLocaleString('en-US'),L.listX+L.listW-12,y+49);}
     ctx.textAlign='right';ctx.fillStyle='rgba(226,239,255,.44)';ctx.font='700 7.5px system-ui';ctx.fillText('ĐỘ KHÓ '+levelConfig(l).difficulty+'/10 • '+levelConfig(l).difficultyLabel,L.listX+L.listW-12,y+38);
   }
   ctx.restore();
@@ -2085,7 +2493,7 @@ function missionLayout(w,h){
 }
 function missionDraw(w,h){
   const L=missionLayout(w,h);
-  modalHeader(L.frame,'MISSIONS','HOÀN THÀNH NHIỆM VỤ  •  NHẬN BOOSTER  •  TIẾN ĐỘ TỰ ĐỘNG LƯU');
+  modalHeader(L.frame,'MISSIONS','HOÀN THÀNH NHIỆM VỤ • NHẬN THƯỞNG');
   missionState.active.forEach((m,i)=>{
     const y=L.top+i*(L.rowH+L.gap),done=missionDone(m),canClaim=done&&missionRewardAvailable(m);
     const g=ctx.createLinearGradient(L.innerX,y,L.innerX,y+L.rowH);
@@ -2106,20 +2514,82 @@ function missionDraw(w,h){
   const claimable=missionCountClaimable();
   modalAction(L.innerX,L.actionsY,L.innerW*.42,44,'NHẬN TẤT CẢ'+(claimable?' ×'+claimable:''),claimable>0,'✓');
   modalAction(L.innerX+L.innerW*.47,L.actionsY,L.innerW*.53,44,'QUAY LẠI',false,'←');
-  ctx.textAlign='center';ctx.fillStyle='rgba(207,228,250,.40)';ctx.font='700 8px system-ui';ctx.fillText(claimable+' nhiệm vụ có thể nhận • Booster tối đa '+BOOSTER_MAX+' mỗi loại',w/2,L.frame.boxY+L.frame.boxH-20);
   if(missionFlash>0){ctx.globalAlpha=Math.min(.22,missionFlash);ctx.fillStyle='#ffe9a5';ctx.fillRect(0,0,w,h);ctx.globalAlpha=1;}
 }
 
+function levelCompleteLayout(w,h){
+  const frame=modalFrame(w,h,{kind:'levelcomplete'});
+  const pad=Math.max(14,frame.boxW*.055);
+  const innerX=frame.boxX+pad,innerW=frame.boxW-pad*2;
+  return {...frame,pad,innerX,innerW};
+}
 function levelCompleteOverlay(w,h){
-  ctx.fillStyle='rgba(0,0,0,.64)';ctx.fillRect(0,0,w,h);
-  ctx.fillStyle='rgba(35,15,45,.98)';round(w*.13,h*.24,w*.74,h*.48,24);
-  ctx.fillStyle='#ffe299';ctx.font='900 27px system-ui';ctx.textAlign='center';ctx.fillText('LEVEL '+level+' COMPLETE!',w/2,h*.34);
-  ctx.fillStyle=themeForLevel(level).accent;ctx.font='900 11px system-ui';ctx.fillText(themeForLevel(level).vi+' • '+themeForLevel(level).name,w/2,h*.375);
-  ctx.fillStyle='#ffd96a';ctx.font='900 38px system-ui';ctx.fillText(starString(levelStars(level)),w/2,h*.43);
-  ctx.fillStyle='#fff';ctx.font='800 15px system-ui';ctx.fillText('SCORE  '+score,w/2,h*.48);
-  ctx.fillStyle='rgba(255,255,255,.58)';ctx.font='700 11px system-ui';ctx.fillText(moves+' MOVES LEFT',w/2,h*.515);
-  button(w*.25,h*.57,w*.50,42,level<MAX_LEVELS?'NEXT LEVEL':'LEVEL MAP',true);
-  button(w*.25,h*.64,w*.50,42,'LEVEL MAP',false);
+  const L=levelCompleteLayout(w,h),r=lastLevelReward||{};
+  const stars=Math.max(1,Math.min(3,Number(levelStars(level))||1));
+  const gained=r.gained||{};
+  const rewardItems=[
+    ['hammer','🔨',boosterName('hammer')],['shuffle','🔀',boosterName('shuffle')],['moves','➕',boosterName('moves')],
+    ['line','🚀',boosterName('line')],['color','🌈',boosterName('color')],['free','🔄',boosterName('free')]
+  ].filter(([k])=>(Number(gained[k])||0)>0);
+  const cx=L.boxX+L.boxW/2;
+
+  // Compact completion screen: remove explanatory microcopy and keep all blocks on a shared grid.
+  modalHeader(L,'LEVEL '+level+' HOÀN THÀNH','', 'cyan');
+  const heroY=L.boxY+100;
+  ctx.save();
+  ctx.textAlign='center';
+  ctx.font='900 '+Math.max(28,Math.min(42,L.boxW*.078))+'px system-ui';
+  ctx.fillStyle='#ffe07a';ctx.shadowColor='rgba(255,205,83,.28)';ctx.shadowBlur=12;
+  ctx.fillText('★'.repeat(stars)+'☆'.repeat(3-stars),cx,heroY);
+  ctx.shadowBlur=0;
+  ctx.fillStyle='#ffffff';ctx.font='950 '+Math.max(23,Math.min(31,L.boxW*.058))+'px system-ui';
+  ctx.fillText(Number(score||0).toLocaleString('en-US'),cx,heroY+43);
+  ctx.restore();
+
+  const statY=heroY+66,statH=54,gap=8,statW=(L.innerW-gap)/2;
+  function statBox(x,title,value,icon){
+    const g=ctx.createLinearGradient(x,statY,x,statY+statH);
+    g.addColorStop(0,'rgba(42,72,112,.92)');g.addColorStop(1,'rgba(12,28,55,.98)');
+    ctx.fillStyle=g;round(x,statY,statW,statH,14);
+    ctx.strokeStyle='rgba(171,218,255,.23)';ctx.lineWidth=1;ctx.stroke();
+    ctx.textAlign='left';ctx.fillStyle='rgba(222,239,255,.58)';ctx.font='800 7.5px system-ui';ctx.fillText(title,x+12,statY+16);
+    ctx.textAlign='center';ctx.fillStyle='#ffe29b';ctx.font='900 21px system-ui';ctx.fillText(String(value),x+statW/2+9,statY+40);
+    ctx.font='900 13px system-ui';ctx.fillText(icon,x+21,statY+38);
+  }
+  statBox(L.innerX,'SAO ĐẠT ĐƯỢC',stars+'/3','⭐');
+  statBox(L.innerX+statW+gap,'LƯỢT CÒN LẠI',Math.max(0,Number(moves)||0),'➕');
+
+  const panelY=statY+63;
+  const cols=rewardItems.length===4?2:Math.min(3,Math.max(1,rewardItems.length));
+  const rows=Math.ceil(rewardItems.length/Math.max(1,cols));
+  const cardH=37,rowGap=5,panelH=rewardItems.length?27+rows*cardH+Math.max(0,rows-1)*rowGap+7:64;
+  const pg=ctx.createLinearGradient(L.innerX,panelY,L.innerX,panelY+panelH);
+  pg.addColorStop(0,'rgba(27,57,93,.84)');pg.addColorStop(1,'rgba(8,21,44,.96)');
+  ctx.fillStyle=pg;round(L.innerX,panelY,L.innerW,panelH,15);
+  ctx.strokeStyle='rgba(166,216,255,.20)';ctx.lineWidth=1;ctx.stroke();
+  ctx.textAlign='left';ctx.fillStyle='#ffe39c';ctx.font='950 9px system-ui';ctx.fillText('🎁  PHẦN THƯỞNG',L.innerX+13,panelY+17);
+  if(rewardItems.length){
+    const gap2=6,cardW=(L.innerW-26-gap2*(cols-1))/cols,gridW=cols*cardW+(cols-1)*gap2;
+    rewardItems.forEach(([k,icon,title],i)=>{
+      const row=Math.floor(i/cols),col=i%cols;
+      const itemsInRow=Math.min(cols,rewardItems.length-row*cols);
+      const rowW=itemsInRow*cardW+(itemsInRow-1)*gap2;
+      const offset=(L.innerW-rowW)/2;
+      const x=L.innerX+offset+col*(cardW+gap2),y=panelY+23+row*(cardH+rowGap);
+      ctx.fillStyle='rgba(48,83,128,.92)';round(x,y,cardW,cardH,10);
+      ctx.strokeStyle='rgba(255,220,145,.20)';ctx.lineWidth=1;ctx.stroke();
+      ctx.textAlign='center';ctx.font='900 14px system-ui';ctx.fillStyle='#ffe39a';ctx.fillText(icon,x+18,y+24);
+      ctx.textAlign='left';ctx.fillStyle='#fff';ctx.font='900 6.8px system-ui';ctx.fillText(title,x+34,y+14);
+      ctx.fillStyle='#ffe39a';ctx.font='950 12px system-ui';ctx.fillText('×'+(Number(gained[k])||0),x+34,y+30);
+    });
+  }else{
+    ctx.textAlign='center';ctx.fillStyle='rgba(222,238,255,.50)';ctx.font='800 8px system-ui';
+    ctx.fillText('CHƯA CÓ THƯỞNG MỚI',cx,panelY+43);
+  }
+
+  const by=L.boxY+L.boxH-82;
+  modalAction(L.innerX,by,L.innerW,38,level<MAX_LEVELS?'MÀN TIẾP THEO':'BẢN ĐỒ LEVEL',true,'▶');
+  modalAction(L.innerX,by+44,L.innerW,34,'BẢN ĐỒ LEVEL',false,'◆');
 }
 
 function dailyDraw(w,h){
@@ -2176,6 +2646,7 @@ function ensureSettingsDom(){
         <section class="tm-settings-section"><div class="tm-settings-section-title">🔊 PHẢN HỒI</div>
           <button class="tm-set-row" data-set="sound"><span><b>🔊 Âm thanh</b><small>Âm thanh ghép, combo và Special</small></span><i id="tmSetSound"></i></button>
           <button class="tm-set-row" data-set="haptic"><span><b>📳 Rung phản hồi</b><small>Phản hồi khi chạm, match và Special</small></span><i id="tmSetHaptic"></i></button>
+          <button class="tm-set-row" data-set="voice"><span><b>🗣️ Giọng đọc</b><small>Đọc 4, 5 viên và Combo bằng giọng thật của thiết bị</small></span><i id="tmSetVoice"></i></button>
           <button class="tm-set-test" data-set="test">📳 TEST RUNG</button>
         </section>
         <section class="tm-settings-section"><div class="tm-settings-section-title">🧭 TRỢ GIÚP</div>
@@ -2198,7 +2669,7 @@ function renderSettingsDom(){
   const desc={high:'Đồ họa tối đa',balanced:'Cân bằng',performance:'Ưu tiên FPS'};
   QUALITY_MODES.forEach(mode=>{const b=document.createElement('button');b.className='tm-quality'+(qualityMode===mode?' active':'');b.dataset.set='quality-'+mode;b.innerHTML=`<b>${names[mode]}</b><small>${desc[mode]}</small>`;b.onclick=()=>{setQuality(mode);renderSettingsDom();haptic('tap')};q.appendChild(b)});
   const set=(id,on)=>{const x=el.querySelector(id);if(x){x.textContent=settingsToggle(on);x.className=on?'on':'off'}};
-  set('#tmSetAdaptive',adaptivePerformance);set('#tmSetMotion',reducedMotion);set('#tmSetFps',showFps);set('#tmSetSound',soundOn);set('#tmSetHaptic',hapticOn);
+  set('#tmSetAdaptive',adaptivePerformance);set('#tmSetMotion',reducedMotion);set('#tmSetFps',showFps);set('#tmSetSound',soundOn);set('#tmSetHaptic',hapticOn);set('#tmSetVoice',voiceOn);
   const cap=typeof hapticCapabilityLabel==='function'?hapticCapabilityLabel():'WEB';
   el.querySelector('#tmSetStatus').textContent=`FPS ${Math.round(fps)} • ${qualityLabel()} • ${cap}`;
 }
@@ -2211,6 +2682,7 @@ function settingsAction(action){
   if(action==='fps'){setShowFps(!showFps);renderSettingsDom();return}
   if(action==='sound'){setSound(!soundOn);renderSettingsDom();return}
   if(action==='haptic'){setHaptic(!hapticOn);renderSettingsDom();return}
+  if(action==='voice'){setVoice(!voiceOn);renderSettingsDom();return}
   if(action==='test'){testHaptic();renderSettingsDom();return}
   if(action==='music'){try{window.showMusicPanel?.(true)}catch(_){}return}
   if(action==='tutorial'){hideSettingsDom();openTutorial();return}
@@ -2228,21 +2700,21 @@ function activateRainbowColor(r,c){
   if(!rainbowTarget||!inside(r,c))return false;
   const rr=rainbowTarget.r,rc=rainbowTarget.c,target=board[r][c],sourceSpecial=rainbowTarget.special||'rainbow';
   if(target.obstacle==='stone'||target.obstacle==='lock'||target.special){cancelRainbow();return false;}
-  const kind=target.kind, cells=[];
+  const kind=target.kind,cells=[];
   for(let y=0;y<N;y++)for(let x=0;x<N;x++)if(board[y][x].kind===kind){board[y][x].matched=true;cells.push({r:y,c:x});}
-  board[rr][rc].matched=true; cells.push({r:rr,c:rc});
-  rainbowTarget=null; combo=Math.max(1,combo+1);beginComboChain(false);chainStep=combo;chainMax=Math.max(chainMax,combo);
-  const cleared=Math.max(0,cells.length-1), scoreGain=Math.round(cleared*55*comboMultiplier(combo))+120;
-  score+=scoreGain; chainScore+=scoreGain; chainCleared+=cleared; chainSpecials++;
-  objectiveProgress+=objective.type==='score'?score:0;
-  if(objective.type==='collect')objectiveProgress+=cells.filter(q=>board[q.r][q.c].kind===objective.kind).length;
-  if(objective.type==='special')objectiveProgress+=1;
+  board[rr][rc].matched=true;cells.push({r:rr,c:rc});
+  rainbowTarget=null;beginComboChain(false);combo=1;chainStep=1;chainMax=1;
+  const cleared=Math.max(0,cells.length-1),scoreGain=Math.round(cleared*55*comboMultiplier(combo))+120;
+  score+=scoreGain;chainScore+=scoreGain;chainCleared+=cleared;chainSpecials++;
+  const collectedByRainbow=cells.reduce((n,q)=>n+(board[q.r][q.c].kind===objective.kind?1:0),0);
+  updateDirectObjective({scoreNow:score,collect:collectedByRainbow,blocks:0});
+  if(objective.type==='combo')objectiveProgress=Math.max(objectiveProgress,chainMax);
   addMissionProgress('score',scoreGain);addMissionProgress('match',cleared);addMissionProgress('special',1);
-  progress=Math.min(1,objective.target>0?objectiveProgress/objective.target:0);
   effects.push({type:'rainbowTarget',kind,x:cellX(rc),y:cellY(rr),life:.7,max:.7,cells});
   triggerLocalImpact(cells,1.0);sound('special',Math.min(5,combo+1));haptic('special',Math.min(1.65,1+combo*.10));juice('special',1.1);
   banner=(sourceSpecial==='star'?'⭐ RAINBOW STAR • ':'🌈 COLOR BOMB • ')+gemNames[kind].toUpperCase()+' XÓA TOÀN BỘ';bannerT=1.2;
   toastScore.push({x:cellX(rc),y:cellY(rr)-8,text:'+'+scoreGain,life:.9,max:.9,scale:1});
+  if(objectiveDone()){levelCompletePending=true;clearUndo();}
   phase=.42;state='clearing';saveProgress('rainbow-color');return true;
 }
 function settingsDraw(w,h){
@@ -2278,7 +2750,7 @@ function modalFrame(w,h,opts={}){
   const kind=opts.kind||'default';
   const full=opts.full!==false;
   const boxW=Math.min(w*.88,540);
-  const tallModal=['booster','missions','levelmap'].includes(kind);
+  const tallModal=['booster','missions','levelmap','levelcomplete'].includes(kind);
   const boxH=Math.min(h*(tallModal?.84:.62),680);
   const boxX=(w-boxW)/2;
   const boxY=kind==='pause'?h*.19:(h-boxH)/2;
@@ -2359,25 +2831,32 @@ function modalCard(x,y,w,h,title,subtitle,count,icon,active=true){
   ctx.restore();
 }
 function boostersLayout(w,h){
-  const boxW=Math.min(w*.92,560),boxH=Math.min(h*.86,680),boxX=(w-boxW)/2,boxY=(h-boxH)/2;
-  const pad=Math.max(18,boxW*.075),innerX=boxX+pad,innerW=boxW-pad*2;
-  const rowH=Math.min(76,h*.088),gap=Math.min(16,h*.018),top=boxY+132,backY=boxY+boxH-64;
-  return {boxX,boxY,boxW,boxH,pad,innerX,innerW,rowH,gap,top,backY};
+  const boxW=Math.min(w*.94,600),boxH=Math.min(h*.90,720),boxX=(w-boxW)/2,boxY=(h-boxH)/2;
+  const pad=Math.max(16,boxW*.055),innerX=boxX+pad,innerW=boxW-pad*2;
+  const cols=2,gap=Math.min(12,h*.014),cardW=(innerW-gap)/cols,rowH=Math.min(92,h*.105),top=boxY+126,backY=boxY+boxH-58;
+  return {boxX,boxY,boxW,boxH,pad,innerX,innerW,gap,cardW,rowH,top,backY};
+}
+function boosterMiniCard(x,y,w,h,k,title){
+  const count=clampBooster(boosters[k]),active=count>0 && (k==='moves' ? moves>=0 : true);
+  ctx.save();
+  const g=ctx.createLinearGradient(x,y,x,y+h);g.addColorStop(0,active?'rgba(47,82,130,.96)':'rgba(24,32,49,.84)');g.addColorStop(1,active?'rgba(12,28,58,.99)':'rgba(15,20,31,.92)');ctx.fillStyle=g;round(x,y,w,h,16);ctx.strokeStyle=active?'rgba(180,222,255,.28)':'rgba(255,255,255,.10)';ctx.lineWidth=1.1;ctx.stroke();
+  const cy=y+h/2;
+  ctx.fillStyle=active?'rgba(83,166,235,.18)':'rgba(255,255,255,.05)';ctx.beginPath();ctx.arc(x+31,cy,21,0,Math.PI*2);ctx.fill();ctx.fillStyle=active?'#ffe29a':'rgba(255,255,255,.34)';ctx.font='900 23px system-ui';ctx.textAlign='center';ctx.fillText(boosterIcon(k),x+31,cy+8);
+  const countText='×'+count, countW=ctx.measureText(countText).width;
+  const titleX=x+60, titleMaxW=Math.max(30,w-60-14-countW-12);
+  ctx.textAlign='left';ctx.fillStyle=active?'#fff':'rgba(255,255,255,.38)';ctx.font='950 11.5px system-ui';
+  while(ctx.measureText(title).width>titleMaxW && parseFloat(ctx.font)>8.5){ctx.font='950 '+(parseFloat(ctx.font)-.5)+'px system-ui';}
+  ctx.fillText(title,titleX,cy+4,titleMaxW);
+  ctx.textAlign='right';ctx.fillStyle=active?'#ffe39c':'rgba(255,255,255,.34)';ctx.font='950 17px system-ui';ctx.fillText(countText,x+w-12,cy+6);
+  ctx.restore();
 }
 function boosterDraw(w,h){
-  const L=boostersLayout(w,h),frame={boxX:L.boxX,boxY:L.boxY,boxW:L.boxW,boxH:L.boxH};
-  modalFrameCustom(frame);
-  ctx.textAlign='center';ctx.fillStyle='#ffe6a5';ctx.font='950 '+Math.max(27,34*(L.boxW/540))+'px system-ui';ctx.fillText('BOOSTERS',w/2,L.boxY+60);
-  ctx.fillStyle='rgba(214,235,255,.60)';ctx.font='800 10px system-ui';ctx.fillText('Hành trang hỗ trợ  •  tối đa 9 mỗi loại',w/2,L.boxY+86);
-  ctx.fillStyle='rgba(255,224,152,.50)';ctx.font='750 9px system-ui';ctx.fillText('CHẠM VÀO BOOSTER ĐỂ SỬ DỤNG',w/2,L.boxY+104);
-  const items=[['hammer','🔨','HAMMER','Phá 1 ô hoặc vật cản'],['shuffle','🔀','SHUFFLE','Xáo trộn toàn bộ bàn'],['moves','＋','+5 MOVES','Thêm 5 lượt chơi']];
-  items.forEach((it,i)=>{
-    const y=L.top+i*(L.rowH+L.gap),count=clampBooster(boosters[it[0]]),active=count>0&&moves>0;
-    modalCard(L.innerX,y,L.innerW,L.rowH,it[2],it[3],count,it[1],active);
-    if(!active){ctx.textAlign='right';ctx.fillStyle='rgba(255,225,170,.34)';ctx.font='800 8px system-ui';ctx.fillText(count<=0?'HẾT':'KHÓA KHI HẾT LƯỢT',L.innerX+L.innerW-16,y+L.rowH-10)}
-  });
-  modalAction(L.innerX,L.backY,L.innerW,48,'QUAY LẠI',false,'←');
-  ctx.textAlign='center';ctx.fillStyle='rgba(206,226,250,.40)';ctx.font='700 8.5px system-ui';ctx.fillText('Booster chỉ trừ khi thao tác hợp lệ • Hammer: chọn ô sau khi mở',w/2,L.backY+62);
+  const L=boostersLayout(w,h);modalFrameCustom({boxX:L.boxX,boxY:L.boxY,boxW:L.boxW,boxH:L.boxH});
+  modalHeader({boxX:L.boxX,boxY:L.boxY,boxW:L.boxW},'BOOSTERS','');
+  const items=Object.keys(BOOSTER_INFO).map(k=>[k,boosterName(k)]);
+  items.forEach((it,i)=>{const col=i%2,row=Math.floor(i/2);boosterMiniCard(L.innerX+col*(L.cardW+L.gap),L.top+row*(L.rowH+L.gap),L.cardW,L.rowH,it[0],it[1]);});
+  modalAction(L.innerX,L.backY,L.innerW,46,'QUAY LẠI',false,'←');
+  ctx.textAlign='center';ctx.fillStyle='rgba(206,226,250,.40)';ctx.font='700 8px system-ui';
 }
 
 function hud(w){
@@ -2450,7 +2929,6 @@ function overlay(w,h,title,buttons){
   if(isPause){
     ctx.fillStyle='rgba(214,233,255,.55)';ctx.font='750 '+Math.max(10,11*(w/DESIGN_W))+'px system-ui';
     ctx.fillText(lastSaveAt?'LAST SAVE  '+new Date(lastSaveAt).toLocaleTimeString():'NOT SAVED',w/2,boxY+101);
-    ctx.fillStyle='rgba(181,214,247,.30)';ctx.font='700 '+Math.max(9,9.5*(w/DESIGN_W))+'px system-ui';ctx.fillText('Màn chơi đang tạm dừng • tiến trình vẫn được giữ nguyên',w/2,boxY+124);
   }else{
     ctx.fillStyle='rgba(214,233,255,.60)';ctx.font='800 14px system-ui';ctx.fillText('SCORE  '+score,w/2,boxY+105);
     ctx.fillStyle='rgba(181,214,247,.48)';ctx.font='700 10px system-ui';ctx.fillText('GOAL  •  '+objective.label,w/2,boxY+126);
@@ -2571,7 +3049,7 @@ function update(dt){
   if(hintT>0)hintT-=dt;if(hintCooldown>0)hintCooldown=Math.max(0,hintCooldown-dt);if(bannerT>0)bannerT-=dt;feedbackFlash=Math.max(0,feedbackFlash-dt*1.8);feedbackPulse=Math.max(0,feedbackPulse-dt*1.7);juiceShakeT=Math.max(0,juiceShakeT-dt);juiceShake=Math.max(0,juiceShake-dt*7);juiceBoardPunchT=Math.max(0,juiceBoardPunchT-dt);juiceBoardPunch=Math.max(0,juiceBoardPunch-dt*.55);juiceHitStop=Math.max(0,juiceHitStop-dt);for(let r=0;r<N;r++)for(let c=0;c<N;c++){const x=board[r][c];x.impactT=Math.max(0,x.impactT-dt);x.impactPower=Math.max(0,x.impactPower-dt*6);if(x.matched){x.alpha=Math.max(0,x.alpha-dt*4);x.scale+=dt*2;continue}x.x+=(x.tx-x.x)*Math.min(1,dt*14);x.y+=(x.ty-x.y)*Math.min(1,dt*14);x.scale+=(1-x.scale)*Math.min(1,dt*10)}for(let i=localImpacts.length-1;i>=0;i--){localImpacts[i].life-=dt;if(localImpacts[i].life<=0)localImpacts.splice(i,1)}for(let i=particles.length-1;i>=0;i--){const p=particles[i];p.x+=p.vx*dt;p.y+=p.vy*dt;p.vy+=180*dt;p.life-=dt;if(p.life<=0)particles.splice(i,1)}
   for(let i=toastScore.length-1;i>=0;i--){toastScore[i].life-=dt;toastScore[i].scale+=dt*1.8;if(toastScore[i].life<=0)toastScore.splice(i,1)}
   for(let i=effects.length-1;i>=0;i--){effects[i].life-=dt;if(effects[i].life<=0)effects.splice(i,1)}
-  for(let i=cascadeDrops.length-1;i>=0;i--){cascadeDrops[i].life-=dt;if(cascadeDrops[i].life<=0)cascadeDrops.splice(i,1)}if(state==='swapping'){phase-=dt;if(phase<=0){if(matches().count===0){doSwap(swapInfo.a,swapInfo.b);moves++;sound('error');haptic('error');flashFeedback(.16);juice('error',1);state='playing';swapInfo=null;clearUndo(false);saveProgress('invalid-swap')}else resolve(true)}}else if(state==='clearing'){phase-=dt;if(phase<=0)collapse()}else if(state==='falling'){let settled=true;for(let r=0;r<N;r++)for(let c=0;c<N;c++)if(Math.abs(board[r][c].x-board[r][c].tx)>1||Math.abs(board[r][c].y-board[r][c].ty)>1)settled=false;if(settled)resolve(false)}else if(state==='playing'){if(moves<=5&&moves>0&&warningT<=0){warningT=.9;sound('error');}if(moves<=0){finishComboChain();if(dailyMode){failDaily();}else{clearSavedGame();state='gameover';saveFlashT=.8;saveFlashText='SAVE CLEARED';}}}}
+  for(let i=cascadeDrops.length-1;i>=0;i--){cascadeDrops[i].life-=dt;if(cascadeDrops[i].life<=0)cascadeDrops.splice(i,1)}if(state==='swapping'){phase-=dt;if(phase<=0){const hasMatch=matches().count>0,hasSpecial=!!(swapInfo&&(board[swapInfo.a.r][swapInfo.a.c].special||board[swapInfo.b.r][swapInfo.b.c].special));if(!hasMatch&&!hasSpecial&&!(swapInfo&&swapInfo.boosterFree)){doSwap(swapInfo.a,swapInfo.b);moves++;sound('error');haptic('error');flashFeedback(.16);juice('error',1);state='playing';swapInfo=null;clearUndo(false);saveProgress('invalid-swap')}else if(!hasMatch&&!hasSpecial&&swapInfo&&swapInfo.boosterFree){swapInfo=null;selected=null;combo=0;clearUndo(false);state='playing';banner='🔄 ĐỔI CHỖ THÀNH CÔNG';bannerT=.85;sound('special',1.4);haptic('special',1);saveProgress('booster-free-switch',true)}else resolve(true)}}else if(state==='clearing'){phase-=dt;if(phase<=0)collapse()}else if(state==='falling'){let settled=true;for(let r=0;r<N;r++)for(let c=0;c<N;c++)if(Math.abs(board[r][c].x-board[r][c].tx)>1||Math.abs(board[r][c].y-board[r][c].ty)>1)settled=false;if(settled)resolve(false)}else if(state==='playing'){if(moves<=5&&moves>0&&warningT<=0){warningT=.9;sound('error');}if(moves<=0){finishComboChain();if(dailyMode){failDaily();}else if(!boosterBusy&&['hammer','shuffle','moves','line','color','free'].some(k=>clampBooster(boosters[k])>0)){movesZeroGrace+=dt;if(movesZeroGrace<2.5){if(bannerT<=0){banner='HẾT LƯỢT • CÓ THỂ DÙNG BOOSTER';bannerT=.8;} }else{clearSavedGame();state='gameover';saveFlashT=.8;saveFlashText='SAVE CLEARED';}}else{clearSavedGame();state='gameover';saveFlashT=.8;saveFlashText='SAVE CLEARED';}}else{movesZeroGrace=0;}}}
 function loop(t){
   if(!running)return;
   const raw=(t-last)/1000;
@@ -2608,6 +3086,69 @@ document.addEventListener('visibilitychange',()=>{
 });
 window.addEventListener('pagehide',()=>{if(running)stopLoop()},{passive:true});
 window.addEventListener('pageshow',()=>{if(state!=='menu'&&!document.hidden)startLoop()},{passive:true});
+function canvasLogicalPoint(e){
+  const rect=canvas.getBoundingClientRect();
+  if(!rect.width||!rect.height)return null;
+  const w=parseFloat(canvas.style.width)||rect.width,h=parseFloat(canvas.style.height)||rect.height;
+  return {x:(e.clientX-rect.left)*w/rect.width,y:(e.clientY-rect.top)*h/rect.height};
+}
+let lastUiActionAt=0;
+function uiActionGuard(){
+  const now=performance.now();
+  if(now-lastUiActionAt<260)return false;
+  lastUiActionAt=now;return true;
+}
+function handleCanvasTap(x,y){
+  const w=parseFloat(canvas.style.width)||DESIGN_W,h=parseFloat(canvas.style.height)||DESIGN_H;
+  if(state==='boosters'){
+    const L=boostersLayout(w,h),items=['hammer','shuffle','moves','line','color','free'];
+    for(let i=0;i<items.length;i++){
+      const col=i%2,row=Math.floor(i/2),xx=L.innerX+col*(L.cardW+L.gap),yy=L.top+row*(L.rowH+L.gap);
+      if(hit({x:xx,y:yy,w:L.cardW,h:L.rowH},x,y)){
+        if(!uiActionGuard())return true;
+        const k=items[i];
+        if(activateBoosterCard(k)){haptic('tap');}
+        return true;
+      }
+    }
+    if(hit({x:L.innerX,y:L.backY-8,w:L.innerW,h:62},x,y)){
+      if(!uiActionGuard())return true;
+      state='playing';boosterMode=null;boosterSelected=null;haptic('tap');startLoop();return true;
+    }
+    return true;
+  }
+  if(state==='levelmap'){
+    const L=levelmapLayout(w,h);
+    if(hit({x:L.listX-8,y:L.backY-10,w:L.listW+16,h:66},x,y)){
+      if(!uiActionGuard())return true;
+      state='menu';selectedMapLevel=Math.max(1,Math.min(MAX_LEVELS,mapState.unlocked));mapScroll=0;haptic('tap');startLoop();return true;
+    }
+    if(x>=L.listX&&x<=L.listX+L.listW&&y>=L.top&&y<=L.bottom){
+      const l=Math.floor((y-L.top+mapScroll)/(L.rowH+L.rowGap))+1;
+      if(l>=1&&l<=MAX_LEVELS&&isLevelUnlocked(l)){
+        if(!uiActionGuard())return true;
+        selectedMapLevel=l;haptic('tap');startGame(l,false);return true;
+      }
+      banner='MÀN CHƯA MỞ KHÓA';bannerT=.7;haptic('error');startLoop();return true;
+    }
+    return true;
+  }
+  if(state==='levelcomplete'){
+    const L=levelCompleteLayout(w,h),by=L.boxY+L.boxH-82;
+    if(hit({x:L.innerX-8,y:by-8,w:L.innerW+16,h:54},x,y)){
+      if(!uiActionGuard())return true;
+      if(level<MAX_LEVELS)startGame(level+1,false);
+      else{state='levelmap';selectedMapLevel=mapState.unlocked;mapScroll=0;startLoop();}
+      return true;
+    }
+    if(hit({x:L.innerX-8,y:by+38,w:L.innerW+16,h:52},x,y)){
+      if(!uiActionGuard())return true;
+      state='levelmap';selectedMapLevel=Math.min(level,Math.max(1,mapState.unlocked));mapScroll=0;haptic('tap');startLoop();return true;
+    }
+    return true;
+  }
+  return false;
+}
 function pointer(e){
   if(e.type==='pointerdown')unlockAudio();
   const rect=canvas.getBoundingClientRect();
@@ -2625,6 +3166,7 @@ function pointer(e){
     return;
   }
   if(e.type!=='pointerup' && e.type!=='pointercancel')return;
+  try{canvas.releasePointerCapture?.(e.pointerId)}catch(_){}
   const start=pointerStart; pointerStart=null;
   lastPointerUpAt=performance.now();
   if(!start)return;
@@ -2675,15 +3217,7 @@ function pointer(e){
     if(hit({x:w*.16,y:h*.875,w:w*.68,h:43},x,y)){state='menu';haptic('tap');return;}
     return;
   }
-  if(state==='boosters'){
-    const w=parseFloat(canvas.style.width)||DESIGN_W, h=parseFloat(canvas.style.height)||DESIGN_H, L=boostersLayout(w,h);
-    for(let i=0;i<3;i++){
-      const yy=L.top+i*(L.rowH+L.gap);
-      if(hit({x:L.innerX,y:yy,w:L.innerW,h:L.rowH},x,y)){haptic('tap');useBooster(['hammer','shuffle','moves'][i]);return;}
-    }
-    if(hit({x:L.innerX,y:L.backY,w:L.innerW,h:48},x,y)){state='playing';haptic('tap');startLoop();return;}
-    return;
-  }
+  if(['boosters','levelmap','levelcomplete'].includes(state)){if(handleCanvasTap(x,y))return;}
   if(state==='daily'){
     const w=parseFloat(canvas.style.width)||DESIGN_W,h=parseFloat(canvas.style.height)||DESIGN_H;
     if(hit({x:w*.20,y:h*.615,w:w*.60,h:46},x,y)&&!dailyState.completed){dailyStart();return;}
@@ -2728,18 +3262,26 @@ function pointer(e){
     }
     return;
   }
-  if(state==='booster-hammer'){
-    if(swipe){return;}
+  if(['booster-hammer','booster-line','booster-color','booster-free'].includes(state)){
     if(x>=cell.x&&x<cell.x+cell.s*N&&y>=cell.y&&y<cell.y+cell.s*N){
-      const r=Math.floor((y-cell.y)/cell.s),c=Math.floor((x-cell.x)/cell.s);applyHammer(r,c);return;
+      const r=Math.floor((y-cell.y)/cell.s),c=Math.floor((x-cell.x)/cell.s);
+      if(state==='booster-hammer'){applyHammer(r,c);return;}
+      if(state==='booster-line'){applyLineBooster(r,c);return;}
+      if(state==='booster-color'){applyColorBooster(r,c);return;}
+      if(state==='booster-free'){if(!boosterSelected){if(!boosterCellSelectable(r,c)){sound('error');haptic('error');return;}boosterSelected={r,c};haptic('select');banner='Ô THỨ NHẤT • CHỌN Ô THỨ HAI';bannerT=.7;startLoop();return;}applyFreeSwitch(boosterSelected,{r,c});return;}
     }
-    state='playing';boosterTarget=null;banner='HAMMER CANCELLED';bannerT=.65;haptic('tap');startLoop();return;
+    cancelSpecialBooster(state==='booster-hammer'?'BÚA ĐÃ HỦY':'BOOSTER ĐÃ HỦY');return;
   }
   if(state==='levelcomplete'){
-    const w=parseFloat(canvas.style.width)||DESIGN_W,h=parseFloat(canvas.style.height)||DESIGN_H;
-    if(hit({x:w*.25,y:h*.57,w:w*.50,h:48},x,y)){
-      if(level<MAX_LEVELS)startGame(level+1,false); else {state='levelmap';startLoop();}
-    }else if(hit({x:w*.25,y:h*.64,w:w*.50,h:48},x,y)){state='levelmap';startLoop();}
+    const w=parseFloat(canvas.style.width)||DESIGN_W,h=parseFloat(canvas.style.height)||DESIGN_H,L=levelCompleteLayout(w,h);
+    // Hitboxes aligned with the compact completion buttons.
+    const by=L.boxY+L.boxH-82;
+    if(hit({x:L.innerX,y:by,w:L.innerW,h:38},x,y)){
+      if(level<MAX_LEVELS){startGame(level+1,false);}
+      else{state='levelmap';selectedMapLevel=mapState.unlocked;mapScroll=0;startLoop();}
+    } else if(hit({x:L.innerX,y:by+44,w:L.innerW,h:34},x,y)){
+      state='levelmap';selectedMapLevel=Math.min(level,Math.max(1,mapState.unlocked));mapScroll=0;haptic('tap');startLoop();
+    }
     return;
   }
   if(state==='paused'){
@@ -2754,7 +3296,7 @@ function pointer(e){
     const w=parseFloat(canvas.style.width)||DESIGN_W;
     const h=parseFloat(canvas.style.height)||DESIGN_H;
     if(hit({x:w*.28,y:h*.48,w:w*.44,h:45},x,y))startGame(level,true);
-    else if(hit({x:w*.28,y:h*.58,w:w*.44,h:45},x,y))close();
+    else if(hit({x:w*.28,y:h*.58,w:w*.44,h:45},x,y)){state='menu';selectedMapLevel=mapState.unlocked;mapScroll=0;haptic('tap');startLoop();}
     return;
   }
   if(state!=='playing')return;
@@ -2784,7 +3326,7 @@ function pointer(e){
 canvas.addEventListener('click',function(e){
   unlockAudio();
   if(performance.now()-lastPointerUpAt<450)return;
-  if(state!=='menu' && state!=='tutorial' && state!=='settings' && state!=='levelmap' && state!=='levelcomplete' && state!=='boosters' && state!=='missions' && state!=='daily' && state!=='dailycomplete' && state!=='booster-hammer')return;
+  if(state!=='menu' && state!=='tutorial' && state!=='settings' && state!=='levelmap' && state!=='levelcomplete' && state!=='gameover' && state!=='boosters' && state!=='missions' && state!=='daily' && state!=='dailycomplete' && !['booster-hammer','booster-line','booster-color','booster-free'].includes(state))return;
   const rect=canvas.getBoundingClientRect(); if(!rect.width||!rect.height)return;
   const x=(e.clientX-rect.left)*(parseFloat(canvas.style.width)||rect.width)/rect.width;
   const y=(e.clientY-rect.top)*(parseFloat(canvas.style.height)||rect.height)/rect.height;
@@ -2804,41 +3346,7 @@ canvas.addEventListener('click',function(e){
     if(hit({x:w*.16,y:h*.875,w:w*.68,h:43},x,y)){state='menu';haptic('tap');return;}
     return;
   }
-  if(state==='boosters'){
-    const L=boostersLayout(w,h);
-    for(let i=0;i<3;i++){const yy=L.top+i*(L.rowH+L.gap);if(hit({x:L.innerX,y:yy,w:L.innerW,h:L.rowH},x,y)){useBooster(['hammer','shuffle','moves'][i]);return;}}
-    if(hit({x:L.innerX,y:L.backY,w:L.innerW,h:48},x,y)){state='playing';haptic('tap');startLoop();}
-    return;
-  }
-  if(state==='missions'){
-    const L=missionLayout(w,h);
-    for(let i=0;i<3;i++){
-      const yy=L.top+i*(L.rowH+L.gap);
-      if(hit({x:L.innerX,y:yy,w:L.innerW,h:L.rowH},x,y)&&missionDone(missionState.active[i])){claimMission(i);startLoop();return;}
-    }
-    if(hit({x:L.innerX,y:L.actionsY,w:L.innerW*.42,h:44},x,y)){claimAllMissions();startLoop();return;}
-    if(hit({x:L.innerX+L.innerW*.47,y:L.actionsY,w:L.innerW*.53,h:44},x,y)){state='menu';haptic('tap');startLoop();}
-    return;
-  }
-  if(state==='booster-hammer'){
-    if(x>=cell.x&&x<cell.x+cell.s*N&&y>=cell.y&&y<cell.y+cell.s*N){const r=Math.floor((y-cell.y)/cell.s),c=Math.floor((x-cell.x)/cell.s);applyHammer(r,c);return;}
-    state='playing';boosterTarget=null;banner='HAMMER CANCELLED';bannerT=.65;haptic('tap');startLoop();return;
-  }
-  if(state==='levelmap'){
-    const L=levelmapLayout(w,h);
-    if(hit({x:L.listX,y:L.backY,w:L.listW,h:46},x,y)){state='menu';haptic('tap');startLoop();return;}
-    if(x>=L.listX&&x<=L.listX+L.listW&&y>=L.top&&y<=L.bottom){
-      const l=Math.floor((y-L.top+mapScroll)/(L.rowH+L.rowGap))+1;
-      if(l>=1&&l<=MAX_LEVELS&&isLevelUnlocked(l)){selectedMapLevel=l;haptic('tap');startGame(l,false);return;}
-    }
-    return;
-  }
-  if(state==='levelcomplete'){
-    if(hit({x:w*.25,y:h*.57,w:w*.50,h:48},x,y)){
-      if(level<MAX_LEVELS)startGame(level+1,false); else {state='levelmap';startLoop();}
-    }else if(hit({x:w*.25,y:h*.64,w:w*.50,h:48},x,y)){state='levelmap';startLoop();}
-    return;
-  }
+  if(['boosters','levelmap','levelcomplete'].includes(state)){if(handleCanvasTap(x,y))return;}
   const saved=hasSavedGame();
   if(state==='menu'){
     const L=menuLayout(w,h), mainRect={x:L.boxX+L.pad,y:L.mainY,w:L.innerW,h:L.mainH};
@@ -2894,7 +3402,9 @@ window.openBejeweled=function(){
   startLoop();
 };
 window.closeBejeweled=close;
-window.__tinhMiLonGameDebug={getState:()=>state,getBoardSize:()=>board.length,useBooster,hasSavedGame,menuLayout,boostersLayout,getStability:()=>({health:v155Health,recoveries:v155Recoveries,frameEMA,particleCount:particles.length,effectCount:effects.length})};
+window.__tinhMiLonGameDebug={getState:()=>state,getBoardSize:()=>board.length,useBooster,hasSavedGame,menuLayout,boostersLayout,getStability:()=>({health:v155Health,recoveries:v155Recoveries,frameEMA,particleCount:particles.length,effectCount:effects.length}),getBoosters:()=>({...boosters}),getLastLevelReward:()=>lastLevelReward};
+window.__tinhMiLonGameDebug.getLevelMapState=()=>JSON.parse(JSON.stringify(mapState));
+window.__tinhMiLonGameDebug.getBoosterMode=()=>({state,boosterMode,boosterSelected,counts:{...boosters}});
 canvas.addEventListener('wheel',function(e){
   if(state!=='levelmap')return;
   e.preventDefault();
@@ -2905,6 +3415,12 @@ canvas.addEventListener('wheel',function(e){
 canvas.addEventListener('pointerdown',pointer,{passive:true});
 canvas.addEventListener('pointerup',pointer,{passive:true});
 canvas.addEventListener('pointercancel',pointer,{passive:true});
+canvas.addEventListener('touchend',function(e){
+  if(performance.now()-lastPointerUpAt<80)return;
+  const t=e.changedTouches&&e.changedTouches[0]; if(!t)return;
+  const pt=canvasLogicalPoint(t); if(!pt)return;
+  if(['boosters','levelmap','levelcomplete'].includes(state)){e.preventDefault();handleCanvasTap(pt.x,pt.y);lastPointerUpAt=performance.now();}
+},{passive:false});
 window.addEventListener('resize',fit,{passive:true});
 window.visualViewport?.addEventListener('resize',fit,{passive:true});
 document.addEventListener('keydown',key);
