@@ -1327,16 +1327,51 @@ function updateDirectObjective({scoreNow,collect=0,blocks=0}){
 }
 function applyHammer(r,c){
   if(!inside(r,c)||state!=='booster-hammer'||clampBooster(boosters.hammer)<=0)return false;
-  const x=board[r][c],wasObstacle=!!x.obstacle,wasSpecial=!!x.special,kind=x.kind;
+  const clear=Array.from({length:N},()=>Array(N).fill(false)),stack=[];
+  const add=(rr,cc)=>{if(inside(rr,cc)&&!clear[rr][cc]){clear[rr][cc]=true;stack.push([rr,cc]);}};
+  const addRow=rr=>{for(let cc=0;cc<N;cc++)add(rr,cc)};
+  const addCol=cc=>{for(let rr=0;rr<N;rr++)add(rr,cc)};
+  const addBomb=(rr,cc,rad=1)=>{for(let y=rr-rad;y<=rr+rad;y++)for(let x=cc-rad;x<=cc+rad;x++)add(y,x)};
+  // Hammer starts the same special-propagation queue used by normal matches.
+  // This makes a hit special fire once, and any special caught in its blast chain too.
+  add(r,c);
+  let activated=0;
+  while(stack.length){
+    const [rr,cc]=stack.pop(),gem=board[rr][cc],special=gem.special;
+    if(!special)continue;
+    activated++;
+    specialEffect(special,rr,cc);
+    if(special==='row')addRow(rr);
+    else if(special==='col')addCol(cc);
+    else if(special==='bomb')addBomb(rr,cc,1);
+    else if(special==='cross'){addRow(rr);addCol(cc)}
+    else if(special==='lightning'){
+      for(let d=-1;d<=1;d++){addRow(rr+d);addCol(cc+d)}
+    }else if(special==='rainbow'||special==='star'){
+      const targetKind=gem.kind;
+      for(let y=0;y<N;y++)for(let x=0;x<N;x++)if(board[y][x].kind===targetKind)add(y,x);
+    }
+  }
+
   boosters.hammer=clampBooster(boosters.hammer-1);saveBoosters();addMissionProgress('booster',1);
-  let collect=0,blocks=0;const wasStructural=x.obstacle==='stone'||x.obstacle==='lock';if(wasObstacle){x.obstacle='';blocks=1;}if(objective.type==='collect'&&!wasStructural&&kind===objective.kind)collect=1;
-  x.special='';x.matched=true;x.alpha=1;
-  const hammerScore=wasObstacle?45:(wasSpecial?120:30);score+=hammerScore;
-  addMissionProgress('score',hammerScore);if(wasSpecial)addMissionProgress('special',1);if(wasObstacle)addMissionProgress('blocks',1);
+  let collect=0,blocks=0,cleared=0,scoreGain=0,specialCount=0;
+  for(let rr=0;rr<N;rr++)for(let cc=0;cc<N;cc++)if(clear[rr][cc]){
+    const gem=board[rr][cc],wasObstacle=!!gem.obstacle,wasStructural=gem.obstacle==='stone'||gem.obstacle==='lock';
+    if(wasObstacle){gem.obstacle='';blocks++;if(wasStructural){} }
+    if(objective.type==='collect'&&!wasStructural&&gem.kind===objective.kind)collect++;
+    if(gem.special)specialCount++;
+    scoreGain+=wasObstacle?45:(gem.special?120:30);
+    gem.special='';gem.matched=true;gem.alpha=1;cleared++;
+  }
+  score+=scoreGain;addMissionProgress('score',scoreGain);
+  if(specialCount)addMissionProgress('special',specialCount);
+  if(blocks)addMissionProgress('blocks',blocks);
   updateDirectObjective({scoreNow:score,collect,blocks});
-  combo=0;chainActive=false;selected=null;hint=null;
-  banner='🔨 BÚA PHÁ Ô!';bannerT=.8;effects.push({type:'burst',x:cellX(c),y:cellY(r),life:.45,max:.45,combo:0});spawn(cellX(c),cellY(r),10);
-  sound('special',2);haptic('special',1.15);flashFeedback(.24);finishBoosterSelection();state='clearing';phase=.32;saveProgress('booster-hammer',true);startLoop();return true;
+  combo=0;chainActive=false;selected=null;hint=null;swapInfo=null;
+  banner=activated?'🔨 BÚA • KÍCH HOẠT ĐẶC BIỆT':'🔨 BÚA PHÁ Ô!';bannerT=activated?1.05:.8;
+  effects.push({type:'burst',x:cellX(c),y:cellY(r),life:.45,max:.45,combo:0});spawn(cellX(c),cellY(r),Math.min(24,10+cleared));
+  sound(activated?'special':'match',activated?2:1);haptic(activated?'fusion':'special',1.15);flashFeedback(activated?.30:.24);
+  finishBoosterSelection();state='clearing';phase=.32;saveProgress('booster-hammer',true);startLoop();return true;
 }
 function cancelSpecialBooster(message='BOOSTER ĐÃ HỦY'){finishBoosterSelection();state='playing';banner=message;bannerT=.65;haptic('tap');startLoop();}
 function lineBoosterTargetSelectable(r,c){return inside(r,c)&&!!board[r]?.[c];}
@@ -3167,9 +3202,17 @@ function pointer(e){
   }
   if(e.type!=='pointerup' && e.type!=='pointercancel')return;
   try{canvas.releasePointerCapture?.(e.pointerId)}catch(_){}
+  if(e.type==='pointercancel'){pointerStart=null;return;}
   const start=pointerStart; pointerStart=null;
   lastPointerUpAt=performance.now();
-  if(!start)return;
+  if(!start){
+    // Some mobile browsers/webviews can lose pointerdown after focus or capture.
+    // Do not let the touchend/click fallbacks be suppressed without handling this tap.
+    if(e.type==='pointerup'&&['boosters','levelmap','levelcomplete'].includes(state)){
+      handleCanvasTap(x,y);
+    }
+    return;
+  }
   const dx=x-start.x,dy=y-start.y;
   const swipe=Math.hypot(dx,dy)>=Math.max(16,cell.s*.24);
 
