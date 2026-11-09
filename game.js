@@ -3087,19 +3087,30 @@ function update(dt){
   for(let i=cascadeDrops.length-1;i>=0;i--){cascadeDrops[i].life-=dt;if(cascadeDrops[i].life<=0)cascadeDrops.splice(i,1)}if(state==='swapping'){phase-=dt;if(phase<=0){const hasMatch=matches().count>0,hasSpecial=!!(swapInfo&&(board[swapInfo.a.r][swapInfo.a.c].special||board[swapInfo.b.r][swapInfo.b.c].special));if(!hasMatch&&!hasSpecial&&!(swapInfo&&swapInfo.boosterFree)){doSwap(swapInfo.a,swapInfo.b);moves++;sound('error');haptic('error');flashFeedback(.16);juice('error',1);state='playing';swapInfo=null;clearUndo(false);saveProgress('invalid-swap')}else if(!hasMatch&&!hasSpecial&&swapInfo&&swapInfo.boosterFree){swapInfo=null;selected=null;combo=0;clearUndo(false);state='playing';banner='🔄 ĐỔI CHỖ THÀNH CÔNG';bannerT=.85;sound('special',1.4);haptic('special',1);saveProgress('booster-free-switch',true)}else resolve(true)}}else if(state==='clearing'){phase-=dt;if(phase<=0)collapse()}else if(state==='falling'){let settled=true;for(let r=0;r<N;r++)for(let c=0;c<N;c++)if(Math.abs(board[r][c].x-board[r][c].tx)>1||Math.abs(board[r][c].y-board[r][c].ty)>1)settled=false;if(settled)resolve(false)}else if(state==='playing'){if(moves<=5&&moves>0&&warningT<=0){warningT=.9;sound('error');}if(moves<=0){finishComboChain();if(dailyMode){failDaily();}else if(!boosterBusy&&['hammer','shuffle','moves','line','color','free'].some(k=>clampBooster(boosters[k])>0)){movesZeroGrace+=dt;if(movesZeroGrace<2.5){if(bannerT<=0){banner='HẾT LƯỢT • CÓ THỂ DÙNG BOOSTER';bannerT=.8;} }else{clearSavedGame();state='gameover';saveFlashT=.8;saveFlashText='SAVE CLEARED';}}else{clearSavedGame();state='gameover';saveFlashT=.8;saveFlashText='SAVE CLEARED';}}else{movesZeroGrace=0;}}}
 function loop(t){
   if(!running)return;
-  const raw=(t-last)/1000;
-  const dt=Math.max(0,Math.min(.033,Number.isFinite(raw)?raw:0));
-  last=t;
-  update(dt);
-  if(perfCanRender() && v155ResumeGrace<=0) draw();
-  else if(perfCanRender()) draw();
-  rafId=requestAnimationFrame(loop);
+  // Clear the current handle before work so startLoop() can recover if a frame
+  // exits unexpectedly. Previously an exception left running=true with no RAF,
+  // making every later startLoop() a no-op (a permanent-looking mobile freeze).
+  rafId=0;
+  try{
+    const raw=(t-last)/1000;
+    const dt=Math.max(0,Math.min(.033,Number.isFinite(raw)?raw:0));
+    last=t;
+    update(dt);
+    if(perfCanRender())draw();
+  }catch(err){
+    running=false;
+    rafId=0;
+    try{console.error('[TÍNH MÍ LON] Game frame recovered after error:',err)}catch(_){}
+    return;
+  }
+  if(running)rafId=requestAnimationFrame(loop);
 }
 function startLoop(){
-  if(running)return;
+  // A stale running flag must never prevent the animation loop from restarting.
+  if(running&&rafId)return;
   running=true;
   last=performance.now();
-  cancelAnimationFrame(rafId);
+  if(rafId)cancelAnimationFrame(rafId);
   rafId=requestAnimationFrame(loop);
 }
 function stopLoop(){
@@ -3148,7 +3159,7 @@ function handleCanvasTap(x,y){
     }
     if(hit({x:L.innerX,y:L.backY-8,w:L.innerW,h:62},x,y)){
       if(!uiActionGuard())return true;
-      state='playing';boosterMode=null;boosterSelected=null;haptic('tap');startLoop();return true;
+      state='playing';finishBoosterSelection();haptic('tap');startLoop();return true;
     }
     return true;
   }
@@ -3458,12 +3469,20 @@ canvas.addEventListener('wheel',function(e){
 canvas.addEventListener('pointerdown',pointer,{passive:true});
 canvas.addEventListener('pointerup',pointer,{passive:true});
 canvas.addEventListener('pointercancel',pointer,{passive:true});
-canvas.addEventListener('touchend',function(e){
-  if(performance.now()-lastPointerUpAt<80)return;
-  const t=e.changedTouches&&e.changedTouches[0]; if(!t)return;
-  const pt=canvasLogicalPoint(t); if(!pt)return;
-  if(['boosters','levelmap','levelcomplete'].includes(state)){e.preventDefault();handleCanvasTap(pt.x,pt.y);lastPointerUpAt=performance.now();}
-},{passive:false});
+// Do not process one physical tap through both Pointer Events and Touch Events.
+// iOS Safari supports Pointer Events; the old unconditional touchend fallback
+// could re-enter the booster/menu state machine during the same tap.
+if(!window.PointerEvent){
+  canvas.addEventListener('touchstart',function(e){
+    const t=e.changedTouches&&e.changedTouches[0];if(!t)return;
+    const pt=canvasLogicalPoint(t);if(pt)pointerStart=pt;
+  },{passive:true});
+  canvas.addEventListener('touchend',function(e){
+    const t=e.changedTouches&&e.changedTouches[0];if(!t)return;
+    pointer({type:'pointerup',clientX:t.clientX,clientY:t.clientY,pointerId:-1});
+  },{passive:true});
+  canvas.addEventListener('touchcancel',function(){pointerStart=null},{passive:true});
+}
 window.addEventListener('resize',fit,{passive:true});
 window.visualViewport?.addEventListener('resize',fit,{passive:true});
 document.addEventListener('keydown',key);
