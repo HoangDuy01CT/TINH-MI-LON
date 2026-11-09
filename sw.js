@@ -1,4 +1,4 @@
-const CACHE_NAME='tinh-mi-lon-mobile-V176-booster-mobile-fix';
+const CACHE_NAME='tinh-mi-lon-mobile-V177-booster-input-fix';
 const CORE_ASSETS = [
   './',
   './index.html',
@@ -10,7 +10,7 @@ const CORE_ASSETS = [
   './icons/apple-touch-icon-v8.png',
   './icons/favicon-32-v8.png',
   './icons/splash-1290x2796-v8.png',
-  './game.js?v=176-booster-mobile-fix',
+  './game.js?v=177-mobile-pointerup-fix',
   './app.js?v=175-qc2',
   './game/images/background_bejeweled_v135.png',
   './game/images/gems_spritesheet.png',

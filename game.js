@@ -3466,9 +3466,15 @@ canvas.addEventListener('wheel',function(e){
   mapScroll=Math.max(0,Math.min(L.maxScroll,mapScroll+e.deltaY));
   startLoop();
 },{passive:false});
+// V177 MOBILE INPUT FIX:
+// Keep pointerdown on the canvas, but receive pointerup/cancel at window level.
+// Some mobile Safari/WebView builds lose the canvas-targeted completion event
+// after pointer capture or viewport compositing changes. The window listener
+// still receives the bubbled/captured completion event, so Booster cards and
+// the board remain interactive instead of getting stuck in a modal state.
 canvas.addEventListener('pointerdown',pointer,{passive:true});
-canvas.addEventListener('pointerup',pointer,{passive:true});
-canvas.addEventListener('pointercancel',pointer,{passive:true});
+window.addEventListener('pointerup',pointer,{capture:true,passive:true});
+window.addEventListener('pointercancel',pointer,{capture:true,passive:true});
 // Do not process one physical tap through both Pointer Events and Touch Events.
 // iOS Safari supports Pointer Events; the old unconditional touchend fallback
 // could re-enter the booster/menu state machine during the same tap.
@@ -3483,6 +3489,10 @@ if(!window.PointerEvent){
   },{passive:true});
   canvas.addEventListener('touchcancel',function(){pointerStart=null},{passive:true});
 }
+canvas.addEventListener('lostpointercapture',function(){
+  // Do not leave an orphaned touch start that can swallow the next tap.
+  pointerStart=null;
+},{passive:true});
 window.addEventListener('resize',fit,{passive:true});
 window.visualViewport?.addEventListener('resize',fit,{passive:true});
 document.addEventListener('keydown',key);
