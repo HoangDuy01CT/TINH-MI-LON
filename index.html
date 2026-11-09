@@ -770,6 +770,11 @@ body.game-open{overflow:hidden;overscroll-behavior:none;-webkit-tap-highlight-co
  .settings-sheet .range-pair{grid-template-columns:minmax(0,1fr) 10px minmax(0,1fr) 22px}
 }
 
+
+/* V178: invisible native hit targets layered over the Canvas BOOST controls. */
+.tm-booster-touch-layer{position:absolute;z-index:2;display:none;pointer-events:none;overflow:hidden;}
+.tm-booster-hit{position:absolute;display:block;margin:0;padding:0;border:0;border-radius:12px;background:transparent;color:transparent;opacity:1;pointer-events:auto;touch-action:manipulation;-webkit-tap-highlight-color:transparent;-webkit-appearance:none;appearance:none;outline:none;cursor:pointer;}
+.tm-booster-hit:focus-visible{outline:2px solid rgba(255,226,156,.95);outline-offset:-3px;background:rgba(255,226,156,.08);}
 </style>
 </head>
 <body>
@@ -800,7 +805,7 @@ body.game-open{overflow:hidden;overscroll-behavior:none;-webkit-tap-highlight-co
     <canvas id="bejeweledCanvas" class="bejeweled-canvas" aria-label="Bàn game kim cương 8 x 8"></canvas>
   </div>
 </section>
-<script src="game.js?v=177-mobile-pointerup-fix"></script>
+<script src="game.js?v=178-native-booster-hit-targets"></script>
 <script src="app.js?v=175-qc2"></script>
 
 

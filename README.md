@@ -1,18 +1,18 @@
 # TINH MÌ LON — README TỔNG HỢP
 
-**Phiên bản hiện tại: V177 — MOBILE BOOSTER INPUT FIX (game engine V176 + mobile pointer fix)**  
+**Phiên bản hiện tại: V178 — MOBILE BOOSTER INPUT FIX (game engine V176 + mobile pointer fix)**  
 **Nền tảng:** Web / PWA / iPhone Safari  
 **Engine:** Canvas JavaScript 8×8 Match-3
 
 ---
 
 
-## V177 — MOBILE BOOSTER INPUT FIX
+## V178 — MOBILE BOOSTER INPUT FIX
 
 - Chuyển nhận `pointerup` và `pointercancel` từ Canvas lên `window` ở capture phase để tránh thất lạc sự kiện kết thúc chạm trên một số trình duyệt mobile Safari/WebView.
 - Giữ `pointerdown` trên Canvas và giữ cơ chế chống kích hoạt lặp qua `lastPointerUpAt`.
 - Xử lý `lostpointercapture` để xóa trạng thái chạm bị treo, tránh thao tác kế tiếp bị nuốt.
-- Bump cache Service Worker và query version của `game.js` để thiết bị tải đúng bản sửa V177.
+- Bump cache Service Worker và query version của `game.js` để thiết bị tải đúng bản sửa V178.
 
 ## 1. Mục tiêu dự án
 
