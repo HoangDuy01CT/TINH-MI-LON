@@ -366,3 +366,8 @@ Nếu tiếp tục nâng cấp, ưu tiên theo thứ tự:
 - Toàn bộ logic gameplay, booster, mission, save… giữ nguyên.
 - Điện thoại dọc (màn hình dài): canvas cao tới ~2.1× chiều rộng, khoảng trống được chia đều giữa HUD – bàn cờ – nút điều khiển (`hudShift`, `cell.y`).
 - Sửa lỗi treo trang khi bấm BOOST trên điện thoại: vòng lặp thu nhỏ chữ ở `boosterMiniCard` dùng `parseFloat(ctx.font)` (luôn ra 950) nên lặp vô hạn khi tên booster không vừa thẻ hẹp.
+
+# V178
+- Sửa dòng thông báo booster ("BÚA PHÁ Ô • CHỌN 1 Ô"…) bị đè lên khung điểm trên điện thoại dài.
+- `sw.js`: file .js/.css/manifest dùng network-first, nên mỗi lần upload bản mới sẽ được nhận ngay, không kẹt cache cũ.
+- Kiểm tra nhanh bản đang chạy: mở console gõ `__TML_BUILD` → phải ra `V178-responsive-boost-fix`.

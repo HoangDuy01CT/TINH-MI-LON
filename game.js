@@ -4,6 +4,7 @@
 const N=8,TYPES=7,START_MOVES=30,CLEAR_PER_LEVEL=18,MAX_LEVELS=30;
 const gemNames=['ruby','amber','citrine','emerald','sapphire','amethyst','diamond'];
 const canvas=document.getElementById('bejeweledCanvas'); if(!canvas)return;
+window.__TML_BUILD='V178-responsive-boost-fix';
 const GAME_STORAGE=(()=>{
   const memory=new Map();
   try{
@@ -2354,7 +2355,7 @@ function draw(){
   // No global center-board pulse; visual impact stays local to matched cells.
   if(bannerT>0){
     ctx.save();
-    const chipW=Math.min(w*.72,320*u),chipH=24*u,cx=w/2,cy=178*u;
+    const chipW=Math.min(w*.72,320*u),chipH=24*u,cx=w/2,cy=178*u+hudShift;
     ctx.fillStyle='rgba(7,12,32,.78)';round(cx-chipW/2,cy-chipH/2,chipW,chipH,chipH/2);
     ctx.strokeStyle='rgba(255,226,154,.28)';ctx.lineWidth=1;ctx.stroke();
     ctx.fillStyle='#ffe8a7';ctx.font='900 '+Math.max(10,10.5*u)+'px system-ui';ctx.textAlign='center';ctx.fillText(banner,cx,cy+3.5*u);
