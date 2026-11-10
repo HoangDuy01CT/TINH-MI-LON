@@ -655,15 +655,15 @@ body.game-open{overflow:hidden;overscroll-behavior:none;-webkit-tap-highlight-co
 }
 .bejeweled-modal.show{display:flex}
 .bejeweled-card{
-  position:relative;width:min(100%,1000px);height:min(100%,1400px);display:flex;align-items:center;justify-content:center;
-  background:linear-gradient(rgba(8,6,26,.55),rgba(8,6,26,.55)),url('game/images/background_bejeweled_v135.png') center/cover no-repeat #0b0820;
-  border:1px solid rgba(190,232,255,.14);border-radius:28px;box-shadow:0 30px 100px #000c;overflow:hidden;
-  padding:8px;
+  position:relative;width:min(100%,780px);height:min(97dvh,920px);display:flex;align-items:center;justify-content:center;
+  background:rgba(8,6,26,.32);border:1px solid rgba(190,232,255,.14);border-radius:28px;box-shadow:0 30px 100px #000c;overflow:hidden;
+  padding:5px;backdrop-filter:blur(2px);-webkit-backdrop-filter:blur(2px);
 }
 .bejeweled-canvas{
-  display:block;flex:0 0 auto;touch-action:none;user-select:none;cursor:pointer;-webkit-user-select:none;
-  -webkit-touch-callout:none;image-rendering:auto;outline:none;
+  display:block;width:auto;height:auto;max-width:100%;max-height:100%;touch-action:none;user-select:none;cursor:pointer;-webkit-user-select:none;
+  -webkit-touch-callout:none;image-rendering:auto;
 }
+
 /* V148 — Tutorial: responsive, balanced, DOM-only and independent from Canvas rendering. */
 .tm-tutorial{position:absolute;inset:0;z-index:100;display:none;box-sizing:border-box;align-items:center;justify-content:center;padding:12px;background:rgba(3,8,24,.78);overflow:hidden;border-radius:inherit;}
 .tm-tutorial.show{display:flex;}
@@ -701,22 +701,10 @@ body.game-open{overflow:hidden;overscroll-behavior:none;-webkit-tap-highlight-co
   position:absolute;right:10px;top:10px;z-index:3;width:44px;height:44px;border:1px solid #ffffff22;border-radius:50%;
   background:rgba(18,12,39,.88);color:#fff;font-size:25px;cursor:pointer;touch-action:manipulation;
 }
-.bejeweled-close:hover{background:rgba(48,36,92,.95)}
-.bejeweled-modal{overscroll-behavior:contain}
-/* Phones / small windows: game fills the whole screen, respecting notch + home bar */
-@media(max-width:620px),(max-height:620px){
+@media(max-width:520px){
   .bejeweled-modal{padding:0}
-  .bejeweled-card{width:100%;height:100%;border-radius:0;border:0;
-    padding:max(4px,env(safe-area-inset-top)) max(4px,env(safe-area-inset-right)) max(4px,env(safe-area-inset-bottom)) max(4px,env(safe-area-inset-left))}
-  .bejeweled-close{right:max(10px,env(safe-area-inset-right));top:max(10px,env(safe-area-inset-top));width:40px;height:40px;font-size:22px;opacity:.85}
-}
-/* Landscape phone: game is portrait-shaped, put the close button at the screen edge, away from the board */
-@media(orientation:landscape) and (max-height:520px){
-  .bejeweled-close{right:max(14px,env(safe-area-inset-right));top:max(10px,env(safe-area-inset-top))}
-}
-.bj-rotate-hint{display:none}
-@media(orientation:landscape) and (max-height:520px){
-  body.game-open .bj-rotate-hint{display:block;position:fixed;left:max(14px,env(safe-area-inset-left));top:50%;transform:translateY(-50%);z-index:10081;max-width:160px;padding:10px 12px;border-radius:14px;background:rgba(18,12,39,.82);color:#ffe7a5;font:700 12px/1.4 system-ui,sans-serif;pointer-events:none;border:1px solid #ffffff22}
+  .bejeweled-card{width:100%;height:100dvh;border-radius:0;border:0;padding:0}
+  .bejeweled-close{right:max(12px,env(safe-area-inset-right));top:max(12px,env(safe-area-inset-top));width:46px;height:46px}
 }
 @media(max-width:360px){
   .bejeweled-close{width:42px;height:42px;font-size:23px}
@@ -782,6 +770,11 @@ body.game-open{overflow:hidden;overscroll-behavior:none;-webkit-tap-highlight-co
  .settings-sheet .range-pair{grid-template-columns:minmax(0,1fr) 10px minmax(0,1fr) 22px}
 }
 
+
+/* V178: invisible native hit targets layered over the Canvas BOOST controls. */
+.tm-booster-touch-layer{position:absolute;z-index:2;display:none;pointer-events:none;overflow:hidden;}
+.tm-booster-hit{position:absolute;display:block;margin:0;padding:0;border:0;border-radius:12px;background:transparent;color:transparent;opacity:1;pointer-events:auto;touch-action:manipulation;-webkit-tap-highlight-color:transparent;-webkit-appearance:none;appearance:none;outline:none;cursor:pointer;}
+.tm-booster-hit:focus-visible{outline:2px solid rgba(255,226,156,.95);outline-offset:-3px;background:rgba(255,226,156,.08);}
 </style>
 </head>
 <body>
@@ -809,11 +802,10 @@ body.game-open{overflow:hidden;overscroll-behavior:none;-webkit-tap-highlight-co
 <section id="bejeweledModal" class="bejeweled-modal" aria-hidden="true" role="dialog" aria-label="Bejeweled by HoangDuy">
   <div class="bejeweled-card">
     <button id="bejeweledClose" class="bejeweled-close" type="button" aria-label="Đóng game" title="Đóng">×</button>
-    <div class="bj-rotate-hint" aria-hidden="true">📱 Xoay dọc điện thoại để chơi to và dễ hơn</div>
     <canvas id="bejeweledCanvas" class="bejeweled-canvas" aria-label="Bàn game kim cương 8 x 8"></canvas>
   </div>
 </section>
-<script src="game.js?v=178-responsive"></script>
+<script src="game.js?v=179-native-booster-buttons"></script>
 <script src="app.js?v=175-qc2"></script>
 
 

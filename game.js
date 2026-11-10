@@ -4,7 +4,6 @@
 const N=8,TYPES=7,START_MOVES=30,CLEAR_PER_LEVEL=18,MAX_LEVELS=30;
 const gemNames=['ruby','amber','citrine','emerald','sapphire','amethyst','diamond'];
 const canvas=document.getElementById('bejeweledCanvas'); if(!canvas)return;
-window.__TML_BUILD='V178-responsive-boost-fix';
 const GAME_STORAGE=(()=>{
   const memory=new Map();
   try{
@@ -1490,38 +1489,30 @@ function loadProgress(){
   }catch(_){return false}
 }
 function recordNewGame(){try{const n=Number(GAME_STORAGE.getItem('tinh-mi-lon-game-games')||0)+1;GAME_STORAGE.setItem('tinh-mi-lon-game-games',String(n));}catch(_){} }
-let hudShift=0;
 const GEM_RATIO=.76;
 const UI={hint:{x:18,y:160,w:112,h:38},menu:{x:142,y:160,w:112,h:38}};
 function fit(){
-  // V177 responsive: size the canvas from the real container (the modal card)
-  // instead of fixed margins/minimums, so it fills phones, tablets, landscape and desktop.
-  const card=canvas.parentElement;
   const vv=window.visualViewport;
-  let availW=card&&card.clientWidth?card.clientWidth:(vv?vv.width:window.innerWidth);
-  let availH=card&&card.clientHeight?card.clientHeight:(vv?vv.height:window.innerHeight);
-  if(card){const cs=getComputedStyle(card);availW-=(parseFloat(cs.paddingLeft)||0)+(parseFloat(cs.paddingRight)||0);availH-=(parseFloat(cs.paddingTop)||0)+(parseFloat(cs.paddingBottom)||0);}
-  const ratio=DESIGN_H/DESIGN_W;
-  const maxScale=1.3; // allow slight upscale on big desktop screens (DPR cap still applies)
-  const d=Math.max(160,Math.min(availW,availH/ratio,DESIGN_W*maxScale));
-  // Tall portrait phones: let the canvas grow taller than the base 620x960 ratio (up to ~2.1) and spread the extra height between HUD, board and buttons.
-  const canvasH=Math.max(d*ratio,Math.min(availH,d*2.1));
-  document.documentElement.classList.toggle('bj-landscape-short',window.innerWidth>window.innerHeight&&window.innerHeight<520);
+  const vw=vv?vv.width:window.innerWidth;
+  const vh=vv?vv.height:window.innerHeight;
+  const safeTop=parseFloat(getComputedStyle(document.documentElement).getPropertyValue('--safe-top'))||0;
+  const safeBottom=parseFloat(getComputedStyle(document.documentElement).getPropertyValue('--safe-bottom'))||0;
+  const maxW=Math.max(320,Math.min(vw-20,DESIGN_W));
+  const maxH=Math.max(480,Math.min(vh-safeTop-safeBottom-20,DESIGN_H));
+  const d=Math.min(maxW,maxH/(DESIGN_H/DESIGN_W));
   const dprCap=performanceProfile().effectiveDpr;
   pixelRatio=Math.min(window.devicePixelRatio||1,dprCap);
   canvas.width=Math.round(d*pixelRatio);
-  canvas.height=Math.round(canvasH*pixelRatio);
+  canvas.height=Math.round(d*(DESIGN_H/DESIGN_W)*pixelRatio);
   canvas.style.width=d+'px';
-  canvas.style.height=canvasH+'px';
+  canvas.style.height=(d*(DESIGN_H/DESIGN_W))+'px';
   const sc=d/DESIGN_W;
   // 8x8 board: the board always occupies exactly 8 cells across.
   // Keep a small side margin on narrow phones while preserving square cells.
   cell.s=Math.min(72*sc,(d-26*sc)/8);
   cell.x=(d-cell.s*8)/2;
   // Keep the 8x8 board below the compact HUD and above the lower controls.
-  const extraH=Math.max(0,canvasH-DESIGN_H*sc);
-  hudShift=extraH*.2;
-  cell.y=208*sc+extraH*.5;
+  cell.y=208*sc;
   if(board.length)for(let r=0;r<N;r++)for(let c=0;c<N;c++){
     const g=board[r][c];
     g.tx=cellX(c);g.ty=cellY(r);
@@ -1533,6 +1524,7 @@ function fit(){
     if(state==='menu'||state==='gameover'||state==='paused'||stale){g.x=g.tx;g.y=g.ty}
   }
   ctx.setTransform(pixelRatio,0,0,pixelRatio,0,0);
+  syncBoosterTouchLayer(true);
 }
 function makeCell(k){return {kind:k,special:'',obstacle:'',matched:false,x:0,y:0,tx:0,ty:0,scale:1,alpha:1,impactT:0,impactPower:0}}
 function triggerLocalImpact(cells,intensity=1){
@@ -2231,6 +2223,7 @@ function drawBackground(w,h){
   }
 }
 function draw(){
+  syncBoosterTouchLayer();
   const drawPerf=performanceProfile();
   const w=parseFloat(canvas.style.width)||DESIGN_W,h=parseFloat(canvas.style.height)||DESIGN_H;
   const u=cell.s/74; // draw-scope UI scale
@@ -2255,7 +2248,7 @@ function draw(){
   if(state==='daily'){dailyDraw(w,h);return}
   if(state==='dailycomplete'){dailyCompleteDraw(w,h);return}
   if(state==='missions'){missionDraw(w,h);return}
-  ctx.save();ctx.translate(0,hudShift);hud(w);ctx.restore();
+  hud(w);
   // V131: no global canvas shake/zoom. Game Feel is localized to the affected match zone.
   ctx.save();
   drawCrystalBoard();
@@ -2355,7 +2348,7 @@ function draw(){
   // No global center-board pulse; visual impact stays local to matched cells.
   if(bannerT>0){
     ctx.save();
-    const chipW=Math.min(w*.72,320*u),chipH=24*u,cx=w/2,cy=178*u+hudShift;
+    const chipW=Math.min(w*.72,320*u),chipH=24*u,cx=w/2,cy=178*u;
     ctx.fillStyle='rgba(7,12,32,.78)';round(cx-chipW/2,cy-chipH/2,chipW,chipH,chipH/2);
     ctx.strokeStyle='rgba(255,226,154,.28)';ctx.lineWidth=1;ctx.stroke();
     ctx.fillStyle='#ffe8a7';ctx.font='900 '+Math.max(10,10.5*u)+'px system-ui';ctx.textAlign='center';ctx.fillText(banner,cx,cy+3.5*u);
@@ -2889,7 +2882,7 @@ function boosterMiniCard(x,y,w,h,k,title){
   const countText='×'+count, countW=ctx.measureText(countText).width;
   const titleX=x+60, titleMaxW=Math.max(30,w-60-14-countW-12);
   ctx.textAlign='left';ctx.fillStyle=active?'#fff':'rgba(255,255,255,.38)';ctx.font='950 11.5px system-ui';
-  {let fs=11.5;while(ctx.measureText(title).width>titleMaxW && fs>8.5){fs-=.5;ctx.font='950 '+fs+'px system-ui';}}
+  while(ctx.measureText(title).width>titleMaxW && parseFloat(ctx.font)>8.5){ctx.font='950 '+(parseFloat(ctx.font)-.5)+'px system-ui';}
   ctx.fillText(title,titleX,cy+4,titleMaxW);
   ctx.textAlign='right';ctx.fillStyle=active?'#ffe39c':'rgba(255,255,255,.34)';ctx.font='950 17px system-ui';ctx.fillText(countText,x+w-12,cy+6);
   ctx.restore();
@@ -2901,6 +2894,61 @@ function boosterDraw(w,h){
   items.forEach((it,i)=>{const col=i%2,row=Math.floor(i/2);boosterMiniCard(L.innerX+col*(L.cardW+L.gap),L.top+row*(L.rowH+L.gap),L.cardW,L.rowH,it[0],it[1]);});
   modalAction(L.innerX,L.backY,L.innerW,46,'QUAY LẠI',false,'←');
   ctx.textAlign='center';ctx.fillStyle='rgba(206,226,250,.40)';ctx.font='700 8px system-ui';
+}
+
+
+// V179: use real HTML buttons for mobile BOOST interactions. Canvas remains visual-only
+// for these controls, avoiding fragile pointer capture / canvas hit-testing on phones.
+let boosterTouchLayer=null,boosterTouchSignature='';
+function syncBoosterTouchLayer(force=false){
+  const host=document.querySelector('.bejeweled-card');
+  if(!host)return;
+  if(!boosterTouchLayer){
+    boosterTouchLayer=document.createElement('div');
+    boosterTouchLayer.className='tm-booster-touch-layer';
+    boosterTouchLayer.setAttribute('aria-label','Điều khiển Booster');
+    host.appendChild(boosterTouchLayer);
+  }
+  const active=state==='playing'||state==='boosters';
+  if(!active){boosterTouchLayer.style.display='none';boosterTouchSignature='';return;}
+  const rect=canvas.getBoundingClientRect(),hostRect=host.getBoundingClientRect();
+  const logicalW=parseFloat(canvas.style.width)||DESIGN_W;
+  const logicalH=parseFloat(canvas.style.height)||DESIGN_H;
+  if(!rect.width||!rect.height||!logicalW||!logicalH){boosterTouchLayer.style.display='none';return;}
+  const sx=rect.width/logicalW,sy=rect.height/logicalH;
+  boosterTouchLayer.style.left=(rect.left-hostRect.left)+'px';
+  boosterTouchLayer.style.top=(rect.top-hostRect.top)+'px';
+  boosterTouchLayer.style.width=rect.width+'px';
+  boosterTouchLayer.style.height=rect.height+'px';
+  boosterTouchLayer.style.display='block';
+  let targets=[];
+  if(state==='playing'){
+    const w=logicalW,u=cell.s/74,by=cell.y+cell.s*8+14*u;
+    const gap=5*u,bw=(wScale(1)-34*u-gap*4)/5,pad=7*u;
+    targets.push({label:'Mở Booster',x:8*u+(bw+gap)*2-pad,y:by-pad,w:bw+pad*2,h:42*u+pad*2});
+  }else{
+    const L=boostersLayout(logicalW,logicalH),items=['hammer','shuffle','moves','line','color','free'];
+    items.forEach((k,i)=>{const col=i%2,row=Math.floor(i/2);targets.push({label:boosterName(k),x:L.innerX+col*(L.cardW+L.gap),y:L.top+row*(L.rowH+L.gap),w:L.cardW,h:L.rowH});});
+    targets.push({label:'Quay lại',x:L.innerX,y:L.backY-8,w:L.innerW,h:62,back:true});
+  }
+  const signature=[state,rect.left,rect.top,rect.width,rect.height,logicalW,logicalH,...targets.flatMap(t=>[t.x,t.y,t.w,t.h,t.label])].join('|');
+  if(!force&&signature===boosterTouchSignature)return;
+  boosterTouchSignature=signature;
+  boosterTouchLayer.replaceChildren();
+  targets.forEach(t=>{
+    const b=document.createElement('button');
+    b.type='button';b.className='tm-booster-hit';b.setAttribute('aria-label',t.label);b.title=t.label;
+    b.style.left=(t.x*sx)+'px';b.style.top=(t.y*sy)+'px';b.style.width=(t.w*sx)+'px';b.style.height=(t.h*sy)+'px';
+    b.addEventListener('click',e=>{
+      e.preventDefault();e.stopPropagation();
+      if(state==='playing'&&!uiActionGuard())return;
+      const cx=t.x+t.w/2,cy=t.y+t.h/2;
+      handleCanvasTap(cx,cy);
+      syncBoosterTouchLayer(true);
+      startLoop();
+    });
+    boosterTouchLayer.appendChild(b);
+  });
 }
 
 function hud(w){
@@ -3475,9 +3523,15 @@ canvas.addEventListener('wheel',function(e){
   mapScroll=Math.max(0,Math.min(L.maxScroll,mapScroll+e.deltaY));
   startLoop();
 },{passive:false});
+// V177 MOBILE INPUT FIX:
+// Keep pointerdown on the canvas, but receive pointerup/cancel at window level.
+// Some mobile Safari/WebView builds lose the canvas-targeted completion event
+// after pointer capture or viewport compositing changes. The window listener
+// still receives the bubbled/captured completion event, so Booster cards and
+// the board remain interactive instead of getting stuck in a modal state.
 canvas.addEventListener('pointerdown',pointer,{passive:true});
-canvas.addEventListener('pointerup',pointer,{passive:true});
-canvas.addEventListener('pointercancel',pointer,{passive:true});
+window.addEventListener('pointerup',pointer,{capture:true,passive:true});
+window.addEventListener('pointercancel',pointer,{capture:true,passive:true});
 // Do not process one physical tap through both Pointer Events and Touch Events.
 // iOS Safari supports Pointer Events; the old unconditional touchend fallback
 // could re-enter the booster/menu state machine during the same tap.
@@ -3492,9 +3546,11 @@ if(!window.PointerEvent){
   },{passive:true});
   canvas.addEventListener('touchcancel',function(){pointerStart=null},{passive:true});
 }
+canvas.addEventListener('lostpointercapture',function(){
+  // Do not leave an orphaned touch start that can swallow the next tap.
+  pointerStart=null;
+},{passive:true});
 window.addEventListener('resize',fit,{passive:true});
-window.addEventListener('orientationchange',()=>setTimeout(()=>{fit();startLoop()},250),{passive:true});
-try{if(window.ResizeObserver&&canvas.parentElement){let _raf=0;new ResizeObserver(()=>{cancelAnimationFrame(_raf);_raf=requestAnimationFrame(()=>{if(modal.classList.contains('show')){fit();startLoop();}})}).observe(canvas.parentElement);}}catch(_){}
 window.visualViewport?.addEventListener('resize',fit,{passive:true});
 document.addEventListener('keydown',key);
 document.getElementById('bejeweledClose')?.addEventListener('click',close);
