@@ -1,4 +1,4 @@
-const CACHE_NAME='tinh-mi-lon-mobile-V178-native-booster-hit-targets';
+const CACHE_NAME='tinh-mi-lon-mobile-V178-responsive';
 const CORE_ASSETS = [
   './',
   './index.html',
@@ -10,7 +10,7 @@ const CORE_ASSETS = [
   './icons/apple-touch-icon-v8.png',
   './icons/favicon-32-v8.png',
   './icons/splash-1290x2796-v8.png',
-  './game.js?v=178-native-booster-hit-targets',
+  './game.js?v=178-responsive',
   './app.js?v=175-qc2',
   './game/images/background_bejeweled_v135.png',
   './game/images/gems_spritesheet.png',
@@ -93,6 +93,19 @@ self.addEventListener('fetch', event => {
   const isAudio = /\.(mp3|m4a|aac|wav|ogg|oga|opus|flac|weba|webm)(\?|$)/i.test(url.pathname);
   if (isAudio) {
     event.respondWith(fetch(request).catch(() => Response.error()));
+    return;
+  }
+
+  // Scripts/manifest: network-first so a new deploy is picked up immediately (falls back to cache offline).
+  if (/\.(js|css|webmanifest)(\?|$)/i.test(url.pathname)) {
+    event.respondWith((async () => {
+      try {
+        const response = await fetch(request, {cache: 'no-cache'});
+        return await cacheResponse(request, response);
+      } catch (_) {
+        return (await caches.match(request)) || Response.error();
+      }
+    })());
     return;
   }
 

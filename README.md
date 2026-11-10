@@ -1,18 +1,10 @@
 # TINH MÌ LON — README TỔNG HỢP
 
-**Phiên bản hiện tại: V178 — MOBILE BOOSTER INPUT FIX (game engine V176 + mobile pointer fix)**  
+**Phiên bản hiện tại: V170 — CACHE SYNC HOTFIX (game engine V169)**  
 **Nền tảng:** Web / PWA / iPhone Safari  
 **Engine:** Canvas JavaScript 8×8 Match-3
 
 ---
-
-
-## V178 — MOBILE BOOSTER INPUT FIX
-
-- Chuyển nhận `pointerup` và `pointercancel` từ Canvas lên `window` ở capture phase để tránh thất lạc sự kiện kết thúc chạm trên một số trình duyệt mobile Safari/WebView.
-- Giữ `pointerdown` trên Canvas và giữ cơ chế chống kích hoạt lặp qua `lastPointerUpAt`.
-- Xử lý `lostpointercapture` để xóa trạng thái chạm bị treo, tránh thao tác kế tiếp bị nuốt.
-- Bump cache Service Worker và query version của `game.js` để thiết bị tải đúng bản sửa V178.
 
 ## 1. Mục tiêu dự án
 
@@ -363,3 +355,19 @@ Nếu tiếp tục nâng cấp, ưu tiên theo thứ tự:
 - Thông số không liên kết chỉ được lưu để tham khảo; thông số chưa có dữ liệu/tiêu chuẩn không bị kết luận Đạt.
 - Không thay đổi công thức tính mí, đánh giá mặc định, lịch sử đo hoặc game engine.
 - Đồng bộ cache Service Worker cho app.js mới; game.js giữ nguyên V175.
+
+---
+
+# V177 — RESPONSIVE GAME (điện thoại + máy tính)
+
+- `game.js`: `fit()` đo kích thước theo khung chứa thật (modal card), bỏ mức tối thiểu cứng 320×480 gây tràn/thu nhỏ khi xoay ngang; cho phóng to tới 1.3× trên màn hình lớn; tự cập nhật khi xoay màn hình / đổi kích thước cửa sổ (ResizeObserver, orientationchange).
+- `index.html`: khung game lấp đầy màn hình điện thoại (tôn trọng tai thỏ/thanh home), nền ảnh game phủ kín khung thay vì hộp nổi; trên máy tính hiển thị khung giữa, to hơn; thêm gợi ý "xoay dọc" khi điện thoại nằm ngang.
+- `sw.js`: tăng version cache lên V177 để thiết bị cũ tự nhận bản mới.
+- Toàn bộ logic gameplay, booster, mission, save… giữ nguyên.
+- Điện thoại dọc (màn hình dài): canvas cao tới ~2.1× chiều rộng, khoảng trống được chia đều giữa HUD – bàn cờ – nút điều khiển (`hudShift`, `cell.y`).
+- Sửa lỗi treo trang khi bấm BOOST trên điện thoại: vòng lặp thu nhỏ chữ ở `boosterMiniCard` dùng `parseFloat(ctx.font)` (luôn ra 950) nên lặp vô hạn khi tên booster không vừa thẻ hẹp.
+
+# V178
+- Sửa dòng thông báo booster ("BÚA PHÁ Ô • CHỌN 1 Ô"…) bị đè lên khung điểm trên điện thoại dài.
+- `sw.js`: file .js/.css/manifest dùng network-first, nên mỗi lần upload bản mới sẽ được nhận ngay, không kẹt cache cũ.
+- Kiểm tra nhanh bản đang chạy: mở console gõ `__TML_BUILD` → phải ra `V178-responsive-boost-fix`.
