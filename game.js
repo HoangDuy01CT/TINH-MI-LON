@@ -2925,7 +2925,7 @@ function syncBoosterTouchLayer(force=false){
   if(state==='playing'){
     const w=logicalW,u=cell.s/74,by=cell.y+cell.s*8+14*u;
     const gap=5*u,bw=(wScale(1)-34*u-gap*4)/5,pad=7*u;
-    targets.push({label:'Mở Booster',x:8*u+(bw+gap)*2-pad,y:by-pad,w:bw+pad*2,h:42*u+pad*2});
+    targets.push({label:'Mở Booster',open:true,x:8*u+(bw+gap)*2-pad,y:by-pad,w:bw+pad*2,h:42*u+pad*2});
   }else{
     const L=boostersLayout(logicalW,logicalH),items=['hammer','shuffle','moves','line','color','free'];
     items.forEach((k,i)=>{const col=i%2,row=Math.floor(i/2);targets.push({label:boosterName(k),x:L.innerX+col*(L.cardW+L.gap),y:L.top+row*(L.rowH+L.gap),w:L.cardW,h:L.rowH});});
@@ -2941,9 +2941,17 @@ function syncBoosterTouchLayer(force=false){
     b.style.left=(t.x*sx)+'px';b.style.top=(t.y*sy)+'px';b.style.width=(t.w*sx)+'px';b.style.height=(t.h*sy)+'px';
     b.addEventListener('click',e=>{
       e.preventDefault();e.stopPropagation();
-      if(state==='playing'&&!uiActionGuard())return;
-      const cx=t.x+t.w/2,cy=t.y+t.h/2;
-      handleCanvasTap(cx,cy);
+      // V180 FIX: handleCanvasTap() intentionally handles modal states only;
+      // it does not process the playing HUD. Open the Booster modal directly.
+      if(state==='playing'){
+        if(!t.open||!uiActionGuard())return;
+        state='boosters';
+        haptic('tap');
+      }else if(state==='boosters'){
+        handleCanvasTap(t.x+t.w/2,t.y+t.h/2);
+      }else{
+        return;
+      }
       syncBoosterTouchLayer(true);
       startLoop();
     });

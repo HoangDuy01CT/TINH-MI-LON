@@ -1,4 +1,4 @@
-const CACHE_NAME='tinh-mi-lon-mobile-V179-native-booster-buttons';
+const CACHE_NAME='tinh-mi-lon-mobile-V180-booster-open-state-fix';
 const CORE_ASSETS = [
   './',
   './index.html',
@@ -10,7 +10,7 @@ const CORE_ASSETS = [
   './icons/apple-touch-icon-v8.png',
   './icons/favicon-32-v8.png',
   './icons/splash-1290x2796-v8.png',
-  './game.js?v=179-native-booster-buttons',
+  './game.js?v=180-booster-open-state-fix',
   './app.js?v=175-qc2',
   './game/images/background_bejeweled_v135.png',
   './game/images/gems_spritesheet.png',

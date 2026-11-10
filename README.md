@@ -1,18 +1,18 @@
 # TINH MÌ LON — README TỔNG HỢP
 
-**Phiên bản hiện tại: V179 — MOBILE BOOSTER INPUT FIX (game engine V176 + mobile pointer fix)**  
+**Phiên bản hiện tại: V180 — MOBILE BOOSTER INPUT FIX (game engine V176 + mobile pointer fix)**  
 **Nền tảng:** Web / PWA / iPhone Safari  
 **Engine:** Canvas JavaScript 8×8 Match-3
 
 ---
 
 
-## V179 — MOBILE BOOSTER INPUT FIX
+## V180 — MOBILE BOOSTER INPUT FIX
 
 - Chuyển nhận `pointerup` và `pointercancel` từ Canvas lên `window` ở capture phase để tránh thất lạc sự kiện kết thúc chạm trên một số trình duyệt mobile Safari/WebView.
 - Giữ `pointerdown` trên Canvas và giữ cơ chế chống kích hoạt lặp qua `lastPointerUpAt`.
 - Xử lý `lostpointercapture` để xóa trạng thái chạm bị treo, tránh thao tác kế tiếp bị nuốt.
-- Bump cache Service Worker và query version của `game.js` để thiết bị tải đúng bản sửa V179.
+- Bump cache Service Worker và query version của `game.js` để thiết bị tải đúng bản sửa V180.
 
 ## 1. Mục tiêu dự án
 
@@ -363,3 +363,9 @@ Nếu tiếp tục nâng cấp, ưu tiên theo thứ tự:
 - Thông số không liên kết chỉ được lưu để tham khảo; thông số chưa có dữ liệu/tiêu chuẩn không bị kết luận Đạt.
 - Không thay đổi công thức tính mí, đánh giá mặc định, lịch sử đo hoặc game engine.
 - Đồng bộ cache Service Worker cho app.js mới; game.js giữ nguyên V175.
+
+
+## V180 – Booster mobile open-state fix
+- Fixed the native HTML BOOST button: it now changes game state directly from `playing` to `boosters`.
+- Booster card and Back buttons continue to use the modal hit-test handler.
+- Updated script and Service Worker cache identifiers to V180.
