@@ -1,10 +1,10 @@
 {
-  "version": "173.0",
+  "version": "181.0",
   "name": "Tính Mí Lon",
   "short_name": "Mí Lon",
   "description": "Ứng dụng tính thông số mí lon và tự đánh giá Đạt / Không đạt theo tiêu chuẩn riêng của từng loại lon",
   "lang": "vi",
-  "start_url": "./index.html?v=175",
+  "start_url": "./index.html?v=181-no-game",
   "scope": "./",
   "id": "/tinh-mi-lon-V175",
   "display": "standalone",

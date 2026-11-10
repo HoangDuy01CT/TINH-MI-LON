@@ -1,8 +1,8 @@
-const CACHE_NAME='tinh-mi-lon-mobile-V180-booster-open-state-fix';
+const CACHE_NAME='tinh-mi-lon-mobile-V181-no-game';
 const CORE_ASSETS = [
   './',
   './index.html',
-  './manifest.webmanifest?v=175',
+  './manifest.webmanifest?v=181-no-game',
   './song-city.mp3',
   './song-10k-years.mp3',
   './icons/icon-192-v8.png',
@@ -10,16 +10,7 @@ const CORE_ASSETS = [
   './icons/apple-touch-icon-v8.png',
   './icons/favicon-32-v8.png',
   './icons/splash-1290x2796-v8.png',
-  './game.js?v=180-booster-open-state-fix',
-  './app.js?v=175-qc2',
-  './game/images/background_bejeweled_v135.png',
-  './game/images/gems_spritesheet.png',
-  './game/images/select.wav',
-  './game/images/swap.wav',
-  './game/images/match.wav',
-  './game/images/combo.wav',
-  './game/images/special.wav',
-  './game/images/error.wav'
+  './app.js?v=181-no-game',
 ];
 
 async function cacheResponse(request, response) {

@@ -1923,27 +1923,4 @@ function closeContactQR(){const e=document.getElementById('contactQRModal');if(e
 
 function openAuthorInfo(){const e=document.getElementById('authorInfoModal');if(e)e.classList.add('open')}function closeAuthorInfo(){const e=document.getElementById('authorInfoModal');if(e)e.classList.remove('open')}document.addEventListener('keydown',function(e){if(e.key==='Escape')closeAuthorInfo()});
 
-(function(){
- const toggle=document.getElementById('gameToggle'),panel=document.getElementById('gamePanel'),close=document.getElementById('gameClose'),item=document.getElementById('gameBejeweled');
- if(!toggle||!panel)return;
- function show(open){panel.classList.toggle('show',open);panel.setAttribute('aria-hidden',String(!open));toggle.classList.toggle('is-open',open);toggle.setAttribute('aria-expanded',String(open));toggle.title=open?'Đóng bảng game':'Mở bảng game';toggle.setAttribute('aria-label',toggle.title);}
- toggle.addEventListener('click',function(){ show(!panel.classList.contains('show')); });
- close&&close.addEventListener('click',function(){show(false);});
- document.addEventListener('click',function(e){if(panel.classList.contains('show')&&!panel.contains(e.target)&&e.target!==toggle)show(false);});
- document.addEventListener('keydown',function(e){if(e.key==='Escape')show(false);});
- item&&item.addEventListener('click',function(e){
-  e.preventDefault();
-  e.stopPropagation();
-  show(false);
-  const launch=function(){
-    if(typeof window.openBejeweled==='function'){window.openBejeweled();return true;}
-    return false;
-  };
-  if(!launch()){setTimeout(function(){
-    if(!launch()){
-      const m=document.getElementById('bejeweledModal');
-      if(m){m.classList.add('show');m.setAttribute('aria-hidden','false');document.body.classList.add('game-open');}
-    }
-  },120);}
-});
-})();
+
