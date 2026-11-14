@@ -10,7 +10,7 @@ window.TML_NPC_CONFIG = {
   smallScreen: { maxWidth: 640, scale: 0.62 },   // iPhone / điện thoại
   startPosition: { corner: "bottom-left", offsetX: 14, offsetY: 64 },
 
-  toggle: { show: true, round: true, position: "bottom-right", offsetX: 14, offsetY: 112 },  // nâng nút tài khoản lên, tạo khoảng cách rõ với nút nhạc và vùng safe-area
+  toggle: { show: true, round: true, position: "bottom-right", offsetX: 14, offsetY: 176 },  // nâng nút tài khoản lên, tạo khoảng cách rõ với nút nhạc và vùng safe-area
 
   roaming: {
     enabled: true,
