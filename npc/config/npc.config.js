@@ -1,5 +1,5 @@
 /* =====================================================================
-   NPC TÍNH MÍ LON — CẤU HÌNH HÀNH VI cho website Tính Mí Lon (V182)
+   NPC TÍNH MÍ LON — CẤU HÌNH HÀNH VI cho website Tính Mí Lon (V186)
    Chỉ ghi những mục khác mặc định. Xem thêm chú thích trong gói NPC gốc (npc.config.js).
    ===================================================================== */
 window.TML_NPC_CONFIG = {
@@ -10,7 +10,8 @@ window.TML_NPC_CONFIG = {
   smallScreen: { maxWidth: 640, scale: 0.62 },   // iPhone / điện thoại
   startPosition: { corner: "bottom-left", offsetX: 14, offsetY: 64 },
 
-  toggle: { show: true, round: true, position: "bottom-right", offsetX: 14, offsetY: 176 },  // nâng nút tài khoản lên, tạo khoảng cách rõ với nút nhạc và vùng safe-area
+  toggle: { show: true, round: true, position: "bottom-right", offsetX: 14, offsetY: 14,
+    beside: ".music-toggle", besideGap: 12 }, // luôn đặt nút NPC ngay phía trên nút loa, cùng mép phải
 
   roaming: {
     enabled: true,

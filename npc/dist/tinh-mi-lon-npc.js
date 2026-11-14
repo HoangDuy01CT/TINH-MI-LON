@@ -2122,11 +2122,18 @@
       let bs = null;
       if (cfg.toggle.beside) { try { bs = document.querySelector(cfg.toggle.beside); } catch (e) { bs = null; } }
       if (bs && U.isShown(bs)) {
-        // đặt ngay bên trái một nút có sẵn của website (vd. nút nhạc), cùng kích thước và cùng hàng
-        const r = bs.getBoundingClientRect(), gap = cfg.toggle.besideGap != null ? cfg.toggle.besideGap : 10;
-        toggleWrap.style.left = Math.max(4, Math.round(r.left - r.width - gap)) + "px";
-        toggleWrap.style.top = Math.round(r.top) + "px";
-        toggleWrap.style.setProperty("--tml-size", Math.round(r.width) + "px");
+        // Xếp nút NPC ngay phía trên nút loa; cùng mép phải và cùng kích thước.
+        // Đọc vị trí thực tế của nút loa để tự thích ứng mobile, desktop, safe-area và xoay màn hình.
+        const r = bs.getBoundingClientRect();
+        const size = Math.max(40, Math.round(Math.min(r.width || 54, r.height || 54)));
+        const gap = cfg.toggle.besideGap != null ? cfg.toggle.besideGap : 12;
+        const left = Math.max(8, Math.min(U.viewW() - size - 8, Math.round(r.right - size)));
+        const top = Math.max(8, Math.round(r.top - size - gap));
+        toggleWrap.style.left = left + "px";
+        toggleWrap.style.top = top + "px";
+        toggleWrap.style.right = "auto";
+        toggleWrap.style.bottom = "auto";
+        toggleWrap.style.setProperty("--tml-size", size + "px");
         return;
       }
       if (mnt && U.isShown(mnt)) {
@@ -2159,6 +2166,11 @@
         const follow = U.rafThrottle(placeToggle);
         window.addEventListener("scroll", follow, { capture: true, passive: true });
         window.addEventListener("resize", follow);
+        window.addEventListener("orientationchange", follow);
+        if (window.visualViewport) {
+          window.visualViewport.addEventListener("resize", follow);
+          window.visualViewport.addEventListener("scroll", follow);
+        }
       }
       toggle.addEventListener("click", () => api.toggle());
       if (roamBtn) roamBtn.addEventListener("click", () => api.setRoaming(!core.state.roaming));

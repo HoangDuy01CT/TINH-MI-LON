@@ -1,4 +1,4 @@
-const CACHE_NAME='tinh-mi-lon-mobile-V183-npc';
+const CACHE_NAME='tinh-mi-lon-mobile-V186-npc';
 const CORE_ASSETS = [
   './',
   './index.html',
@@ -11,10 +11,10 @@ const CORE_ASSETS = [
   './icons/favicon-32-v8.png',
   './icons/splash-1290x2796-v8.png',
   './app.js?v=181-no-game',
-  // NPC trợ lý (V183)
-  './npc/config/npc.config.js?v=183',
-  './npc/config/npc.guide.vi.js?v=183',
-  './npc/dist/tinh-mi-lon-npc.js?v=183',
+  // NPC trợ lý (V186)
+  './npc/config/npc.config.js?v=186',
+  './npc/config/npc.guide.vi.js?v=186',
+  './npc/dist/tinh-mi-lon-npc.js?v=186',
   './npc/sprites/idle/00.png',
   './npc/sprites/idle/01.png',
   './npc/sprites/idle/02.png',
