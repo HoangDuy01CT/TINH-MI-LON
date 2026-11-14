@@ -295,6 +295,71 @@
     const sprite = ui.sprite;
     const manifest = core.manifest;
     let state = "idle", dir = "down", frame = 0, timer = 0, exprTimer = 0, exprIdx = null, stopped = false, lastSrc = "";
+    const shadowEl = ui.root.querySelector(".tml-npc__shadow");
+    // ---- Lớp chuyển động mượt (tính bằng code, không cần thêm ảnh) ----
+    // phase: pha bước chân (chu kỳ), tính theo QUÃNG ĐƯỜNG đã đi nên chân khớp với tốc độ thực tế (không trượt, không "chạy tại chỗ")
+    const CYCLE = { walk: 46, run: 88 };       // độ dài một chu kỳ bước (px của sprite, chưa nhân tỉ lệ)
+    const BOB = { walk: 2.4, run: 4.2 };       // độ nảy theo nhịp bước (px sprite)
+    const LEAN = { walk: 2.2, run: 6 };        // độ nghiêng người khi di chuyển (độ)
+    let phase = 0, rafId = 0, lastT = 0, lastPos = null, vx = 0, vy = 0, speed = 0, leanDeg = 0, wasMoving = false;
+    let sq = 0, sqv = 0;                       // lò xo nén/giãn (squash & stretch)
+    let idleT = Math.random() * 6;
+    const smoothOn = () => cfg.animation.smooth !== false && !core.reduced();
+    const kick = v => { sqv += v; };
+    function motionTick(t) {
+      rafId = 0;
+      if (stopped || core.destroyed) return;
+      const dt = Math.min(0.05, Math.max(0.001, (t - (lastT || t)) / 1000)); lastT = t;
+      const p = core.pos;
+      if (lastPos) {
+        const ivx = (p.x - lastPos.x) / dt, ivy = (p.y - lastPos.y) / dt, k = 1 - Math.exp(-dt * 14);
+        vx += (ivx - vx) * k; vy += (ivy - vy) * k;
+      }
+      lastPos = { x: p.x, y: p.y };
+      speed = Math.hypot(vx, vy);
+      const sc = core.scale || 1, moving = (state === "walk" || state === "run") && speed > 4;
+      if (moving && !wasMoving) kick(state === "run" ? 12 : 7);      // vừa xuất phát: người hơi giãn ra
+      if (!moving && wasMoving) kick(-10);                              // vừa dừng: hơi nhún xuống
+      wasMoving = moving;
+      let bob = 0, tilt = 0, sx = 1, sy = 1;
+      if ((state === "walk" || state === "run") && exprIdx == null) {
+        if (moving) {
+          phase += (speed * dt) / ((CYCLE[state] || 46) * sc);
+          const l = frames();
+          if (l.length > 1) {
+            const f = Math.floor((phase % 1) * l.length) % l.length;
+            if (f !== frame) { frame = f; paint(); }
+          }
+          bob = -Math.abs(Math.sin(phase * Math.PI * 2)) * (BOB[state] || 2);
+          const lead = Math.max(-1, Math.min(1, vx / (state === "run" ? 150 : 60)));
+          const base = dir === "up" || dir === "down" ? 0.35 : 1;
+          tilt = lead * (LEAN[state] || 2) * base;
+        }
+      } else if (state === "idle" && exprIdx == null) {
+        idleT += dt;
+        if (cfg.animation.breathing !== false) {
+          const b = Math.sin(idleT * 2.1);
+          sy += b * 0.011; sx -= b * 0.006; bob = b * -0.5;
+        }
+      }
+      leanDeg += (tilt - leanDeg) * (1 - Math.exp(-dt * 10));
+      // lò xo squash: s'' = -k·s - c·s'
+      sqv += (-190 * sq - 17 * sqv) * dt; sq += sqv * dt;
+      const sqq = Math.max(-0.1, Math.min(0.1, sq / 14));
+      sy *= 1 - sqq; sx *= 1 + sqq * 0.7;
+      sprite.style.transform = `translateY(${bob.toFixed(2)}px) rotate(${leanDeg.toFixed(2)}deg) scale(${sx.toFixed(4)},${sy.toFixed(4)})`;
+      if (shadowEl) {
+        const lift = Math.min(1, -bob / 4.2);
+        shadowEl.style.transform = `scale(${(1 - lift * 0.14).toFixed(3)})`;
+        shadowEl.style.opacity = (1 - lift * 0.25).toFixed(2);
+      }
+      schedule();
+    }
+    function schedule() { if (!rafId && !stopped && smoothOn()) rafId = requestAnimationFrame(motionTick); }
+    function cancelMotion() {
+      if (rafId) cancelAnimationFrame(rafId); rafId = 0; lastT = 0; lastPos = null; vx = vy = speed = 0; leanDeg = 0; sq = sqv = 0; wasMoving = false;
+      sprite.style.transform = ""; if (shadowEl) { shadowEl.style.transform = ""; shadowEl.style.opacity = ""; }
+    }
 
     const frames = () => {
       const e = manifest.states[state];
@@ -315,6 +380,8 @@
       clearInterval(timer); timer = 0;
       const l = frames();
       if (stopped || exprIdx != null || l.length < 2 || core.reduced()) return;
+      if (smoothOn() && (state === "walk" || state === "run")) { schedule(); return; }   // khung hình do pha bước chân điều khiển
+      if (smoothOn()) schedule();
       const base = INTERVALS[state] || 200;
       timer = setInterval(() => { frame = (frame + 1) % l.length; paint(); }, base / (cfg.animation.speed || 1));
     }
@@ -326,7 +393,10 @@
         return true;
       }
       clearTimeout(exprTimer); exprIdx = null;
-      state = nextState; dir = d; frame = 0;
+      const turned = d !== dir && nextState === state;
+      state = nextState; dir = d;
+      frame = (state === "walk" || state === "run") && smoothOn() ? Math.floor((phase % 1) * (frames().length || 1)) : 0;
+      if (turned && smoothOn()) kick(state === "run" ? 7 : 4);        // đổi hướng: nhún nhẹ cho tự nhiên
       paint(); restart();
       return true;
     }
@@ -338,8 +408,8 @@
       paint(); restart();
       exprTimer = setTimeout(() => { exprIdx = null; paint(); restart(); }, ms);
     }
-    function stop() { stopped = true; clearInterval(timer); timer = 0; clearTimeout(exprTimer); exprIdx = null; }
-    function resume() { stopped = false; paint(); restart(); }
+    function stop() { stopped = true; clearInterval(timer); timer = 0; clearTimeout(exprTimer); exprIdx = null; cancelMotion(); }
+    function resume() { stopped = false; paint(); restart(); schedule(); }
     function preload() {
       const all = [];
       Object.values(manifest.states).forEach(e => {
@@ -356,7 +426,7 @@
       walk: d => play("walk", d),
       run: d => play("run", d),
       face: d => play("idle", d),
-      expression, stop, resume, preload, paint,
+      expression, stop, resume, preload, paint, kick,
       get state() { return state; },
       get direction() { return dir; },
       DIRS
@@ -1921,7 +1991,7 @@
   "use strict";
   const NS = window.TinhMiLonNPC;
   const U = NS.util;
-  const CSS = "/* NPC TÍNH MÍ LON v0.5.0 — CSS nằm trong Shadow DOM nên không ảnh hưởng và không bị ảnh hưởng bởi CSS của website */\n:host{all:initial}\n*,*::before,*::after{box-sizing:border-box}\n.tml-layer{position:fixed;inset:0;pointer-events:none;font:14px/1.45 system-ui,-apple-system,\"Segoe UI\",Roboto,\"Helvetica Neue\",Arial,sans-serif;color:#25213a}\n[hidden]{display:none!important}\n\n/* ---------- Nhân vật ---------- */\n.tml-npc{position:absolute;left:0;top:0;width:80px;height:144px;transform-origin:0 0;will-change:transform;pointer-events:auto;cursor:pointer;user-select:none;-webkit-tap-highlight-color:transparent;touch-action:manipulation;outline:none}\n.tml-npc__shadow{position:absolute;left:14px;right:14px;bottom:2px;height:10px;border-radius:50%;background:radial-gradient(ellipse at center,#0005,#0000 70%);pointer-events:none}\n.tml-npc__sprite{position:relative;display:block;width:80px;height:144px;object-fit:contain;image-rendering:pixelated;pointer-events:none;-webkit-user-drag:none}\n.tml-npc[data-state=\"idle\"] .tml-npc__sprite{animation:tml-breathe 2.6s ease-in-out infinite}\n.tml-npc.tml-nobreath .tml-npc__sprite{animation:none!important}\n@keyframes tml-breathe{0%,100%{transform:translateY(0)}50%{transform:translateY(-1px)}}\n.tml-npc:focus-visible{outline:2px dashed #8b6bd6;outline-offset:4px;border-radius:8px}\n\n/* ---------- Bong bóng hội thoại ---------- */\n.tml-bubble{position:absolute;left:0;top:0;min-width:150px;max-width:272px;padding:10px 32px 11px 13px;border:2px solid #cdb6ff;border-radius:14px;background:#fff;color:#25213a;box-shadow:0 6px 22px #0003;pointer-events:auto;will-change:transform;--tml-tail:30px;--tml-accent:#8b6bd6}\n.tml-bubble[data-type=\"warn\"]{border-color:#f2b84b;--tml-accent:#b9790a}\n.tml-bubble[data-type=\"error\"]{border-color:#ef7b7b;--tml-accent:#c23030}\n.tml-bubble[data-type=\"success\"]{border-color:#6fcf97;--tml-accent:#1f8f4f}\n.tml-bubble__title{margin:0 0 3px;font-size:11.5px;font-weight:700;letter-spacing:.2px;text-transform:none;color:var(--tml-accent)}\n.tml-bubble__text{font-size:13.5px;font-weight:500;white-space:pre-line;overflow-wrap:anywhere}\n.tml-bubble__text strong{font-weight:700}\n.tml-bubble__close{position:absolute;top:5px;right:6px;width:22px;height:22px;border:0;border-radius:50%;background:transparent;color:#6b6585;font:700 16px/22px system-ui,sans-serif;cursor:pointer;padding:0}\n.tml-bubble__close:hover{background:#0000000f;color:#25213a}\n.tml-bubble__close:focus-visible{outline:2px solid #8b6bd6}\n.tml-bubble::after{content:\"\";position:absolute;width:12px;height:12px;background:#fff;border:2px solid inherit;border-color:inherit}\n.tml-bubble[data-tail=\"bottom\"]::after{bottom:-8px;left:var(--tml-tail);margin-left:-6px;transform:rotate(45deg);border-top-color:transparent;border-left-color:transparent}\n.tml-bubble[data-tail=\"top\"]::after{top:-8px;left:var(--tml-tail);margin-left:-6px;transform:rotate(45deg);border-bottom-color:transparent;border-right-color:transparent}\n.tml-bubble[data-tail=\"right\"]::after{right:-8px;top:var(--tml-tail);margin-top:-6px;transform:rotate(45deg);border-bottom-color:transparent;border-left-color:transparent}\n.tml-bubble[data-tail=\"left\"]::after{left:-8px;top:var(--tml-tail);margin-top:-6px;transform:rotate(45deg);border-top-color:transparent;border-right-color:transparent}\n\n/* ---------- Mũi tên chỉ & khung sáng ---------- */\n.tml-arrow{position:absolute;left:0;top:0;width:56px;height:28px;transform-origin:0 0;pointer-events:none;will-change:transform}\n.tml-arrow svg{display:block;width:56px;height:28px;overflow:visible;animation:tml-bob .9s ease-in-out infinite;filter:drop-shadow(0 2px 3px #0004)}\n@keyframes tml-bob{0%,100%{transform:translateX(-5px)}50%{transform:translateX(3px)}}\n.tml-line{position:absolute;left:0;top:0;height:0;border-top:3px dotted #8b6bd6;transform-origin:0 0;pointer-events:none;opacity:.85}\n.tml-ring{position:absolute;left:0;top:0;border:3px solid #8b6bd6;pointer-events:none;will-change:transform;box-shadow:0 0 0 3px #8b6bd633,0 0 14px #8b6bd688;animation:tml-pulse 1.4s ease-in-out infinite}\n@keyframes tml-pulse{0%,100%{opacity:.95}50%{opacity:.5}}\n\n/* ---------- Nút bật/tắt ---------- */\n.tml-toggle-wrap{position:absolute;display:flex;gap:6px;pointer-events:auto}\n.tml-toggle-wrap.tml-inline{position:static;display:inline-flex}\n.tml-toggle{display:inline-flex;align-items:center;gap:8px;height:34px;padding:0 13px 0 10px;border:1.5px solid #cdb6ff;border-radius:999px;background:#fff;color:#2b2545;font:700 12.5px/1 system-ui,-apple-system,\"Segoe UI\",Roboto,Arial,sans-serif;letter-spacing:.2px;cursor:pointer;box-shadow:0 2px 10px #0003;white-space:nowrap}\n.tml-toggle:hover{background:#f5efff}\n.tml-toggle:focus-visible{outline:2px solid #8b6bd6;outline-offset:2px}\n.tml-toggle__dot{width:11px;height:11px;border-radius:50%;background:#9aa0b4;box-shadow:inset 0 0 0 2px #fff,0 0 0 1.5px #9aa0b4}\n.tml-toggle[aria-checked=\"true\"] .tml-toggle__dot{background:#27ae60;box-shadow:inset 0 0 0 2px #fff,0 0 0 1.5px #27ae60}\n.tml-toggle[aria-checked=\"false\"]{color:#5b5775;background:#f1eff7}\n.tml-toggle--roam{padding:0 11px;font-weight:600}\n\n@media (prefers-reduced-motion:reduce){\n  .tml-npc__sprite,.tml-arrow svg,.tml-line{position:absolute;left:0;top:0;height:0;border-top:3px dotted #8b6bd6;transform-origin:0 0;pointer-events:none;opacity:.85}\n.tml-ring{animation:none!important}\n}\n";
+  const CSS = "/* NPC TÍNH MÍ LON v0.5.0 — CSS nằm trong Shadow DOM nên không ảnh hưởng và không bị ảnh hưởng bởi CSS của website */\n:host{all:initial}\n*,*::before,*::after{box-sizing:border-box}\n.tml-layer{position:fixed;inset:0;pointer-events:none;font:14px/1.45 system-ui,-apple-system,\"Segoe UI\",Roboto,\"Helvetica Neue\",Arial,sans-serif;color:#25213a}\n[hidden]{display:none!important}\n\n/* ---------- Nhân vật ---------- */\n.tml-npc{position:absolute;left:0;top:0;width:80px;height:144px;transform-origin:0 0;will-change:transform;pointer-events:auto;cursor:pointer;user-select:none;-webkit-tap-highlight-color:transparent;touch-action:manipulation;outline:none}\n.tml-npc__shadow{transform-origin:50% 50%;position:absolute;left:14px;right:14px;bottom:2px;height:10px;border-radius:50%;background:radial-gradient(ellipse at center,#0005,#0000 70%);pointer-events:none}\n.tml-npc__sprite{transform-origin:50% 100%;will-change:transform;position:relative;display:block;width:80px;height:144px;object-fit:contain;image-rendering:pixelated;pointer-events:none;-webkit-user-drag:none}\n@keyframes tml-breathe{0%,100%{transform:translateY(0)}50%{transform:translateY(-1px)}}\n.tml-npc:focus-visible{outline:2px dashed #8b6bd6;outline-offset:4px;border-radius:8px}\n\n/* ---------- Bong bóng hội thoại ---------- */\n.tml-bubble{position:absolute;left:0;top:0;min-width:150px;max-width:272px;padding:10px 32px 11px 13px;border:2px solid #cdb6ff;border-radius:14px;background:#fff;color:#25213a;box-shadow:0 6px 22px #0003;pointer-events:auto;will-change:transform;--tml-tail:30px;--tml-accent:#8b6bd6}\n.tml-bubble[data-type=\"warn\"]{border-color:#f2b84b;--tml-accent:#b9790a}\n.tml-bubble[data-type=\"error\"]{border-color:#ef7b7b;--tml-accent:#c23030}\n.tml-bubble[data-type=\"success\"]{border-color:#6fcf97;--tml-accent:#1f8f4f}\n.tml-bubble__title{margin:0 0 3px;font-size:11.5px;font-weight:700;letter-spacing:.2px;text-transform:none;color:var(--tml-accent)}\n.tml-bubble__text{font-size:13.5px;font-weight:500;white-space:pre-line;overflow-wrap:anywhere}\n.tml-bubble__text strong{font-weight:700}\n.tml-bubble__close{position:absolute;top:5px;right:6px;width:22px;height:22px;border:0;border-radius:50%;background:transparent;color:#6b6585;font:700 16px/22px system-ui,sans-serif;cursor:pointer;padding:0}\n.tml-bubble__close:hover{background:#0000000f;color:#25213a}\n.tml-bubble__close:focus-visible{outline:2px solid #8b6bd6}\n.tml-bubble::after{content:\"\";position:absolute;width:12px;height:12px;background:#fff;border:2px solid inherit;border-color:inherit}\n.tml-bubble[data-tail=\"bottom\"]::after{bottom:-8px;left:var(--tml-tail);margin-left:-6px;transform:rotate(45deg);border-top-color:transparent;border-left-color:transparent}\n.tml-bubble[data-tail=\"top\"]::after{top:-8px;left:var(--tml-tail);margin-left:-6px;transform:rotate(45deg);border-bottom-color:transparent;border-right-color:transparent}\n.tml-bubble[data-tail=\"right\"]::after{right:-8px;top:var(--tml-tail);margin-top:-6px;transform:rotate(45deg);border-bottom-color:transparent;border-left-color:transparent}\n.tml-bubble[data-tail=\"left\"]::after{left:-8px;top:var(--tml-tail);margin-top:-6px;transform:rotate(45deg);border-top-color:transparent;border-right-color:transparent}\n\n/* ---------- Mũi tên chỉ & khung sáng ---------- */\n.tml-arrow{position:absolute;left:0;top:0;width:56px;height:28px;transform-origin:0 0;pointer-events:none;will-change:transform}\n.tml-arrow svg{display:block;width:56px;height:28px;overflow:visible;animation:tml-bob .9s ease-in-out infinite;filter:drop-shadow(0 2px 3px #0004)}\n@keyframes tml-bob{0%,100%{transform:translateX(-5px)}50%{transform:translateX(3px)}}\n.tml-line{position:absolute;left:0;top:0;height:0;border-top:3px dotted #8b6bd6;transform-origin:0 0;pointer-events:none;opacity:.85}\n.tml-ring{position:absolute;left:0;top:0;border:3px solid #8b6bd6;pointer-events:none;will-change:transform;box-shadow:0 0 0 3px #8b6bd633,0 0 14px #8b6bd688;animation:tml-pulse 1.4s ease-in-out infinite}\n@keyframes tml-pulse{0%,100%{opacity:.95}50%{opacity:.5}}\n\n/* ---------- Nút bật/tắt ---------- */\n.tml-toggle.tml-toggle--round{--s:var(--tml-size,54px);width:var(--s);height:var(--s);padding:0;gap:0;justify-content:center;border:1px solid var(--border,#e4e7ee);border-radius:50%;background:var(--card,#fff);color:var(--blue,#0a7cff);box-shadow:var(--shadow,0 4px 16px #0003);backdrop-filter:blur(12px);-webkit-backdrop-filter:blur(12px);transition:transform .12s}\n.tml-toggle.tml-toggle--round:hover{background:var(--card,#fff)}\n.tml-toggle.tml-toggle--round:active{transform:scale(.96)}\n.tml-toggle.tml-toggle--round:focus-visible{outline:3px solid var(--blue,#0a7cff);outline-offset:3px}\n.tml-toggle.tml-toggle--round .tml-toggle__label{position:absolute;width:1px;height:1px;overflow:hidden;clip:rect(0 0 0 0);white-space:nowrap}\n.tml-toggle.tml-toggle--round[aria-checked=\"true\"]{background:var(--blue,#0a7cff);color:#fff;border-color:transparent}\n.tml-toggle.tml-toggle--round[aria-checked=\"true\"] .tml-toggle__slash{display:none}\n.tml-toggle.tml-toggle--round[aria-checked=\"false\"]{background:var(--card,#fff);color:var(--muted,#8a90a2)}\n\n.tml-toggle-wrap{position:absolute;display:flex;gap:6px;pointer-events:auto}\n.tml-toggle-wrap.tml-inline{position:static;display:inline-flex}\n.tml-toggle{display:inline-flex;align-items:center;gap:8px;height:34px;padding:0 13px 0 10px;border:1.5px solid #cdb6ff;border-radius:999px;background:#fff;color:#2b2545;font:700 12.5px/1 system-ui,-apple-system,\"Segoe UI\",Roboto,Arial,sans-serif;letter-spacing:.2px;cursor:pointer;box-shadow:0 2px 10px #0003;white-space:nowrap}\n.tml-toggle:hover{background:#f5efff}\n.tml-toggle:focus-visible{outline:2px solid #8b6bd6;outline-offset:2px}\n.tml-toggle__dot{width:11px;height:11px;border-radius:50%;background:#9aa0b4;box-shadow:inset 0 0 0 2px #fff,0 0 0 1.5px #9aa0b4}\n.tml-toggle[aria-checked=\"true\"] .tml-toggle__dot{background:#27ae60;box-shadow:inset 0 0 0 2px #fff,0 0 0 1.5px #27ae60}\n.tml-toggle[aria-checked=\"false\"]{color:#5b5775;background:#f1eff7}\n.tml-toggle--roam{padding:0 11px;font-weight:600}\n\n@media (prefers-reduced-motion:reduce){\n  .tml-npc__sprite,.tml-arrow svg,.tml-line{position:absolute;left:0;top:0;height:0;border-top:3px dotted #8b6bd6;transform-origin:0 0;pointer-events:none;opacity:.85}\n.tml-ring{animation:none!important}\n}\n";
   const SCRIPT_SRC = (document.currentScript && document.currentScript.src) || "";
   let instance = null;
 
@@ -1984,7 +2054,10 @@
     if (cfg.toggle.show) {
       toggleWrap = h("div", "tml-toggle-wrap");
       toggle = h("button", "tml-toggle", { type: "button", role: "switch", "aria-checked": "false", "aria-label": "Bật hoặc tắt trợ lý NPC" });
-      toggle.innerHTML = '<span class="tml-toggle__dot"></span><span class="tml-toggle__label"></span>';
+      if (cfg.toggle.round) {   // kiểu nút tròn đơn giản, giống nút nhạc: chỉ có biểu tượng (chữ nằm trong aria/tooltip)
+        toggle.classList.add("tml-toggle--round");
+        toggle.innerHTML = '<svg viewBox="0 0 24 24" width="26" height="26" aria-hidden="true"><circle cx="12" cy="8" r="4" fill="currentColor"/><path d="M4 21c0-4.4 3.6-7 8-7s8 2.6 8 7z" fill="currentColor"/><line class="tml-toggle__slash" x1="3.5" y1="3.5" x2="20.5" y2="20.5" stroke="currentColor" stroke-width="2.4" stroke-linecap="round"/></svg><span class="tml-toggle__label"></span>';
+      } else toggle.innerHTML = '<span class="tml-toggle__dot"></span><span class="tml-toggle__label"></span>';
       toggleWrap.append(toggle);
       if (cfg.toggle.roamingSwitch) {
         roamBtn = h("button", "tml-toggle tml-toggle--roam", { type: "button", role: "switch", "aria-checked": "false", "aria-label": "Bật hoặc tắt NPC tự đi dạo" });
@@ -2010,7 +2083,7 @@
       npcRect() { const s = core.size(); return U.mkRect(core.pos.x, core.pos.y, core.pos.x + s.w, core.pos.y + s.h); },
       place(x, y) {
         core.pos.x = x; core.pos.y = y;
-        root.style.transform = `translate3d(${Math.round(x)}px,${Math.round(y)}px,0) scale(${core.scale})`;
+        root.style.transform = `translate3d(${x.toFixed(2)}px,${y.toFixed(2)}px,0) scale(${core.scale})`;
         bus.emit("move", core.pos);
       },
       refreshScale() {
@@ -2046,6 +2119,16 @@
       let mnt = null;
       if (cfg.toggle.mount) { try { mnt = document.querySelector(cfg.toggle.mount); } catch (e) { mnt = null; } }
       toggleWrap.style.cssText = "";
+      let bs = null;
+      if (cfg.toggle.beside) { try { bs = document.querySelector(cfg.toggle.beside); } catch (e) { bs = null; } }
+      if (bs && U.isShown(bs)) {
+        // đặt ngay bên trái một nút có sẵn của website (vd. nút nhạc), cùng kích thước và cùng hàng
+        const r = bs.getBoundingClientRect(), gap = cfg.toggle.besideGap != null ? cfg.toggle.besideGap : 10;
+        toggleWrap.style.left = Math.max(4, Math.round(r.left - r.width - gap)) + "px";
+        toggleWrap.style.top = Math.round(r.top) + "px";
+        toggleWrap.style.setProperty("--tml-size", Math.round(r.width) + "px");
+        return;
+      }
       if (mnt && U.isShown(mnt)) {
         // gắn nút "vào" một vị trí có sẵn của website: nút bám theo phần tử đó
         const r = mnt.getBoundingClientRect();
@@ -2060,7 +2143,9 @@
     function renderToggle() {
       if (toggle) {
         toggle.setAttribute("aria-checked", String(core.state.enabled));
-        toggle.querySelector(".tml-toggle__label").textContent = core.state.enabled ? cfg.toggle.labelOn : cfg.toggle.labelOff;
+        const lb = core.state.enabled ? cfg.toggle.labelOn : cfg.toggle.labelOff;
+        toggle.querySelector(".tml-toggle__label").textContent = lb;
+        if (cfg.toggle.round) toggle.title = lb + " — bấm để " + (core.state.enabled ? "tắt" : "bật") + " trợ lý";
       }
       if (roamBtn) {
         roamBtn.hidden = !core.state.enabled;
@@ -2070,7 +2155,7 @@
     }
     if (toggle) {
       placeToggle();
-      if (cfg.toggle.mount) { // nút bám theo vị trí gắn kết kể cả khi NPC đang tắt
+      if (cfg.toggle.mount || cfg.toggle.beside) { // nút bám theo vị trí gắn kết kể cả khi NPC đang tắt
         const follow = U.rafThrottle(placeToggle);
         window.addEventListener("scroll", follow, { capture: true, passive: true });
         window.addEventListener("resize", follow);
