@@ -1,0 +1,128 @@
+{
+  "frameSize": {
+    "width": 80,
+    "height": 144
+  },
+  "source": "assets/source/sprite_sheet_background_removed.png",
+  "directions": {},
+  "states": {
+    "idle": {
+      "down": [
+        "sprites/idle/00.png"
+      ],
+      "right": [
+        "sprites/idle/01.png"
+      ],
+      "up": [
+        "sprites/idle/02.png"
+      ],
+      "left": [
+        "sprites/idle/03.png"
+      ]
+    },
+    "walk": {
+      "down": [
+        "sprites/walk/down/00.png",
+        "sprites/walk/down/01.png",
+        "sprites/walk/down/02.png"
+      ],
+      "right": [
+        "sprites/walk/right/00.png",
+        "sprites/walk/right/01.png",
+        "sprites/walk/right/02.png",
+        "sprites/walk/right/03.png"
+      ],
+      "up": [
+        "sprites/walk/up/00.png",
+        "sprites/walk/up/01.png",
+        "sprites/walk/up/02.png",
+        "sprites/walk/up/03.png"
+      ],
+      "left": [
+        "sprites/walk/left/00.png",
+        "sprites/walk/left/01.png",
+        "sprites/walk/left/02.png",
+        "sprites/walk/left/03.png"
+      ]
+    },
+    "run": {
+      "down": [
+        "sprites/run/down/00.png",
+        "sprites/run/down/01.png",
+        "sprites/run/down/02.png",
+        "sprites/run/down/03.png"
+      ],
+      "right": [
+        "sprites/run/right/00.png",
+        "sprites/run/right/01.png",
+        "sprites/run/right/02.png",
+        "sprites/run/right/03.png"
+      ],
+      "up": [
+        "sprites/run/up/00.png",
+        "sprites/run/up/01.png",
+        "sprites/run/up/02.png",
+        "sprites/run/up/03.png"
+      ],
+      "left": [
+        "sprites/run/left/00.png",
+        "sprites/run/left/01.png",
+        "sprites/run/left/02.png",
+        "sprites/run/left/03.png"
+      ]
+    },
+    "jump": {
+      "down": [
+        "sprites/jump/down/00.png",
+        "sprites/jump/down/01.png",
+        "sprites/jump/down/02.png"
+      ],
+      "right": [
+        "sprites/jump/right/00.png",
+        "sprites/jump/right/01.png",
+        "sprites/jump/right/02.png",
+        "sprites/jump/right/03.png"
+      ],
+      "up": [
+        "sprites/jump/up/00.png",
+        "sprites/jump/up/01.png",
+        "sprites/jump/up/02.png",
+        "sprites/jump/up/03.png"
+      ],
+      "left": [
+        "sprites/jump/left/00.png",
+        "sprites/jump/left/01.png",
+        "sprites/jump/left/02.png",
+        "sprites/jump/left/03.png"
+      ]
+    },
+    "sit": {
+      "frames": [
+        "sprites/sit/00.png",
+        "sprites/sit/01.png",
+        "sprites/sit/02.png",
+        "sprites/sit/03.png"
+      ]
+    },
+    "lie": {
+      "frames": [
+        "sprites/lie/00.png",
+        "sprites/lie/01.png",
+        "sprites/lie/02.png"
+      ]
+    },
+    "interact": {
+      "frames": [
+        "sprites/interact/00.png",
+        "sprites/interact/01.png",
+        "sprites/interact/02.png",
+        "sprites/interact/03.png"
+      ]
+    }
+  },
+  "notes": [
+    "Frames extracted from the supplied transparent sprite sheet using connected-component bounds.",
+    "Direction labels are provisional based on the visual order in the source sheet; verify in the preview before production use.",
+    "All frames are nearest-neighbor normalized to 80x144 transparent canvases."
+  ]
+}
