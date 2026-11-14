@@ -10,7 +10,7 @@ window.TML_NPC_CONFIG = {
   smallScreen: { maxWidth: 640, scale: 0.62 },   // iPhone / điện thoại
   startPosition: { corner: "bottom-left", offsetX: 14, offsetY: 64 },
 
-  toggle: { show: true, round: true, beside: "#musicToggle", besideGap: 10, position: "bottom-right", offsetX: 78, offsetY: 14 },   // nút tròn, nằm cạnh nút nhạc
+  toggle: { show: true, round: true, position: "bottom-right", offsetX: 14, offsetY: 78 },   // nút NPC nằm phía trên nút nhạc
 
   roaming: {
     enabled: true,
